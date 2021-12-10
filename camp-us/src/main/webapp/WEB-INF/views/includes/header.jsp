@@ -31,7 +31,7 @@
 
             <div class="col-12 mb-3 mb-md-0 col-md-4 order-1 order-md-2 text-center">
               <div class="site-logo">
-                <a href="/resources/index.html" class="js-logo-clone">CAMP-US</a>
+                <a href="/common/main#" class="js-logo-clone">CAMP-US</a>
               </div>
             </div>
 
@@ -128,17 +128,18 @@
     </header>
     
     <script type="text/javascript">
-
-   
-   
+ 
    $(document).ready(function() {
       //.icon-search2")
       $(document).on("click",".icon-search2",function(){
          alert("00")
          window.location.href="search.jsp"
-      })
-    //  getPager()
+      }) //  getPager()
+    
    });
+   
+
+
      </script>
     
 </body>

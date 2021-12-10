@@ -28,5 +28,9 @@
 	<body>
 		hello, world!
 	</body>
+	
+	<script>
+		self.location.href="common/main"
+	</script>
 
 <%@ include file="includes/footer.jsp"%>

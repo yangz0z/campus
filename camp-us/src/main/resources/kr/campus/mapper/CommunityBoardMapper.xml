@@ -3,7 +3,7 @@
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
   
-<mapper namespace="kr.campus.mapper.CommonMapper">
+<mapper namespace="kr.campus.mapper.CommunityBoardMapper">
 	<select id="getList" resultType="kr.campus.domain.CommunityBoardVO">
 	<![CDATA[ 	
 	select *from tbl_community_board where bno > 0
@@ -11,7 +11,7 @@
 	</select>
 	
 	<insert id="insert">
-		insert into tbl_community_board(bno, category, title, writer_nickname, writer_id, content)
+		insert into tbl_community_board(bno, category, title, writernickname, writerid, content)
 		values (seq_community_board.nextval, #{category}, #{title}, #{writerNickname}, #{writerID}, #{content})
 	</insert>
 	
@@ -28,8 +28,8 @@
 		set category = #{category}, 
 		title = #{title},
 		content = #{content},
-		writer_nickname = #{writerNickname},
-		writer_id = #{writerID}
+		writernickname = #{writerNickname},
+		writerid = #{writerID}
 		where bno = #{bno}
 	</update>
 	

@@ -5,6 +5,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
 <!-- jstl fmt 쓸때 위와 같음. fmt : formatter 형식 맞춰서 표시 -->
 <%@ include file="../includes/header.jsp"%>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -35,13 +36,34 @@
 	<input type="hidden" id="cnt" name="cnt" value="1000">
 	<!-- 화면에는 보이지는 않음(내부에만 보이는것) 데이터베이스를 가져와서 총 건수를 알아올때 -->
 
+	<div class="kategorie">
+		<input type="submit" class="btn btn-sm btn-primary form-control kategowr"
+			value="노하우"> <input type="submit"
+			class="btn btn-sm btn-primary form-control kategowr" value="장소추천"> <input
+			type="submit" class="btn btn-sm btn-primary form-control kategowr"
+			value="제품추천"> <input type="submit"
+			class="btn btn-sm btn-primary form-control kategowr" value="여행기"> <input
+			type="submit" class="btn btn-sm btn-primary form-control kategowr" value="Q&A">
+	</div>
 	<div class="container">
-		<br> <br> <br>
-		<h3>검색결과</h3>
+		<br> <br> <br> <span>
+			<h3>
+				전체 게시글 <input type="submit"
+					class="commuinty btn btn-sm btn-primary form-contro" value="글쓰기">
+			</h3>
+
+
+		</span>
+
+
+		<!-- <h3>
+			전체 게시글 <input type="submit" style=" value="글쓰기">
+		</h3> -->
 		<!-- 레코드의 갯수를 출력 -->
 		<table width="1200px">
 			<thead>
 				<tr>
+					<th>카테고리</th>
 					<th>제목&emsp;&emsp;&emsp;&emsp;&emsp;</th>
 					<th>작성자&emsp;&emsp;</th>
 					<th>작성일</th>

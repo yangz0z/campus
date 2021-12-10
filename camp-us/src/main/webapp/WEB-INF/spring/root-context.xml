@@ -28,5 +28,6 @@
 	</bean>
 	
 	<mybatis-spring:scan base-package="kr.campus.mapper"/>
+	<context:component-scan base-package="kr.campus.service"/>
 
 </beans>
