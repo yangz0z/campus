@@ -62,17 +62,21 @@
 		<table width="600" height="50" align="left">
 			<tr>
 				<td>기간선택</td>
-				<td><input type="text" class="form-control py-4" id="startDate"
-					placeholder="-"></td>
+				<td>
+				<input type="text" class="form-control py-4"
+				id="startDate" placeholder="-">
+				</td>
 				<td>-</td>
-				<td><input type="text" class="form-control py-4" id="endDate"
-					placeholder="-"></td>&emsp;&emsp;
-				<td><input type="submit"
-					class="btn btn-sm btn-primary form-control" value="조회"></td>
+				<td>
+				<input type="text" class="form-control py-4"
+				id="endDate" placeholder="-">
+				</td>&emsp;&emsp;
+				<td>
+				<input type="submit" class="btn btn-sm btn-primary form-control" value="조회">
+				</td>
 			</tr>
 		</table>
-	</div>
-	<!-- 
+	</div><!-- 
 	
 	<hr>
 	<table width="1300" height="1" align="center">
@@ -85,100 +89,88 @@
 	</tr>
 	</table>
 	<hr> -->
-
-
+	
+	
 	<div class="site-section">
-		<div class="container">
-			<div class="row mb-5">
-				<form class="col-md-12" method="post">
-					<div class="site-blocks-table">
-						<table class="table table-bordered">
-							<thead>
-								<tr>
-									<th class="product-thumbnail">상품정보</th>
-									<th class="product-name">주문일자</th>
-									<th class="product-price">주문번호</th>
-									<th class="product-total">주문금액(수량)</th>
-									<th class="product-remove">주문상태</th>
-									<th class="product-review">후기작성</th>
-								</tr>
-							</thead>
-
-							<tbody>
-								<tr>
-									<td class="product-thumbnail"><img
-										src="resources/images/facebook.png" alt="Image"
-										class="img-fluid"></td>
-									<td class="product-name">
-										<h2 class="h5 text-black">2021.11.01</h2>
-									</td>
-									<td>202111011557060001</td>
-									<td>
-										<div>79,200원</div>
-										<div>1개</div>
-									</td>
-									<td>
-										<div>
-											<u>구매 확정</u>
-										</div>
-										<div>
-											<input type="submit"
-												class="btn btn-sm btn-primary form-control" value="배송조회">
-										</div>
-									</td>
-									<td>
-										<div>
-											<input type="submit"
-												class="btn btn-sm btn-primary form-control" value="후기작성" onclick="div_show();">
-										</div>
-									</td>
-								</tr>
-
-
-								<td class="product-thumbnail"><img
-									src="resources/images/naver.png" alt="Image" class="img-fluid">
-								</td>
-								<td class="product-name">
-									<h2 class="h5 text-black">2021.12.24</h2>
-								</td>
-								<td>20211102254890012</td>
-								<td>
-									<div>85,600원</div>
-									<div>2개</div>
-								</td>
-								<td>
-									<div>
-										<u>구매 미확정</u>
-									</div>
-									<div>
-										<input type="submit"
-											class="btn btn-sm btn-primary form-control" value="배송조회">
-									</div>
-								</td>
-								<td>
-									<div> 
-										<input type="submit"
-											class="btn btn-sm btn-primary form-control" value="후기작성불가" onclick="alert('후기작성이 불가합니다\n구매확정 여부를 확인해주세요.');"
-											style="cursor:pointer">
-											<!-- <a type="submit" class="btn btn-sm btn-primary form-control" value="후기작성"
-											 onclick="alert('후기작성이 불가합니다\n구매확정 여부를 확인해주세요.');" style="cursor:pointer">후기작성</a> -->
-									</div>
-								</td>
-								<tr>
-
-								</tr>
-							</tbody>
-						</table>
-					</div>
-				</form>
-			</div>
-		</div>
+	<div class="container">
+	<div class="row mb-5">
+	<form class="col-md-12" method="post">
+	<div class="site-blocks-table">
+	<table class="table table-bordered">
+	<thead>
+	<tr>
+	<th class="product-thumbnail">상품정보</th>
+	<th class="product-name">주문일자</th>
+	<th class="product-price">주문번호</th>
+	<th class="product-total">주문금액(수량)</th>
+	<th class="product-remove">주문상태</th>
+	<th class="product-review">후기작성</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	<tr>
+	<td class="product-thumbnail">
+	<img src="resources/images/facebook.png" alt="Image" class="img-fluid">
+	</td>
+	<td class="product-name">
+	<h2 class="h5 text-black">2021.11.01</h2>
+	</td>
+	<td>202111011557060001</td>
+	<td>
+	<div>79,200원</div>
+	<div>1개</div>
+	</td>
+	<td>
+	<div><u>구매 확정</u></div>
+	<div>
+	<input type="submit" class="btn btn-sm btn-primary form-control" value="배송조회">
+	</div>
+	</td>	
+	<td>
+	<div>
+	<input type="submit" class="btn btn-sm btn-primary form-control" value="후기작성">
+	</div>
+	</td>
+	</tr>
+	
+	
+	<td class="product-thumbnail">
+	<img src="resources/images/naver.png" alt="Image" class="img-fluid">
+	</td>
+	<td class="product-name">
+	<h2 class="h5 text-black">2021.12.24</h2>
+	</td>
+	<td>20211102254890012</td>
+	<td>
+	<div>85,600원</div>
+	<div>2개</div>
+	</td>
+	<td>
+	<div><u>구매 미확정</u></div>
+	<div>
+	<input type="submit" class="btn btn-sm btn-primary form-control" value="배송조회">
+	</div>
+	</td>	
+	<td>
+	<div>
+	<input type="submit" class="btn btn-sm btn-primary form-control" value="후기작성불가">
+	</div>
+	</td>
+	<tr>
+	
+	</tr>
+	</tbody>
+	
+	
+	</table>
+	</div>
+	</form>
+	</div>
+	</div>
 	</div>
 	
-	
-	
-	<!-- display:none 으로 실제화면에서 스크립트 처리하지않는이상 보이지않음 -->
-<div id="warning" style="display:none">
+	<div id="warning" style="display:none">
 	<div class="site-section block-8">
 		<div class="container">
 			<div class="row justify-content-center  mb-5"><!-- 
@@ -189,22 +181,6 @@
 			</div>
 		</div>
 </div>
-
-<script type="text/javascript">
-	function div_show() {
-		document.getElementById("test_div").style.display = "block";
-	}
-	
-	function div_hide() {
-		document.getElementById("test_div").style.display = "none";
-	}	
-	</script>
-            
-            
-<!-- display:none 으로 실제화면에서 스크립트 처리하지않는이상 보이지않음 -->
-
-
-
 	<!-- style.css 에 스타일 추가했음
 	  /* 이미지 둥글게 */
   .box {

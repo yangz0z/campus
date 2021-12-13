@@ -21,4 +21,22 @@ public class CommunityBoardController {
 		log.info("list");
 		model.addAttribute("list", service.getList());
 	}
+	
+	@GetMapping("/editPost")
+	public void editPost(Model model) {
+		log.info("edit post");
+		model.addAttribute("editPost", service.getList());
+	}
+	
+	@GetMapping("/readPost")
+	public void readPost(Model model) {
+		log.info("read post");
+		model.addAttribute("readPost", service.getList());
+	}
+	
+	@GetMapping("/registPost")
+	public void registPost(Model model) {
+		log.info("regist post");
+		model.addAttribute("registPost", service.getList());
+	}
 }

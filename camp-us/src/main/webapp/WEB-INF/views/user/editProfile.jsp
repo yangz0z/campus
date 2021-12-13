@@ -4,10 +4,10 @@
 <!-- jstl core 쓸때 태그에 c 로 표시. -->
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
 <!-- jstl fmt 쓸때 위와 같음. fmt : formatter 형식 맞춰서 표시 -->
-
+<%@ include file="../includes/header.jsp"%>
 <!-- my page 전체 수정 예정 기존 home.jsp 에 드롭박스로 추가 예정-->
 
-<%@ include file="../includes/header.jsp"%>
+
 
 
 
@@ -52,6 +52,8 @@
 						id="myProfile_Email_subscribe" placeholder="이메일">
 						<input type="text" class="form-control py-4"
 						id="myProfile_NicName_subscribe" placeholder="닉네임">
+						<input type="text" class="form-control py-4"
+						id="myProfile_address_subscribe" placeholder="주소지">
 					<p>
 					<p>
 					<p>

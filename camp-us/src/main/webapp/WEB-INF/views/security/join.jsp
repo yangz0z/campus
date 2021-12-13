@@ -7,9 +7,6 @@
 
 <!-- my page 전체 수정 예정 기존 home.jsp 에 드롭박스로 추가 예정-->
 
-<%@ include file="../includes/header.jsp"%>
-
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -52,6 +49,9 @@
 						id="member_Email_subscribe" placeholder="이메일">
 						<input type="text" class="form-control py-4"
 						id="member_NicName_subscribe" placeholder="닉네임">
+						<input type="text" class="form-control py-4"
+						id="member_address_subscribe" placeholder="주소지">
+						
 					<p>
 					<p>
 					<p>
@@ -62,6 +62,30 @@
 					<br>
 					<input type="submit" class="btn btn-sm btn-primary form-control"
 							value="홈으로 이동">
+							
+							<div class="py-4">
+						<span
+							style="font: italic bold 0.7em/1em Verdana, Geneva, Arial, sans-serif;">SNS계정으로
+							간편로그인</span>
+					</div>
+
+					<table width="300" align="center">
+						<tr>
+							<td>
+								<div class="box" style="background: #BDBDBD;">
+									<img class="profile" src="/resources/images/facebook.png">
+							</td>
+							<td>
+								<div class="box" style="background: #BDBDBD;">
+									<img class="profile" src="/resources/images/naver.png">
+							</td>
+							<td>
+								<div class="box" style="background: #BDBDBD;">
+									<img class="profile" src="/resources/images/kakao.png">
+							</td>
+							</div>
+						<tr>
+					</table>
 
 				</div>
 			</div>
@@ -103,4 +127,3 @@
 </body>
 </html>
 
-<%@ include file="../includes/footer.jsp"%>

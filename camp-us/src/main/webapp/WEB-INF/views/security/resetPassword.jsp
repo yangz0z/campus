@@ -8,8 +8,6 @@
 <!-- my page 전체 수정 예정 기존 home.jsp 에 드롭박스로 추가 예정-->
 
 
-<%@ include file="../includes/header.jsp"%>
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -97,5 +95,3 @@
 
 </body>
 </html>
-
-<%@ include file="../includes/footer.jsp"%>

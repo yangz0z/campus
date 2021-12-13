@@ -31,7 +31,7 @@
 
             <div class="col-12 mb-3 mb-md-0 col-md-4 order-1 order-md-2 text-center">
               <div class="site-logo">
-                <a href="/common/main#" class="js-logo-clone">CAMP-US</a>
+                <a href="/common/main" class="js-logo-clone">CAMP-US</a>
               </div>
             </div>
 
@@ -48,9 +48,9 @@
                                     <li class="has-children active"><span
                                        class="icon icon-person"></span>
                                        <ul class="dropdown">
-                                          <li><a href="#">Edit Profile</a></li>
-                                          <li><a href="#">My Shopping</a></li>
-                                          <li><a href="#">My Community</a></li><!-- 
+                                          <li><a href="/user/editProfile">Edit Profile</a></li>
+                                          <li><a href="/user/orderList">My Shopping</a></li>
+                                          <li><a href="/user/myCommunity">My Community</a></li><!-- 
                                           <li class=""><a href=""></a>
                                              <ul class="">
                                                 <li><a href=""></a></li>

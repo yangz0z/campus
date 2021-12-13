@@ -10,24 +10,27 @@ import lombok.extern.log4j.Log4j;
 
 @Log4j
 @Controller
-@RequestMapping("/common/*")
-@AllArgsConstructor 
-public class CommonController {
-//	private CommonService service;
+@RequestMapping("/shop/*")
+@AllArgsConstructor
+public class ShopController {
 	
-	@GetMapping("/main")
-	public void main() {
+	@GetMapping("/modifyItem")
+	public void modifyItem() {
 	}
 	
-	@GetMapping("/contact")
-	public void contact() {
+	@GetMapping("/registItem")
+	public void registItem() {
 	}
 	
-	@GetMapping("/search")
-	public void search() {
+	@GetMapping("/readItem")
+	public void readItem() {
 	}
 	
-	@GetMapping("/searchResult")
-	public void searchResult() {
+	@GetMapping("/itemList")
+	public void itemList() {
+	}
+	
+	@GetMapping("/sale")
+	public void sale() {
 	}
 }
