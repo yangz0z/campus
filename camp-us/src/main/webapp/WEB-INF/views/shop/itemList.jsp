@@ -12,7 +12,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<title>Shoppers &mdash; Colorlib e-Commerce Template</title>
+<title>CAMP-US</title>
 <meta charset="utf-8">
 <meta name="viewport"
    content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -63,7 +63,7 @@
                      <div class="d-flex">
                         <div class=" mr-1 ml-md-auto">
                            <button type="button" class="btn form-control border-0"
-                              id="dropdownMenuOffset">상품등록</button>
+                              id="registItem">상품등록</button>
                         </div>
                         <div class="btn-group">
                            <button type="button"
@@ -71,12 +71,12 @@
                               id="dropdownMenuReference" data-toggle="dropdown">최신순</button>
                            <div class="dropdown-menu"
                               aria-labelledby="dropdownMenuReference">
-                              <a class="dropdown-item" href="#">Relevance</a> <a
-                                 class="dropdown-item" href="#">Name, A to Z</a> <a
+                              <a class="dropdown-item" href="#">인기순</a> 
+                              <!-- <a class="dropdown-item" href="#">Name, A to Z</a> <a
                                  class="dropdown-item" href="#">Name, Z to A</a>
                               <div class="dropdown-divider"></div>
                               <a class="dropdown-item" href="#">Price, low to high</a> <a
-                                 class="dropdown-item" href="#">Price, high to low</a>
+                                 class="dropdown-item" href="#">Price, high to low</a> -->
                            </div>
                         </div>
                      </div>
@@ -330,5 +330,16 @@
 
 
 </body>
+
+   
+<script>
+$(document).ready(function() {
+	$("#registItem").on("click", function(e) {
+		console.log("regist item");
+		self.location = "/shop/registItem";
+	});
+}); //document ready function end
+</script>
+
 </html>
 <%@ include file="../includes/footer.jsp"%>

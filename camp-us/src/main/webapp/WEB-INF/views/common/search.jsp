@@ -12,7 +12,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<title>Shoppers &mdash; Colorlib e-Commerce Template</title>
+<title>CAMP-US</title>
 <meta charset="utf-8">
 <meta name="viewport"
    content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -41,7 +41,7 @@
       <br><br><br>
          <h3>
             SHOP 검색결과&emsp;
-         <input type="submit" class="btn btn-sm btn-primary " value="더보기">
+         <input type="button" class="btn btn-sm btn-primary" id="shopResult" value="더보기">
          </h3>     
       
       <div class="row mb-5">
@@ -132,7 +132,7 @@
 
 
       <h3>COMMUNITY 검색결과
-         <input type="submit" class="btn btn-sm btn-primary " value="더보기">
+         <input type="button" class="btn btn-sm btn-primary" id="communityResult" value="더보기">
       </h3>
       <!-- 레코드의 갯수를 출력 -->
       
@@ -192,5 +192,19 @@
 
 
 </body>
+<script>
+$(document).ready(function() {
+	$("#shopResult").on("click", function(e) {
+		console.log("go searchResult page with #shop");
+		self.location = "/common/searchResult";
+	});
+	
+	$("#communityResult").on("click", function(e) {
+		console.log("go searchResult page with #community");
+		self.location = "/common/searchResult";
+	});
+});
+</script>
+
 </html>
 <%@ include file="../includes/footer.jsp"%>

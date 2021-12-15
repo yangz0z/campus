@@ -1,5 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
-	pageEncoding="UTF-8"%>
+   pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <!-- jstl core 쓸때 태그에 c 로 표시. -->
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
@@ -15,10 +15,10 @@
 <title>Shoppers &mdash; Colorlib e-Commerce Template</title>
 <meta charset="utf-8">
 <meta name="viewport"
-	content="width=device-width, initial-scale=1, shrink-to-fit=no">
+   content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
 <link rel="stylesheet"
-	href="https://fonts.googleapis.com/css?family=Mukta:300,400,700">
+   href="https://fonts.googleapis.com/css?family=Mukta:300,400,700">
 <link rel="stylesheet" href="/resources/fonts/icomoon/style.css">
 
 <link rel="stylesheet" href="/resources/css/bootstrap.min.css">
@@ -35,60 +35,63 @@
 </head>
 <body>
 
-	<div class="site-section block-8" >
-		<div class="container">
-			<div class="row justify-content-center  mb-5">
-				<div class="col-md-7 site-section-heading text-center pt-4">
-					<h2>로그인</h2>
-					<br> <br> <input type="text" class="form-control py-4"
-						id="ID_subscribe" placeholder="아이디">
-					<p>
-					<p>
-					<p>
-					<p>
-						<input type="password" class="form-control py-4" id="PW_subscribe"
-							placeholder="비밀번호">
-					<p>
-					<p>
-					<p>
-						<input type="submit" class="btn btn-sm btn-primary form-control"
-							value="로그인">
-					<div class="form-control ">
-						<font size="3em"> 비밀번호 재설정</font> &emsp;&emsp;&emsp;&emsp; <font
-							size="3em"> 회원가입</font>
-					</div>
-					<br>
-					<div class="py-4">
-						<span
-							style="font: italic bold 0.7em/1em Verdana, Geneva, Arial, sans-serif;">SNS계정으로
-							간편로그인</span>
-					</div>
+   <div class="site-section block-8" >
+      <div class="container">
+         <div class="row justify-content-center  mb-5">
+            <div class="col-md-7 site-section-heading text-center pt-4">
+               <h2>로그인</h2>
+               <br> <br> <input type="text" class="form-control py-4"
+                  id="ID_subscribe" placeholder="아이디">
+               <p>
+               <p>
+               <p>
+               <p>
+                  <input type="password" class="form-control py-4" id="PW_subscribe"
+                     placeholder="비밀번호">
+               <p>
+               <p>
+               <p>
+                  <input type="submit" class="btn btn-sm btn-primary form-control"
+                     value="로그인">
+               <div class="form-control ">
+               
+               
+               <a href="/security/resetPassword">비밀번호 재설정</a>&emsp;&emsp;
+               <a href="/security/join">회원가입</a>
+               
+               </div>
+               <br>
+               <div class="py-4">
+                  <span
+                     style="font: italic bold 0.7em/1em Verdana, Geneva, Arial, sans-serif;">SNS계정으로
+                     간편로그인</span>
+               </div>
 
-					<table width="300" align="center">
-						<tr>
-							<td>
-								<div class="box" style="background: #BDBDBD;">
-									<img class="profile" src="/resources/images/facebook.png">
-							</td>
-							<td>
-								<div class="box" style="background: #BDBDBD;">
-									<img class="profile" src="/resources/images/naver.png">
-							</td>
-							<td>
-								<div class="box" style="background: #BDBDBD;">
-									<img class="profile" src="/resources/images/kakaotalk.png">
-							</td>
-							</div>
-						<tr>
-					</table>
+               <table width="300" align="center">
+                  <tr>
+                     <td>
+                        <div class="box" style="background: #BDBDBD;">
+                           <img class="profile" src="/resources/images/facebook.png">
+                     </td>
+                     <td>
+                        <div class="box" style="background: #BDBDBD;">
+                           <img class="profile" src="/resources/images/naver.png">
+                     </td>
+                     <td>
+                        <div class="box" style="background: #BDBDBD;">
+                           <img class="profile" src="/resources/images/kakaotalk.png">
+                     </td>
+                     </div>
+                  <tr>
+               </table>
 
-				</div>
-			</div>
-		</div>
-	</div>
-	
-	<!-- style.css 에 스타일 추가했음
-	  /* 이미지 둥글게 */
+            </div>
+         </div>
+      </div>
+   </div>
+   
+   <!-- style.css 에 스타일 추가했음
+     /* 이미지 둥글게 */
   .box {
     width: 60px;
     height: 60px; 
@@ -109,16 +112,15 @@
 
 
 
-	<script src="/resources/js/jquery-3.3.1.min.js"></script>
-	<script src="/resources/js/jquery-ui.js"></script>
-	<script src="/resources/js/popper.min.js"></script>
-	<script src="/resources/js/bootstrap.min.js"></script>
-	<script src="/resources/js/owl.carousel.min.js"></script>
-	<script src="/resources/js/jquery.magnific-popup.min.js"></script>
-	<script src="/resources/js/aos.js"></script>
-	<script src="/resources/js/main.js"></script>
+   <script src="/resources/js/jquery-3.3.1.min.js"></script>
+   <script src="/resources/js/jquery-ui.js"></script>
+   <script src="/resources/js/popper.min.js"></script>
+   <script src="/resources/js/bootstrap.min.js"></script>
+   <script src="/resources/js/owl.carousel.min.js"></script>
+   <script src="/resources/js/jquery.magnific-popup.min.js"></script>
+   <script src="/resources/js/aos.js"></script>
+   <script src="/resources/js/main.js"></script>
 
 
 </body>
 </html>
-
