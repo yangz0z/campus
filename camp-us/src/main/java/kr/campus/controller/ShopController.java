@@ -5,6 +5,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import kr.campus.service.ItemService;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j;
 
@@ -13,6 +14,7 @@ import lombok.extern.log4j.Log4j;
 @RequestMapping("/shop/*")
 @AllArgsConstructor
 public class ShopController {
+	private ItemService service;
 	
 	@GetMapping("/modifyItem")
 	public void modifyItem() {
@@ -27,7 +29,9 @@ public class ShopController {
 	}
 	
 	@GetMapping("/itemList")
-	public void itemList() {
+	public void itemList(Model model) {
+		log.info("item list ......");
+		model.addAttribute("itemList", service.itemList());
 	}
 	
 	@GetMapping("/sale")

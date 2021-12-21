@@ -40,7 +40,7 @@
          <div class="container">
             <div class="row">
                <div class="col-md-12 mb-0">
-                  <a href="/resources/index.html">Home</a> <span class="mx-2 mb-0">/</span>
+                  <a href="/common/main">Home</a> <span class="mx-2 mb-0">/</span>
                   <strong class="text-black">Shop</strong>
                </div>
             </div>
@@ -67,12 +67,12 @@
                         </div>
                         <div class="btn-group">
                            <button type="button"
-                              class="btn dropdown-toggle btn-primary btn-lg btn-block"
+                              class="btn btn-secondary btn-sm dropdown-toggle"
                               id="dropdownMenuReference" data-toggle="dropdown">최신순</button>
                            <div class="dropdown-menu"
                               aria-labelledby="dropdownMenuReference">
-                              <a class="dropdown-item" href="#">인기순</a> 
-                              <!-- <a class="dropdown-item" href="#">Name, A to Z</a> <a
+                              <a class="dropdown-item" href="#">인기순</a> <!-- <a
+                                 class="dropdown-item" href="#">Name, A to Z</a> <a
                                  class="dropdown-item" href="#">Name, Z to A</a>
                               <div class="dropdown-divider"></div>
                               <a class="dropdown-item" href="#">Price, low to high</a> <a
@@ -84,8 +84,46 @@
                   </div>
                </div>
                <div class="row mb-5">
-
+               
+                <c:forEach var="item" items="${itemList}">
+                 <input id="quantity" name="quantity" type="hidden" value="${item.quantity}">
+                 <c:if test="${item.quantity >0}">
                   <div class="col-sm-6 col-lg-4 mb-4" data-aos="fade-up">
+                     <div class="block-4 text-center border">
+                        <figure class="block-4-image">
+                           <a href="/shop/readItem?num=${item.itemCode}">
+                           <img src="/resources/images/cloth_1.jpg" alt="Image placeholder"
+                              class="img-fluid"></a>
+                        </figure>
+                        <div class="block-4-text p-4">
+                           <h3>
+                              <a href="/shop/readItem?num=${item.itemCode}"><c:out value="${item.itemName}"/></a>
+                           </h3>
+                           <p class="mb-0"><fmt:formatNumber value="${item.price}" pattern="#,###"/>원</p>
+                        </div>
+                     </div>
+                  </div>
+                  </c:if>
+                  <!-- 재고가 없을 때 Sold Out 표시 및 하이퍼링크 삭제 -->
+                  <c:if test="${item.quantity eq 0}">
+                    <div class="col-sm-6 col-lg-4 mb-4" data-aos="fade-up">
+                     <div class="block-4 text-center border">
+                        <figure class="block-4-image">
+                           <img src="/resources/images/cloth_1.jpg" alt="Image placeholder"
+                              class="img-fluid">
+                        </figure>
+                        <div class="block-4-text p-4">
+                           <h3>
+                              <c:out value="${item.itemName}"/>
+                           </h3>
+                           <p class="mb-0">Sold Out</p>
+                        </div>
+                     </div>
+                  </div>
+                  </c:if>
+                 </c:forEach>
+                  				
+                   <div class="col-sm-6 col-lg-4 mb-4" data-aos="fade-up">
                      <div class="block-4 text-center border">
                         <figure class="block-4-image">
                            <a href="/resources/shop-single.html"><img
@@ -100,7 +138,7 @@
                            <p class="text-primary font-weight-bold">$50</p>
                         </div>
                      </div>
-                  </div>
+                  </div> 
                   <div class="col-sm-6 col-lg-4 mb-4" data-aos="fade-up">
                      <div class="block-4 text-center border">
                         <figure class="block-4-image">
@@ -279,8 +317,7 @@
                            <p class="text-primary font-weight-bold">$50</p>
                         </div>
                      </div>
-                  </div>
-
+                  </div> 
 
                </div>
                   <div class="col-md-12 text-center" >

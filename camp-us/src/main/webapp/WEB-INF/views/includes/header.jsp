@@ -123,7 +123,7 @@
 								<li><a href="#">Menu Three</a></li>
 							</ul></li>
 						<li><a href="/shop/itemList">PICNIC</a></li>
-						<li><a href="/shop/itemList">SALE</a></li>
+						<li><a href="/shop/sale">SALE</a></li>
 						<li><a href="/community/list">COMMUNITY</a></li>
 						<li><a href="/common/contact">Contact</a></li>
 					</ul>
