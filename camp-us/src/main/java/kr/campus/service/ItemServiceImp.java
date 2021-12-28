@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import kr.campus.domain.Criteria;
 import kr.campus.domain.ItemVO;
 import kr.campus.mapper.ItemMapper;
 import lombok.AllArgsConstructor;
@@ -19,9 +20,9 @@ public class ItemServiceImp implements ItemService {
 	private ItemMapper mapper;
 
 	@Override
-	public List<ItemVO> itemList() {
-		log.info("get item list......");
-		return mapper.itemList();
+	public List<ItemVO> itemList(Criteria cri) {
+		log.info("get item list......" + cri);
+		return mapper.itemList(cri);
 	}
 
 	@Override
@@ -31,21 +32,21 @@ public class ItemServiceImp implements ItemService {
 	}
 
 	@Override
-	public List<ItemVO> hotList() {
-		// TODO Auto-generated method stub
-		return null;
+	public List<ItemVO> recommendedItems() {
+		log.info("get item list order by purchases");
+		return mapper.recommendedItems();
 	}
 
 	@Override
-	public List<ItemVO> newList() {
-		// TODO Auto-generated method stub
-		return null;
+	public List<ItemVO> newList(Criteria cri) {
+		log.info("get item list......" + cri);
+		return mapper.newList(cri);
 	}
 
 	@Override
-	public int getTotal() {
-		// TODO Auto-generated method stub
-		return 0;
+	public int getTotal(Criteria cri) {
+		log.info("get total count......");
+		return mapper.getTotal(cri);
 	}
 
 }

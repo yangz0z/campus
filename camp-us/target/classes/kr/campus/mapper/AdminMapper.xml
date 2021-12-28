@@ -4,10 +4,25 @@
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
   <mapper namespace="kr.campus.mapper.AdminMapper">
   
+     <select id="getList" resultType="kr.campus.domain.ItemVO">
+   <![CDATA[    
+   select *from tbl_board where bno > 0
+   ]]>   </select>
+
+  
+  
   <insert id="itemsEnroll">
      
-        insert into tbl_items(itemCode, itemName, price, quantity, ratings, category, purchases, reviewno, qnano, thumbNail)
-      values(#{itemCode},#{itemName}, #{price},#{quantity},#{ratings},#{category},#{purchases},#{reviewno},#{qnano},#{thumbNail})
+        insert into tbl_items(itemCode,itemName,price,quantity,category,thumbNail,details)
+      values(
+      #{itemcode},
+      #{itemname},
+      #{price},
+      #{quantity},
+      #{category},
+      #{thumbnail},
+      #{details}
+      )
 
      </insert>
   

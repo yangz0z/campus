@@ -103,9 +103,9 @@
 				role="navigation">
 				<div class="container">
 					<ul class="site-menu js-clone-nav d-none d-md-block">
-						<li class="has-children active"><a
-							href="/shop/itemList">CAMPING</a>
-							<ul class="dropdown">
+						<li class="categoryBtn">
+							<a href="camping">CAMPING</a>
+							<!-- <ul class="dropdown">
 								<li><a href="#">Menu One</a></li>
 								<li><a href="#">Menu Two</a></li>
 								<li><a href="#">Menu Three</a></li>
@@ -115,19 +115,28 @@
 										<li><a href="#">Menu Two</a></li>
 										<li><a href="#">Menu Three</a></li>
 									</ul></li>
-							</ul></li>
-						<li class="has-children"><a href="/shop/itemList">BACKPACKING</a>
-							<ul class="dropdown">
+							</ul> -->
+						</li>
+						<li class="categoryBtn"><a href="backpacking">BACKPACKING</a>
+							<!-- <ul class="dropdown">
 								<li><a href="#">Menu One</a></li>
 								<li><a href="#">Menu Two</a></li>
 								<li><a href="#">Menu Three</a></li>
-							</ul></li>
-						<li><a href="/shop/itemList">PICNIC</a></li>
-						<li><a href="/shop/sale">SALE</a></li>
+							</ul> -->
+						</li>
+						<li class="categoryBtn"><a href="picnic">PICNIC</a></li>
+						<li><a href="/shop/newList">NEW</a></li>
 						<li><a href="/community/list">COMMUNITY</a></li>
 						<li><a href="/common/contact">Contact</a></li>
 					</ul>
 				</div>
+				
+				<form id="actionForm" action="/shop/itemList" method="get">
+					<input type="hidden" name="pageNum" value="${pageMaker.cri.pageNum}"> 
+					<input type="hidden" name="amount" value="${pageMaker.cri.amount}">
+					<input type="hidden" name="category" value="${pageMaker.cri.category}">
+				</form>
+				
 			</nav>
 		</header>
 
@@ -139,10 +148,22 @@
 					alert("00")
 					window.location.href = "search.jsp"
 				}) //  getPager() */
-
-			});
+			
+				var actionForm = $("#actionForm");
+			
+				//카테고리 버튼 클릭 이벤트
+				$(".categoryBtn a").on("click", function(e) {
+					e.preventDefault();
+					console.log("clicked");
+					actionForm.find("input[name='category']").val($(this).attr("href"));
+					actionForm.find("input[name='pageNum']").val(1);
+					actionForm.find("input[name='amount']").val(12);
+					actionForm.append($(this).attr("active"));
+					actionForm.submit();
+				});
+				
+			}); //document ready function end
 		</script>
 </body>
-
 
 </html>

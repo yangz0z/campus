@@ -59,7 +59,7 @@
                   <span class="icon-truck"></span>
                </div>
                <div class="text">
-                  <h2 class="text-uppercase">Free Shipping</h2>
+                  <h2 class="text-uppercase">FREE SHIPING</h2>
                   <p>캠퍼스는 전품목 무료배송입니다.</p>
                </div>
             </div>
@@ -92,7 +92,7 @@
          <div class="row">
             <div class="col-sm-6 col-md-6 col-lg-4 mb-4 mb-lg-0" data-aos="fade"
                data-aos-delay="">
-               <a class="block-2-item" href="#">
+               <a class="block-2-item" href="../shop/itemList?category=camping">
                   <figure class="image">
                      <img src="/resources/images/Camping.png" alt="" class="img-fluid">
                   </figure>
@@ -104,7 +104,7 @@
             </div>
             <div class="col-sm-6 col-md-6 col-lg-4 mb-5 mb-lg-0" data-aos="fade"
                data-aos-delay="100">
-               <a class="block-2-item" href="#">
+               <a class="block-2-item" href="../shop/itemList?category=backpacking">
                   <figure class="image">
                      <img src="/resources/images/Backpacking.png" alt=""
                         class="img-fluid">
@@ -117,7 +117,7 @@
             </div>
             <div class="col-sm-6 col-md-6 col-lg-4 mb-5 mb-lg-0" data-aos="fade"
                data-aos-delay="200">
-               <a class="block-2-item" href="#">
+               <a class="block-2-item" href="../shop/itemList?category=picnic">
                   <figure class="image">
                      <img src="/resources/images/Picnic.png" alt="" class="img-fluid">
                   </figure>
@@ -141,86 +141,30 @@
          <div class="row">
             <div class="col-md-12">
                <div class="nonloop-block-3 owl-carousel">
-                  <div class="item">
+				<c:forEach var="item" items="${recommendedItems}">
+				  <div class="item">
                      <div class="block-4 text-center">
                         <figure class="block-4-image">
-                           <img src="/resources/images/cloth_1.jpg"
-                              alt="Image placeholder" class="img-fluid">
-                        </figure>
-                        <div class="block-4-text p-4">
-                           <h3>
-                              <a href="#">Tank Top</a>
-                           </h3>
-                           <p class="mb-0">Finding perfect t-shirt</p>
-                           <p class="text-primary font-weight-bold">$50</p>
-                        </div>
-                     </div>
-                  </div>
-                  <div class="item">
-                     <div class="block-4 text-center">
-                        <figure class="block-4-image">
+                         <a href="../shop/readItem?itemcode=${item.itemCode}">
                            <img src="/resources/images/shoe_1.jpg" alt="Image placeholder"
                               class="img-fluid">
+                         </a>
                         </figure>
                         <div class="block-4-text p-4">
                            <h3>
-                              <a href="#">Corater</a>
+                              <a href="../shop/readItem?itemcode=${item.itemCode}"><c:out value="${item.itemName}"/></a>
                            </h3>
-                           <p class="mb-0">Finding perfect products</p>
-                           <p class="text-primary font-weight-bold">$50</p>
+                           <p class="mb-0"><fmt:formatNumber value="${item.price}" pattern="#,###"/>원</p>
                         </div>
                      </div>
                   </div>
-                  <div class="item">
-                     <div class="block-4 text-center">
-                        <figure class="block-4-image">
-                           <img src="/resources/images/cloth_2.jpg"
-                              alt="Image placeholder" class="img-fluid">
-                        </figure>
-                        <div class="block-4-text p-4">
-                           <h3>
-                              <a href="#">Polo Shirt</a>
-                           </h3>
-                           <p class="mb-0">Finding perfect products</p>
-                           <p class="text-primary font-weight-bold">$50</p>
-                        </div>
-                     </div>
-                  </div>
-                  <div class="item">
-                     <div class="block-4 text-center">
-                        <figure class="block-4-image">
-                           <img src="/resources/images/cloth_3.jpg"
-                              alt="Image placeholder" class="img-fluid">
-                        </figure>
-                        <div class="block-4-text p-4">
-                           <h3>
-                              <a href="#">T-Shirt Mockup</a>
-                           </h3>
-                           <p class="mb-0">Finding perfect products</p>
-                           <p class="text-primary font-weight-bold">$50</p>
-                        </div>
-                     </div>
-                  </div>
-                  <div class="item">
-                     <div class="block-4 text-center">
-                        <figure class="block-4-image">
-                           <img src="/resources/images/shoe_1.jpg" alt="Image placeholder"
-                              class="img-fluid">
-                        </figure>
-                        <div class="block-4-text p-4">
-                           <h3>
-                              <a href="#">Corater</a>
-                           </h3>
-                           <p class="mb-0">Finding perfect products</p>
-                           <p class="text-primary font-weight-bold">$50</p>
-                        </div>
-                     </div>
-                  </div>
+				</c:forEach>		
                </div>
             </div>
          </div>
       </div>
    </div>
+   
 
    <div class="site-section block-8">
       <div class="container">
@@ -236,7 +180,7 @@
             </div>
             <div class="col-md-12 col-lg-5 text-center pl-md-5">
                <h2>
-                  <a href="#">UP TO 50% SALE</a>
+                  <a href="../shop/newList">New Items!</a>
                </h2>
                <p class="post-meta mb-4">
                   By <a href="#">Carl Smith</a> <span class="block-8-sep">&bullet;</span>
@@ -264,14 +208,8 @@
 
    <!-- 서치 페이징 처리 스크립트 사용X form의 action으로 변경함-->
    <script type="text/javascript">
-      $(document).ready(function() {
-         //.icon-search2")
-         /* $(document).on("click", ".icon-search2", function() {
-            alert("검색창 테스트")
-            window.location.href = "search.jsp"
-         })
-         //  getPager() */
-      });
+	$(document).ready(function() {
+	}); //document ready function end
    </script>
 
 

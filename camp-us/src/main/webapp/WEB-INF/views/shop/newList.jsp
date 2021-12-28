@@ -47,6 +47,16 @@
          </div>
       </div>
    </div>
+   
+    <div class="site-section block-8">
+      <div class="container">
+         <div class="row justify-content-center  mb-5">
+            <div class="col-md-7 site-section-heading text-center pt-4">
+               <h2>New Items</h2>
+            </div>
+         </div>
+      </div>
+   </div>
 
 
 
@@ -54,31 +64,7 @@
 		<div class="container">
 			<div class="row mb-5">
 				<div class="row">
-					<div class="div-1">
-						<div class="col-md-12 mb-5">
-							<div class="float-md-left mb-4">
-								<h2 class="text-black h5">${category}</h2>
-							</div>
-							<div class="div-1">
-								<div class="d-flex">
-									<div class=" mr-1 ml-md-auto">
-										<button type="button" class="btn form-control border-0"
-											id="registItem">상품등록</button>
-									</div>
-									<!-- <div class="btn-group">
-                           <button type="button"
-                              class="btn btn-secondary btn-sm dropdown-toggle"
-                              id="dropdownMenuReference" data-toggle="dropdown">최신순</button>
-                           <div class="dropdown-menu"
-                              aria-labelledby="dropdownMenuReference">
-                              <a class="dropdown-item" href="#">인기순</a> 
-                           </div>
-                        </div> -->
-								</div>
-							</div>
-						</div>
-					</div> <!-- div-1 -->
-					
+				
 					<div class="row mb-5">
 
 						<c:forEach var="item" items="${itemList}">
