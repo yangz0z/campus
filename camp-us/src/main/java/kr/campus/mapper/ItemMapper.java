@@ -8,7 +8,7 @@ import kr.campus.domain.ItemVO;
 public interface ItemMapper {
 	public List<ItemVO> itemList(Criteria cri);
 	
-	public ItemVO readItem(int itemCode); //상품 상세페이지
+	public ItemVO readItem(String itemCode); //상품 상세페이지
 	
 	public List<ItemVO> recommendedItems(); //추천아이템
 	

@@ -1,5 +1,8 @@
 package kr.campus.controller;
 
+import java.util.Locale;
+
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,7 +20,8 @@ public class CommunityBoardController {
 	private CommunityBoardService service;
 	
 	@GetMapping("/list")
-	public void list(Model model) {
+	public void list(Authentication authentication, Locale locale,Model model) {
+		GetAuth.getAuth(authentication, model);
 		log.info("list");
 		model.addAttribute("list", service.getList());
 	}

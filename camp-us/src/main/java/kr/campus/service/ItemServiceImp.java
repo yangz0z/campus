@@ -26,7 +26,7 @@ public class ItemServiceImp implements ItemService {
 	}
 
 	@Override
-	public ItemVO readItem(int itemCode) {
+	public ItemVO readItem(String itemCode) {
 		log.info("read item......" + itemCode);
 		return mapper.readItem(itemCode);
 	}

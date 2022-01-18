@@ -2,28 +2,18 @@
 <!DOCTYPE mapper
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-  <mapper namespace="kr.campus.mapper.AdminMapper">
-  
-     <select id="getList" resultType="kr.campus.domain.ItemVO">
-   <![CDATA[    
-   select *from tbl_board where bno > 0
-   ]]>   </select>
+<mapper namespace="kr.campus.mapper.AdminMapper">
 
-  
-  
-  <insert id="itemsEnroll">
-     
-        insert into tbl_items(itemCode,itemName,price,quantity,category,thumbNail,details)
-      values(
-      #{itemcode},
-      #{itemname},
-      #{price},
-      #{quantity},
-      #{category},
-      #{thumbnail},
-      #{details}
-      )
+	<insert id="itemsEnroll">
+		insert into tbl_items(itemName,price,quantity,category,thumbnail,details)
+		values(
+		#{itemName},
+		#{price},
+		#{quantity},
+		#{category},
+		#{thumbnail},
+		#{details}
+		)
+	</insert>
 
-     </insert>
-  
-  </mapper>
+</mapper>

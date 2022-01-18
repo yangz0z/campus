@@ -24,24 +24,32 @@ import org.springframework.web.multipart.MultipartFile;
 
 import lombok.extern.log4j.Log4j;
 
+
+
+
 @Log4j
 @Controller
 public class UploadController {
-   String uploadFolder = "c:\\upload";
+   @javax.annotation.Resource
+   String uploadPath ;
 
-
-
-   @PostMapping(value = "/uploadAjaxAction", produces = MediaType.APPLICATION_JSON_VALUE)
-   @ResponseBody // 응답을 json 형태로 리턴.
+   /*
+    *  경록가 씨:폴더..... 접근하면 보안에 취약해....해커가 금방 해킹하겠지....
+    *  그래서 상대경로 저장 하는 방법을 추천하는데 어제 밨던 상대 경로 만들어서 하는것좋아 근대 그부분은 개발자가 알면 좋으나 운영자 영역이다...
+    *  소스 수정은 폴더까지 저장되도록 수정했다 
+    * */
+   @PostMapping("/uploadAjaxAction")
    public ResponseEntity<String> uploadAjaxPost(MultipartFile[] uploadFile) {
       // rest 방식 으로 ajax 처리
       // 파일을 받고 json 값을 리턴.
 
       String uploadFileName ="";
       // 여러개 파일 저장을 위한 객체 배열 타입 선언.
-      String uploadFolder = "c:\\upload";
+      String uploadFolder = uploadPath;
 
       String uploadFolderPath = getFolder();
+      log.info("file path :"+uploadFolderPath);
+      log.warn("file path :"+uploadFolderPath);
       File uploadPath = new File(uploadFolder, uploadFolderPath);
       // 예) c:\\upload\\2021\\10\\12 에 파일 저장 예정.
 
@@ -49,6 +57,7 @@ public class UploadController {
          uploadPath.mkdirs();
          // 경로에 폴더들이 생성되어 있지 않다면, 폴더 생성.
       }
+      log.info("19999 length:"+uploadFile);
 
       // 파일은 1개 일수도 있고, 여러개 일수도 있음.
       for (MultipartFile multipartFile : uploadFile) {
@@ -71,25 +80,26 @@ public class UploadController {
       
 
          UUID uuid = UUID.randomUUID();
+         log.info("uuid:" + uuid.toString());
+         uploadFileName =  uuid.toString() + "_" + uploadFileName;
          // universal unique identifier, 범용 고유 식별자.
          // 파일의 중복을 회피.
+         
 
-         uploadFileName = uuid.toString() + "_" + uploadFileName;
-         // 예) uuid_일일일.txt
-
+         
          try {
             File saveFile = new File(uploadPath, uploadFileName);
             multipartFile.transferTo(saveFile);
-            // 서버에 파일 저장.
+            // 서버에 파일 저장
 
             
          } catch (Exception e) {
-            log.warn("eroor:"+e.getMessage());
+            log.info("eroor:"+e.getMessage());
             e.printStackTrace();
          }
       }
 
-      return new ResponseEntity<>(uploadFileName, HttpStatus.OK);
+      return new ResponseEntity<>(uploadFolderPath +"\\"+uploadFileName, HttpStatus.OK);
    }
 
    private String getFolder() {
@@ -185,4 +195,9 @@ public class UploadController {
 
       return new ResponseEntity<Resource>(resource, headers, HttpStatus.OK);
    }
+
+   
+   
+   
+
 }

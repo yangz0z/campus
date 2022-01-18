@@ -21,7 +21,7 @@ public class CartServiceTests {
 //	@Test
 //	public void testInsert() {
 //		CartVO cart = new CartVO();
-//		cart.setItemCode("CP0001");
+//		cart.setItemCode("1");
 //		cart.setUserID("user00");
 //		cart.setQuantity(2);
 //		cart.setMoney(5000);
@@ -31,8 +31,12 @@ public class CartServiceTests {
 //	}
 	
 	@Test
-	public void testList() {
-		
+	public void testModify() {
+		CartVO cart = new CartVO();
+		cart.setCartID(21);
+		cart.setQuantity(3);
+		service.modify(cart);
+		log.info(cart.getQuantity());
 	}
 
 }

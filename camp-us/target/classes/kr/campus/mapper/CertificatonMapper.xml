@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="kr.campus.mapper.CertificationMapper">
+	
+	<!-- 장바구니 담기 버튼 클릭시 실행되는 쿼리문 -->
+	<insert id="add">
+		insert into TBL_CERTIFICATION (key,userId)
+		values (#{key},#{userId})
+	</insert>
+	
+	<delete id="delete">
+	 delete TBL_CERTIFICATION Where key = #{key} and userId= #{userId}
+	</delete>
+	
+	<select id="get" resultType="kr.campus.domain.CertificationVO">
+	 Select * from TBL_CERTIFICATION Where key= #{key} and userId= #{userId}
+	</select>
+	
+	
+	
+</mapper>

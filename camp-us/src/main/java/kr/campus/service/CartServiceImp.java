@@ -19,9 +19,9 @@ public class CartServiceImp implements CartService {
 	private CartMapper mapper;
 	
 	@Override
-	public void insert(CartVO cart) {
+	public int insert(CartVO cart) {
 		log.info("insert cart service....");
-		mapper.insert(cart);
+		return mapper.insert(cart);
 	}
 
 	@Override
@@ -31,9 +31,9 @@ public class CartServiceImp implements CartService {
 	}
 
 	@Override
-	public void delete(CartListVO cartList) {
+	public int delete(CartListVO cartList) {
 		log.info("delete cart service...." + cartList);
-		mapper.delete(cartList);
+		return mapper.delete(cartList);
 	}
 
 	@Override
@@ -42,4 +42,11 @@ public class CartServiceImp implements CartService {
 		mapper.deleteAll(userID);
 	}
 
+	@Override
+	public int modify(CartVO cart) {
+		log.info("modify cart service...." + cart);
+		return mapper.modify(cart);
+	}
+
+	
 }

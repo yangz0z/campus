@@ -33,6 +33,11 @@
 		]]>
 	</select>
 	
+	<select id="readItem" resultType="kr.campus.domain.ItemVO">
+		select * from tbl_items where itemCode = #{itemCode}
+	</select>
+	
+	
 <!-- 	<select id="newList" resultType="kr.campus.domain.ItemVO">
 		<![CDATA[
 			select * from 

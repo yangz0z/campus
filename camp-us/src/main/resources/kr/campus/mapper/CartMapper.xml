@@ -20,6 +20,10 @@
 		where cart.userID = #{userID}
 	</select>
 	
+	<update id="modify">
+		update tbl_cart set quantity=#{quantity} where cartid =#{cartID}
+	</update>
+	
 	<delete id="delete">
 		delete from tbl_cart
 		where itemCode = #{itemCode} and userID = #{userID}

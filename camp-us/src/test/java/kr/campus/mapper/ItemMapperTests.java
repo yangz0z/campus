@@ -51,4 +51,10 @@ public class ItemMapperTests {
 		List<ItemVO> recommendedItems = mapper.recommendedItems();
 		recommendedItems.forEach(item -> log.info(item));
 	}
+	
+//	@Test
+//	public void testReadItem() {
+//		ItemVO item = mapper.readItem("TE0012");
+//		log.info(item);
+//	}
 }

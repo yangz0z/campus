@@ -36,4 +36,5 @@ public class ShopControllerTests {
 		log.info(mockMvc.perform(MockMvcRequestBuilders.get("/shop/itemList"))
 				.andReturn().getModelAndView().getModelMap());
 	}
+	
 }

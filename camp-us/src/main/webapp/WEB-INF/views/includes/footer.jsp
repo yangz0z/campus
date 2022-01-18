@@ -1,11 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
    pageEncoding="UTF-8"%>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-</head>
-<body>
+
 <footer class="site-footer border-top">
     
       <div class="container">

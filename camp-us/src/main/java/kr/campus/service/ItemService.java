@@ -9,7 +9,7 @@ public interface ItemService {
 
 	public List<ItemVO> itemList(Criteria cri); //전체상품 목록보기
 	
-	public ItemVO readItem(int itemCode); //상품 상세페이지
+	public ItemVO readItem(String itemCode); //상품 상세페이지
 	
 	public List<ItemVO> recommendedItems(); //추천아이템
 	

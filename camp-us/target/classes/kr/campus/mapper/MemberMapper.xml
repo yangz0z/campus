@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.campus.mapper.MemberMapper">
+
+   <resultMap type="kr.campus.domain.MemberVO" id="memberMap">
+      <id property="userId" column="userId" />
+      <result property="password" column="password" />
+      <result property="email" column="email" />
+      <result property="nickname" column="nickname" />      
+      <result property="Addr1" column="addr1" />
+      <result property="Addr2" column="addr2" />
+      <result property="Addr3" column="addr3" />
+      <result property="Addr4" column="addr4" />
+      <result property="contact" column="contact" />
+      <result property="cnt" column="cnt" />
+      <collection property="authList" resultMap="authMap"></collection>
+   </resultMap>
+
+   <resultMap type="kr.campus.domain.AuthVO" id="authMap">
+      <result property="userId" column="userId" />
+      <result property="auth" column="auth" />
+   </resultMap>
+
+
+   <insert id="memberJoin">
+      insert into tbl_user values(#{userId},
+      #{password}, #{email},  #{nickname},
+      #{Addr1}, #{Addr2},
+      #{Addr3},
+      #{Addr4},#{contact}
+      )
+
+   </insert>
+   
+   
+   <update id="memberUpdate">
+   update tbl_user set 
+   password =#{password},
+   email =#{email},
+   nickname=#{nickname},   
+   Addr1=#{Addr1}, 
+   Addr2= #{Addr2},
+   Addr3=#{Addr3},
+   Addr4=#{Addr4},
+   contact =#{contact}
+   Where userId = #{userId}
+   </update>
+
+   <select id="read" resultMap="memberMap">
+      select mem.*,auth.auth
+      from
+      tbl_user mem left outer join
+      tbl_memberauth auth on
+      mem.userid=auth.userid
+      where mem.userid=#{userId}
+      order by auth.auth DESC
+   </select>
+
+
+  <select id="idcheck" resultMap="memberMap">
+  Select * from tbl_user Where userid=#{userId}
+  </select>
+
+   <sql id="criteria">
+      <trim prefix="(" suffix=")" prefixOverrides="OR">
+         <foreach item="type" collection="typeArr">
+            <trim prefix="OR">
+               <choose>
+                  <when test="type=='T'.toString()">
+                     userid like '%'||#{keyword}||'%'
+                  </when>
+                  <when test="type=='C'.toString()">
+                     nickname like '%'||#{keyword}||'%'
+                  </when>
+                  <when test="type=='W'.toString()">
+                     email like '%'||#{keyword}||'%'
+                  </when>
+                  <when test="type=='X'.toString()">
+                            addr2 like '%'||#{keyword}||'%'                  
+                  </when>
+               </choose>
+            </trim>
+         </foreach>
+      </trim>
+   </sql>
+
+
+   <select id="memberselect" resultMap="memberMap">
+      select rn ,userid, password, email, nickname, addr1, addr2, addr3,
+      addr4,contact,cnt
+      from
+      (
+      SELECT
+      /*+tbl_user(tbl_member pk_member) */
+      rownum rn,
+      userid,
+      password,
+      email,
+      nickname,
+      addr1,
+      addr2,
+      addr3,
+      addr4,
+      contact
+      ,(Select count(1) from tbl_user Where 1=1 and
+      <include refid="criteria" /> 
+      ) as cnt
+      FROM
+      tbl_user
+      Where
+      <![CDATA[
+      rownum <= #{pageNum} * #{amount}
+      and
+      ]]>
+      <include refid="criteria" />
+      )
+      where rn > (#{pageNum}-1) * #{amount}
+      and
+      <include refid="criteria" />
+   </select>
+</mapper>

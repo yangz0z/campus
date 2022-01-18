@@ -16,21 +16,21 @@ public class AdminMapperTests {
    private AdminMapper mapper;
    
    /* 상품 등록 */
-   @Test
-   public void itemsEnrollTest() throws Exception{
-      
-      ItemVO items = new ItemVO();
-      
-      items.setItemCode("15");
-      items.setItemName("테스트랑꼐");
-      items.setPrice(23000);
-      items.setQuantity(10);
-      items.setRatings(5);
-      items.setCategory("2");
-      items.setPurchases(114);
-      items.setReviewno(2);
-      items.setThumbNail("사진");
-      
-      mapper.itemsEnroll(items);
-   }
+//   @Test
+//   public void itemsEnrollTest() throws Exception{
+//      
+//      ItemVO items = new ItemVO();
+//      
+//      items.setItemCode("15");
+//      items.setItemName("테스트랑꼐");
+//      items.setPrice(23000);
+//      items.setQuantity(10);
+//      items.setRatings(5);
+//      items.setCategory("2");
+//      items.setPurchases(114);
+//      items.setReviewno(2);
+//      items.setThumbNail("사진");
+//      
+//      mapper.itemsEnroll(items);
+//   }
 }

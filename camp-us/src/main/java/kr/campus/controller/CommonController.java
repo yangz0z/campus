@@ -1,5 +1,8 @@
 package kr.campus.controller;
 
+import java.util.Locale;
+
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,7 +28,8 @@ public class CommonController {
 	}
 	
 	@GetMapping("/contact")
-	public void contact() {
+	public void contact(Authentication authentication, Locale locale, Model model) {
+		GetAuth.getAuth(authentication, model);
 	}
 	
 	@GetMapping("/search")
