@@ -1,0 +1,139 @@
+# Campus - 캠핑준비 체크리스트
+
+캠핑에 필요한 모든 준비물을 체크할 수 있는 웹 애플리케이션입니다.
+
+## 기술 스택
+
+| 영역 | 기술 |
+|------|------|
+| Monorepo | TurboRepo + pnpm workspaces |
+| Backend | Nest.js + TypeORM |
+| Frontend | Next.js (App Router) |
+| Database | PostgreSQL (로컬: Docker / 프로덕션: Neon) |
+
+## 사전 준비
+
+- [Node.js](https://nodejs.org/) 22+
+- [pnpm](https://pnpm.io/) 10+
+- [Docker](https://www.docker.com/) (Docker Compose 포함)
+
+## 로컬 개발 환경
+
+### Docker로 실행 (권장)
+
+모든 서비스(PostgreSQL + API + Web)를 한 번에 띄웁니다.
+
+```bash
+docker compose --profile dev up
+```
+
+| 서비스 | URL | 설명 |
+|--------|-----|------|
+| API | http://localhost:4000 | Nest.js (hot reload) |
+| Web | http://localhost:3000 | Next.js (hot reload) |
+| PostgreSQL | localhost:5432 | DB (user: campus / pw: campus) |
+
+#### DB만 Docker로 띄우고 호스트에서 직접 개발
+
+```bash
+# PostgreSQL 컨테이너만 실행
+docker compose --profile dev up postgres
+
+# 호스트에서 의존성 설치 및 개발 서버 실행
+pnpm install
+pnpm dev
+```
+
+이 경우 `.env` 파일에 로컬 DB 연결 정보를 설정해야 합니다.
+
+```env
+DATABASE_URL=postgresql://campus:campus@localhost:5432/campus
+```
+
+### Docker 없이 실행
+
+별도의 PostgreSQL이 필요합니다.
+
+```bash
+# 환경변수 설정
+cp .env.example .env
+# .env 파일에서 DATABASE_URL을 실제 DB 정보로 수정
+
+# 의존성 설치 및 실행
+pnpm install
+pnpm dev
+```
+
+개별 앱만 실행하려면:
+
+```bash
+pnpm dev --filter api   # 백엔드만
+pnpm dev --filter web   # 프론트엔드만
+```
+
+## 프로덕션 환경
+
+### 환경변수 설정
+
+`.env` 파일에 Neon PostgreSQL 연결 정보를 설정합니다.
+
+```env
+DATABASE_URL=postgresql://username:password@ep-xxxx.region.aws.neon.tech/dbname?sslmode=require
+```
+
+### Docker로 빌드 및 실행
+
+```bash
+docker compose --profile prod up --build
+```
+
+| 서비스 | URL | 설명 |
+|--------|-----|------|
+| API | http://localhost:4000 | 멀티스테이지 빌드 이미지 |
+| Web | http://localhost:3000 | Next.js standalone 이미지 |
+
+### 개별 빌드
+
+```bash
+docker compose --profile prod build api   # API만 빌드
+docker compose --profile prod build web   # Web만 빌드
+```
+
+## 환경변수
+
+| 변수 | 설명 | 기본값 |
+|------|------|--------|
+| `DATABASE_URL` | PostgreSQL 연결 URL (프로덕션용) | - |
+| `POSTGRES_USER` | 로컬 DB 사용자 | `campus` |
+| `POSTGRES_PASSWORD` | 로컬 DB 비밀번호 | `campus` |
+| `POSTGRES_DB` | 로컬 DB 이름 | `campus` |
+| `NODE_ENV` | 실행 환경 | `development` |
+| `PORT` | API 서버 포트 | `4000` |
+
+## 프로젝트 구조
+
+```
+campus/
+├── apps/
+│   ├── api/                  # Nest.js 백엔드
+│   │   ├── src/
+│   │   │   ├── main.ts
+│   │   │   ├── app.module.ts
+│   │   │   ├── app.controller.ts
+│   │   │   ├── app.service.ts
+│   │   │   └── config/
+│   │   │       └── database.config.ts
+│   │   └── Dockerfile
+│   └── web/                  # Next.js 프론트엔드
+│       ├── src/app/
+│       │   ├── layout.tsx
+│       │   └── page.tsx
+│       └── Dockerfile
+├── packages/
+│   ├── typescript-config/    # 공유 TypeScript 설정
+│   └── eslint-config/        # 공유 ESLint 설정
+├── docker-compose.yml        # dev/prod profiles 통합
+├── turbo.json
+├── pnpm-workspace.yaml
+└── .env.example
+```
