@@ -1,0 +1,85 @@
+services:
+  # ============================================
+  # Shared: Local PostgreSQL (dev only)
+  # ============================================
+  postgres:
+    image: postgres:16-alpine
+    profiles: ["dev"]
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-campus}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-campus}
+      POSTGRES_DB: ${POSTGRES_DB:-campus}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-campus}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ============================================
+  # Dev: source mount + hot reload
+  # ============================================
+  api-dev:
+    image: node:22-alpine
+    profiles: ["dev"]
+    working_dir: /app
+    command: sh -c "corepack enable && pnpm install && pnpm dev --filter api"
+    ports:
+      - "4000:4000"
+    volumes:
+      - .:/app
+      - api_node_modules:/app/apps/api/node_modules
+      - root_node_modules:/app/node_modules
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-campus}:${POSTGRES_PASSWORD:-campus}@postgres:5432/${POSTGRES_DB:-campus}
+      NODE_ENV: development
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  web-dev:
+    image: node:22-alpine
+    profiles: ["dev"]
+    working_dir: /app
+    command: sh -c "corepack enable && pnpm install && pnpm dev --filter web"
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - web_node_modules:/app/apps/web/node_modules
+      - root_node_modules:/app/node_modules
+    environment:
+      NODE_ENV: development
+
+  # ============================================
+  # Prod: built images
+  # ============================================
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    profiles: ["prod"]
+    ports:
+      - "4000:4000"
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      NODE_ENV: production
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    profiles: ["prod"]
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+
+volumes:
+  postgres_data:
+  api_node_modules:
+  web_node_modules:
+  root_node_modules:
