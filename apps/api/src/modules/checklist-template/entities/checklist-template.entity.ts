@@ -39,6 +39,7 @@ export class ChecklistTemplate {
   sourceTemplateId!: string | null;
 
   @ManyToOne(() => ChecklistTemplate, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'source_template_id' })
   sourceTemplate!: ChecklistTemplate | null;
 
   @Column({

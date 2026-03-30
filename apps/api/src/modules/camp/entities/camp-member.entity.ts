@@ -20,6 +20,7 @@ export class CampMember {
     nullable: false,
     onDelete: 'CASCADE',
   })
+  @JoinColumn({ name: 'camp_id' })
   camp!: Camp;
 
   @Column({ name: 'camp_id', type: 'uuid' })

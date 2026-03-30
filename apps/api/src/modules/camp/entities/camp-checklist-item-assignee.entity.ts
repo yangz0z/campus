@@ -1,6 +1,7 @@
 import {
   Column,
   Entity,
+  JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
   Unique,
@@ -18,6 +19,7 @@ export class CampChecklistItemAssignee {
     nullable: false,
     onDelete: 'CASCADE',
   })
+  @JoinColumn({ name: 'item_id' })
   item!: CampChecklistItem;
 
   @Column({ name: 'item_id', type: 'uuid' })
@@ -27,6 +29,7 @@ export class CampChecklistItemAssignee {
     nullable: false,
     onDelete: 'CASCADE',
   })
+  @JoinColumn({ name: 'member_id' })
   member!: CampMember;
 
   @Column({ name: 'member_id', type: 'uuid' })

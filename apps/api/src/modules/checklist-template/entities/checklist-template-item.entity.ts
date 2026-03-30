@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -18,6 +19,7 @@ export class ChecklistTemplateItem {
     nullable: false,
     onDelete: 'CASCADE',
   })
+  @JoinColumn({ name: 'group_id' })
   group!: ChecklistTemplateGroup;
 
   @Column({ name: 'group_id', type: 'uuid' })

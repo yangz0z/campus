@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -21,6 +22,7 @@ export class CampChecklistGroup {
     nullable: false,
     onDelete: 'CASCADE',
   })
+  @JoinColumn({ name: 'camp_id' })
   camp!: Camp;
 
   @Column({ name: 'camp_id', type: 'uuid' })
