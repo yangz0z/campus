@@ -8,7 +8,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Season } from '../enums/season.enum';
+import { Season } from '../../../common/enums/season.enum';
 import { ChecklistTemplateGroup } from './checklist-template-group.entity';
 
 @Entity('checklist_template')
