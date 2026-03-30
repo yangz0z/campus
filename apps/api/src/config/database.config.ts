@@ -14,6 +14,7 @@ export const databaseConfig: TypeOrmModuleAsyncOptions = {
           ? { rejectUnauthorized: false }
           : false,
       autoLoadEntities: true,
+      migrations: [__dirname + '/../migrations/*{.ts,.js}'],
       synchronize: nodeEnv !== 'production',
       logging: nodeEnv !== 'production',
     };
