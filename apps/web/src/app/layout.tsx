@@ -1,4 +1,6 @@
 import type { Metadata } from 'next';
+import { ClerkProvider } from '@clerk/nextjs';
+import { koKR } from '@clerk/localizations';
 
 export const metadata: Metadata = {
   title: 'Campus - 캠핑준비 체크리스트',
@@ -11,8 +13,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ko">
-      <body>{children}</body>
-    </html>
+    <ClerkProvider localization={koKR}>
+      <html lang="ko">
+        <body>{children}</body>
+      </html>
+    </ClerkProvider>
   );
 }
