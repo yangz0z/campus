@@ -2,10 +2,12 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
   Unique,
 } from 'typeorm';
+import { User } from '../../user/entities/user.entity';
 import { Camp } from './camp.entity';
 
 @Entity('camp_member')
@@ -22,6 +24,10 @@ export class CampMember {
 
   @Column({ name: 'camp_id', type: 'uuid' })
   campId!: string;
+
+  @ManyToOne(() => User, { nullable: false, onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'user_id' })
+  user!: User;
 
   @Column({ name: 'user_id', type: 'uuid' })
   userId!: string;

@@ -3,12 +3,14 @@ import {
   CreateDateColumn,
   Entity,
   Index,
+  JoinColumn,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Season } from '../../../common/enums/season.enum';
+import { User } from '../../user/entities/user.entity';
 import { ChecklistTemplateGroup } from './checklist-template-group.entity';
 
 @Entity('checklist_template')
@@ -24,6 +26,10 @@ export class ChecklistTemplate {
 
   @Column({ name: 'owner_type', length: 10 })
   ownerType!: 'system' | 'user';
+
+  @ManyToOne(() => User, { nullable: true, onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'user_id' })
+  user!: User | null;
 
   @Column({ name: 'user_id', type: 'uuid', nullable: true })
   @Index('idx_template_user_id')

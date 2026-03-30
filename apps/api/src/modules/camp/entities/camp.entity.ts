@@ -3,11 +3,14 @@ import {
   CreateDateColumn,
   Entity,
   Index,
+  JoinColumn,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Season } from '../../../common/enums/season.enum';
+import { User } from '../../user/entities/user.entity';
 import { CampMember } from './camp-member.entity';
 import { CampChecklistGroup } from './camp-checklist-group.entity';
 
@@ -15,6 +18,10 @@ import { CampChecklistGroup } from './camp-checklist-group.entity';
 export class Camp {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
+
+  @ManyToOne(() => User, { nullable: false, onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'user_id' })
+  user!: User;
 
   @Column({ name: 'user_id', type: 'uuid' })
   @Index('idx_camp_user_id')
