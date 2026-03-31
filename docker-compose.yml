@@ -20,13 +20,28 @@ services:
       retries: 5
 
   # ============================================
+  # Dev: install + shared build (init)
+  # ============================================
+  init-dev:
+    image: node:22-alpine
+    profiles: ["dev"]
+    working_dir: /app
+    command: sh -c "corepack enable && pnpm install --store-dir /tmp/pnpm-store && pnpm --filter @campus/shared build"
+    volumes:
+      - .:/app
+      - api_node_modules:/app/apps/api/node_modules
+      - web_node_modules:/app/apps/web/node_modules
+      - shared_node_modules:/app/packages/shared/node_modules
+      - root_node_modules:/app/node_modules
+
+  # ============================================
   # Dev: source mount + hot reload
   # ============================================
   api-dev:
     image: node:22-alpine
     profiles: ["dev"]
-    working_dir: /app
-    command: sh -c "corepack enable && pnpm install --store-dir /tmp/pnpm-store && pnpm --filter @campus/shared build && cd apps/api && pnpm dev"
+    working_dir: /app/apps/api
+    command: sh -c "corepack enable && pnpm dev"
     ports:
       - "4000:4000"
     volumes:
@@ -42,12 +57,14 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      init-dev:
+        condition: service_completed_successfully
 
   web-dev:
     image: node:22-alpine
     profiles: ["dev"]
-    working_dir: /app
-    command: sh -c "corepack enable && pnpm install --store-dir /tmp/pnpm-store && pnpm --filter @campus/shared build && cd apps/web && pnpm dev"
+    working_dir: /app/apps/web
+    command: sh -c "corepack enable && pnpm dev"
     ports:
       - "3000:3000"
     volumes:
@@ -63,6 +80,9 @@ services:
       NEXT_PUBLIC_CLERK_SIGN_UP_URL: /sign-in
       NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL: /mypage
       NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL: /mypage
+    depends_on:
+      init-dev:
+        condition: service_completed_successfully
 
   # ============================================
   # Prod: built images
