@@ -23,10 +23,10 @@ export default function Header() {
           ) : (
             <div className="flex items-center gap-3">
               <a
-                href="/dashboard"
+                href="/mypage"
                 className="text-sm font-medium text-gray-600 transition-colors hover:text-primary-700"
               >
-                대시보드
+                내 캠프
               </a>
               <UserButton
                 appearance={{

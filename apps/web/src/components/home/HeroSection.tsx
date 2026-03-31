@@ -20,14 +20,8 @@ export default function HeroSection() {
             href="/sign-in"
             className="w-full rounded-xl bg-primary-600 px-6 py-3.5 text-base font-semibold text-white shadow-lg shadow-primary-600/25 transition-all hover:bg-primary-700 hover:shadow-xl sm:w-auto"
           >
-            무료로 시작하기
+            바로 시작하기
           </Link>
-          <a
-            href="#features"
-            className="w-full rounded-xl border border-earth-300 bg-white px-6 py-3.5 text-base font-semibold text-gray-700 transition-all hover:border-earth-400 hover:bg-earth-50 sm:w-auto"
-          >
-            더 알아보기
-          </a>
         </div>
       </div>
     </section>

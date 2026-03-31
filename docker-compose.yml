@@ -26,12 +26,13 @@ services:
     image: node:22-alpine
     profiles: ["dev"]
     working_dir: /app
-    command: sh -c "corepack enable && pnpm install && cd apps/api && pnpm dev"
+    command: sh -c "corepack enable && pnpm install --store-dir /tmp/pnpm-store && pnpm --filter @campus/shared build && cd apps/api && pnpm dev"
     ports:
       - "4000:4000"
     volumes:
       - .:/app
       - api_node_modules:/app/apps/api/node_modules
+      - shared_node_modules:/app/packages/shared/node_modules
       - root_node_modules:/app/node_modules
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-campus}:${POSTGRES_PASSWORD:-campus}@postgres:5432/${POSTGRES_DB:-campus}
@@ -46,12 +47,13 @@ services:
     image: node:22-alpine
     profiles: ["dev"]
     working_dir: /app
-    command: sh -c "corepack enable && pnpm install && cd apps/web && pnpm dev"
+    command: sh -c "corepack enable && pnpm install --store-dir /tmp/pnpm-store && pnpm --filter @campus/shared build && cd apps/web && pnpm dev"
     ports:
       - "3000:3000"
     volumes:
       - .:/app
       - web_node_modules:/app/apps/web/node_modules
+      - shared_node_modules:/app/packages/shared/node_modules
       - root_node_modules:/app/node_modules
     environment:
       NODE_ENV: development
@@ -59,8 +61,8 @@ services:
       CLERK_SECRET_KEY: ${CLERK_SECRET_KEY}
       NEXT_PUBLIC_CLERK_SIGN_IN_URL: /sign-in
       NEXT_PUBLIC_CLERK_SIGN_UP_URL: /sign-in
-      NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL: /dashboard
-      NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL: /dashboard
+      NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL: /mypage
+      NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL: /mypage
 
   # ============================================
   # Prod: built images
@@ -93,4 +95,5 @@ volumes:
   postgres_data:
   api_node_modules:
   web_node_modules:
+  shared_node_modules:
   root_node_modules:
