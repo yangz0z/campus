@@ -23,6 +23,13 @@
 
 모든 서비스(PostgreSQL + API + Web)를 한 번에 띄웁니다.
 
+먼저 프로젝트 루트에 `.env` 파일을 생성하고 Clerk 인증 키를 설정합니다.
+
+```env
+CLERK_SECRET_KEY=sk_test_xxxxx
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_xxxxx
+```
+
 ```bash
 docker compose --profile dev up
 ```
@@ -55,9 +62,8 @@ DATABASE_URL=postgresql://campus:campus@localhost:5432/campus
 별도의 PostgreSQL이 필요합니다.
 
 ```bash
-# 환경변수 설정
-cp .env.example .env
-# .env 파일에서 DATABASE_URL을 실제 DB 정보로 수정
+# 환경변수 설정 (.env 파일 생성 후 DB 및 Clerk 정보 입력)
+# DATABASE_URL, CLERK_SECRET_KEY, NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY 설정
 
 # 의존성 설치 및 실행
 pnpm install
@@ -75,10 +81,12 @@ pnpm dev --filter web   # 프론트엔드만
 
 ### 환경변수 설정
 
-`.env` 파일에 Neon PostgreSQL 연결 정보를 설정합니다.
+`.env` 파일에 Neon PostgreSQL 연결 정보와 Clerk 인증 키를 설정합니다.
 
 ```env
 DATABASE_URL=postgresql://username:password@ep-xxxx.region.aws.neon.tech/dbname?sslmode=require
+CLERK_SECRET_KEY=sk_live_xxxxx
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_live_xxxxx
 ```
 
 ### Docker로 빌드 및 실행
@@ -109,6 +117,8 @@ docker compose --profile prod build web   # Web만 빌드
 | `POSTGRES_DB` | 로컬 DB 이름 | `campus` |
 | `NODE_ENV` | 실행 환경 | `development` |
 | `PORT` | API 서버 포트 | `4000` |
+| `CLERK_SECRET_KEY` | Clerk 시크릿 키 (API, Web) | - |
+| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Clerk 퍼블릭 키 (Web) | - |
 
 ## 프로젝트 구조
 
@@ -135,5 +145,5 @@ campus/
 ├── docker-compose.yml        # dev/prod profiles 통합
 ├── turbo.json
 ├── pnpm-workspace.yaml
-└── .env.example
+└── .env                      # 환경변수 (직접 생성)
 ```
