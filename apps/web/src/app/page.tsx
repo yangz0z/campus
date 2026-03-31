@@ -1,10 +1,17 @@
+import { auth } from '@clerk/nextjs/server';
+import { redirect } from 'next/navigation';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import HeroSection from '@/components/home/HeroSection';
 import SeasonSection from '@/components/home/SeasonSection';
 import FeatureSection from '@/components/home/FeatureSection';
 
-export default function Home() {
+export default async function Home() {
+  const { userId } = await auth();
+  if (userId) {
+    redirect('/mypage');
+  }
+
   return (
     <>
       <Header />
