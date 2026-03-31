@@ -1,8 +1,19 @@
+import Header from '@/components/layout/Header';
+import Footer from '@/components/layout/Footer';
+import HeroSection from '@/components/home/HeroSection';
+import SeasonSection from '@/components/home/SeasonSection';
+import FeatureSection from '@/components/home/FeatureSection';
+
 export default function Home() {
   return (
-    <main>
-      <h1>Campus</h1>
-      <p>캠핑준비 체크리스트 앱</p>
-    </main>
+    <>
+      <Header />
+      <main className="min-h-screen">
+        <HeroSection />
+        <SeasonSection />
+        <FeatureSection />
+      </main>
+      <Footer />
+    </>
   );
 }
