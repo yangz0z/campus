@@ -9,8 +9,9 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-earth-200 bg-white/80 backdrop-blur-md">
       <div className="mx-auto flex h-14 max-w-screen-lg items-center justify-between px-4">
-        <a href="/" className="text-lg font-bold tracking-tight text-primary-700">
-          Campus
+        <a href="/" className="text-lg font-bold tracking-tight">
+          <span className="text-primary-700">Camp</span>
+          <span className="text-warm-500">Us</span>
         </a>
 
         <nav>
