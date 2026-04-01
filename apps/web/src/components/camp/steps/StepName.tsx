@@ -9,12 +9,14 @@ const easeOut = [0.22, 1, 0.36, 1] as const;
 
 interface StepNameProps {
   onNext: (title: string, location: string) => void;
+  initialTitle?: string;
+  initialLocation?: string;
 }
 
-export default function StepName({ onNext }: StepNameProps) {
-  const [title, setTitle] = useState('');
-  const [location, setLocation] = useState('');
-  const [showInput, setShowInput] = useState(false);
+export default function StepName({ onNext, initialTitle, initialLocation }: StepNameProps) {
+  const [title, setTitle] = useState(initialTitle ?? '');
+  const [location, setLocation] = useState(initialLocation ?? '');
+  const [showInput, setShowInput] = useState(!!initialTitle);
   const locationRef = useRef<HTMLInputElement>(null);
 
   const handleTypingDone = useCallback(() => setShowInput(true), []);

@@ -5,12 +5,13 @@ import { motion } from 'framer-motion';
 interface ChatBubbleProps {
   variant: 'question' | 'answer';
   faded?: boolean;
+  interactive?: boolean;
   children: React.ReactNode;
 }
 
 const easeOut = [0.22, 1, 0.36, 1] as const;
 
-export default function ChatBubble({ variant, faded = false, children }: ChatBubbleProps) {
+export default function ChatBubble({ variant, faded = false, interactive = false, children }: ChatBubbleProps) {
   const isQuestion = variant === 'question';
 
   return (
@@ -30,9 +31,12 @@ export default function ChatBubble({ variant, faded = false, children }: ChatBub
           isQuestion
             ? 'rounded-tl-md bg-white border border-earth-200 text-gray-800 shadow-sm'
             : 'rounded-tr-md bg-primary-50 text-primary-800'
-        }`}
+        } ${interactive ? 'cursor-pointer transition-opacity hover:opacity-80 active:opacity-60' : ''}`}
       >
         {children}
+        {interactive && (
+          <span className="chat-bubble-edit-hint ml-2 text-xs text-primary-400">수정</span>
+        )}
       </div>
     </motion.div>
   );

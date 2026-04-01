@@ -13,13 +13,16 @@ const easeOut = [0.22, 1, 0.36, 1] as const;
 
 interface StepDateProps {
   onNext: (startDate: string, endDate: string, season: string) => void;
+  initialStartDate?: string;
+  initialEndDate?: string;
+  initialSeason?: string;
 }
 
-export default function StepDate({ onNext }: StepDateProps) {
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
-  const [season, setSeason] = useState<string | null>(null);
-  const [showInput, setShowInput] = useState(false);
+export default function StepDate({ onNext, initialStartDate, initialEndDate, initialSeason }: StepDateProps) {
+  const [startDate, setStartDate] = useState(initialStartDate ?? '');
+  const [endDate, setEndDate] = useState(initialEndDate ?? '');
+  const [season, setSeason] = useState<string | null>(initialSeason ?? null);
+  const [showInput, setShowInput] = useState(!!initialStartDate);
 
   const handleTypingDone = useCallback(() => setShowInput(true), []);
 

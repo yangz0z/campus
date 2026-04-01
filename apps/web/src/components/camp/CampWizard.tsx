@@ -121,36 +121,48 @@ export default function CampWizard() {
 
       {/* Completed step 1 */}
       {currentStep > 0 && (
-        <div className="mb-2">
+        <div className="wizard-step wizard-step--1 mb-2">
           <ChatBubble variant="question" faded>
             어떤 캠프를 계획하고 있나요?
           </ChatBubble>
-          <ChatBubble variant="answer" faded>
-            <p className="font-medium">{formData.title}</p>
-            {formData.location && (
-              <p className="mt-0.5 text-sm opacity-70">📍 {formData.location}</p>
-            )}
-          </ChatBubble>
+          <button
+            type="button"
+            onClick={() => setCurrentStep(0)}
+            className="wizard-step-edit w-full text-left"
+          >
+            <ChatBubble variant="answer" faded interactive>
+              <p className="font-medium">{formData.title}</p>
+              {formData.location && (
+                <p className="mt-0.5 text-sm opacity-70">📍 {formData.location}</p>
+              )}
+            </ChatBubble>
+          </button>
         </div>
       )}
 
       {/* Completed step 2 */}
       {currentStep > 1 && (
-        <div className="mb-2">
+        <div className="wizard-step wizard-step--2 mb-2">
           <ChatBubble variant="question" faded>
             언제부터 언제까지 가나요?
           </ChatBubble>
-          <ChatBubble variant="answer" faded>
-            <p className="font-medium">
-              {formatDateShort(formData.startDate)} ~ {formatDateShort(formData.endDate)}
-            </p>
-            {formData.season && (
-              <span className="mt-1 inline-block text-sm">
-                {SEASONS.find((s) => s.id === formData.season)?.icon}{' '}
-                {SEASONS.find((s) => s.id === formData.season)?.name}
-              </span>
-            )}
-          </ChatBubble>
+          <button
+            type="button"
+            onClick={() => setCurrentStep(1)}
+            className="wizard-step-edit w-full text-left"
+          >
+            <ChatBubble variant="answer" faded interactive>
+              <p className="font-medium">
+                {formatDateShort(formData.startDate)} ~ {formatDateShort(formData.endDate)}
+              </p>
+              {formData.season && (
+                <span className="mt-1 inline-block text-sm">
+                  {SEASONS.find((s) => s.id === formData.season)?.icon}{' '}
+                  {SEASONS.find((s) => s.id === formData.season)?.name}
+                </span>
+              )}
+            </ChatBubble>
+          </button>
         </div>
       )}
 
@@ -165,7 +177,11 @@ export default function CampWizard() {
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.5, ease: easeOut }}
             >
-              <StepName onNext={handleNameNext} />
+              <StepName
+                onNext={handleNameNext}
+                initialTitle={formData.title || undefined}
+                initialLocation={formData.location || undefined}
+              />
             </motion.div>
           )}
 
@@ -177,7 +193,12 @@ export default function CampWizard() {
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.5, ease: easeOut }}
             >
-              <StepDate onNext={handleDateNext} />
+              <StepDate
+                onNext={handleDateNext}
+                initialStartDate={formData.startDate || undefined}
+                initialEndDate={formData.endDate || undefined}
+                initialSeason={formData.season || undefined}
+              />
             </motion.div>
           )}
 
