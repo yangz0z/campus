@@ -13,6 +13,7 @@ import { CreateChecklistGroupDto } from './dto/create-checklist-group.dto';
 import { CreateChecklistItemDto } from './dto/create-checklist-item.dto';
 import { UpdateChecklistItemMemoDto } from './dto/update-checklist-item-memo.dto';
 import { SetItemAssigneesDto } from './dto/set-item-assignees.dto';
+import { ToggleChecklistItemDto } from './dto/toggle-checklist-item.dto';
 
 @Injectable()
 export class CampService {
@@ -168,22 +169,28 @@ export class CampService {
     });
 
     return {
+      myMemberId: member.id,
       groups: groups.map((g) => ({
         id: g.id,
         title: g.title,
         sortOrder: g.sortOrder,
-        items: g.items.map((i) => ({
-          id: i.id,
-          title: i.title,
-          isRequired: i.isRequired,
-          sortOrder: i.sortOrder,
-          memo: i.memo,
-          assignees: i.assignees.map((a) => ({
-            memberId: a.memberId,
-            nickname: a.member.user.nickname,
-            profileImage: a.member.user.profileImage,
-          })),
-        })),
+        items: g.items.map((i) => {
+          const myAssignee = i.assignees.find((a) => a.memberId === member.id);
+          return {
+            id: i.id,
+            title: i.title,
+            isRequired: i.isRequired,
+            sortOrder: i.sortOrder,
+            memo: i.memo,
+            isCheckedByMe: myAssignee?.isChecked ?? false,
+            assignees: i.assignees.map((a) => ({
+              memberId: a.memberId,
+              nickname: a.member.user.nickname,
+              profileImage: a.member.user.profileImage,
+              isChecked: a.isChecked,
+            })),
+          };
+        }),
       })),
     };
   }
@@ -235,7 +242,31 @@ export class CampService {
       sortOrder: saved.sortOrder,
       memo: saved.memo,
       assignees: [],
+      isCheckedByMe: false,
     };
+  }
+
+  async toggleChecklistItem(user: User, campId: string, itemId: string, dto: ToggleChecklistItemDto) {
+    const member = await this.campMemberRepository.findOne({ where: { campId, userId: user.id } });
+    if (!member) throw new ForbiddenException();
+
+    const item = await this.campChecklistItemRepository.findOne({
+      where: { id: itemId },
+      relations: ['group'],
+    });
+    if (!item || item.group.campId !== campId) throw new NotFoundException();
+
+    let assignee = await this.campChecklistItemAssigneeRepository.findOne({
+      where: { itemId, memberId: member.id },
+    });
+
+    if (!assignee) {
+      assignee = this.campChecklistItemAssigneeRepository.create({ itemId, memberId: member.id });
+    }
+
+    assignee.isChecked = dto.isChecked;
+    assignee.checkedAt = dto.isChecked ? new Date() : null;
+    await this.campChecklistItemAssigneeRepository.save(assignee);
   }
 
   async updateChecklistItemMemo(user: User, campId: string, itemId: string, dto: UpdateChecklistItemMemoDto) {

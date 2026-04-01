@@ -6,6 +6,7 @@ import type {
   CreateChecklistGroupResponse,
   CreateChecklistItemRequest,
   CreateChecklistItemResponse,
+  ToggleCheckRequest,
   UpdateChecklistItemMemoRequest,
   GetChecklistResponse,
   GetCampMembersResponse,
@@ -59,6 +60,18 @@ export function createChecklistItem(
 
 export function getCampChecklist(token: string, campId: string): Promise<GetChecklistResponse> {
   return apiFetch<GetChecklistResponse>(`/camps/${campId}/checklist`, token);
+}
+
+export function toggleChecklistItem(
+  token: string,
+  campId: string,
+  itemId: string,
+  data: ToggleCheckRequest,
+): Promise<void> {
+  return apiFetch<void>(`/camps/${campId}/checklist/items/${itemId}/check`, token, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
 }
 
 export function updateChecklistItemMemo(

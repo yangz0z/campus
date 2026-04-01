@@ -21,6 +21,7 @@ export interface AssigneeInfo {
   memberId: string;
   nickname: string;
   profileImage: string | null;
+  isChecked: boolean;
 }
 
 export interface ChecklistItem {
@@ -30,6 +31,7 @@ export interface ChecklistItem {
   sortOrder: number;
   memo: string | null;
   assignees: AssigneeInfo[];
+  isCheckedByMe: boolean;
 }
 
 export interface ChecklistGroup {
@@ -40,6 +42,7 @@ export interface ChecklistGroup {
 }
 
 export interface GetChecklistResponse {
+  myMemberId: string;
   groups: ChecklistGroup[];
 }
 
@@ -76,6 +79,10 @@ export interface UpdateChecklistItemMemoRequest {
   memo: string | null;
 }
 
+export interface ToggleCheckRequest {
+  isChecked: boolean;
+}
+
 export interface CreateChecklistItemResponse {
   id: string;
   title: string;
@@ -83,6 +90,7 @@ export interface CreateChecklistItemResponse {
   sortOrder: number;
   memo: string | null;
   assignees: AssigneeInfo[];
+  isCheckedByMe: boolean;
 }
 
 export interface CampSummary {

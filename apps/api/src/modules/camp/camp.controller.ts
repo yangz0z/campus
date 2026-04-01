@@ -5,6 +5,7 @@ import { CampService } from './camp.service';
 import { CreateCampDto } from './dto/create-camp.dto';
 import { CreateChecklistGroupDto } from './dto/create-checklist-group.dto';
 import { CreateChecklistItemDto } from './dto/create-checklist-item.dto';
+import { ToggleChecklistItemDto } from './dto/toggle-checklist-item.dto';
 import { UpdateChecklistItemMemoDto } from './dto/update-checklist-item-memo.dto';
 import { SetItemAssigneesDto } from './dto/set-item-assignees.dto';
 
@@ -66,6 +67,17 @@ export class CampController {
     @Param('campId', ParseUUIDPipe) campId: string,
   ) {
     return this.campService.getCampChecklist(user, campId);
+  }
+
+  @Patch(':campId/checklist/items/:itemId/check')
+  @HttpCode(204)
+  toggleChecklistItem(
+    @CurrentUser() user: User,
+    @Param('campId', ParseUUIDPipe) campId: string,
+    @Param('itemId', ParseUUIDPipe) itemId: string,
+    @Body() dto: ToggleChecklistItemDto,
+  ) {
+    return this.campService.toggleChecklistItem(user, campId, itemId, dto);
   }
 
   @Patch(':campId/checklist/items/:itemId/memo')
