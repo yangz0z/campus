@@ -8,6 +8,11 @@ import { CreateCampDto } from './dto/create-camp.dto';
 export class CampController {
   constructor(private readonly campService: CampService) {}
 
+  @Get()
+  getMyCamps(@CurrentUser() user: User) {
+    return this.campService.getMyCamps(user);
+  }
+
   @Post()
   create(
     @CurrentUser() user: User,

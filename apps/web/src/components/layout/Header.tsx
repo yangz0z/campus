@@ -7,11 +7,33 @@ export default function Header() {
   const { isSignedIn } = useAuth();
 
   return (
-    <header className="sticky top-0 z-50 border-b border-earth-200 bg-white/80 backdrop-blur-md">
+    <header className="site-header sticky top-0 z-50 overflow-hidden border-b border-earth-200 bg-white/80 backdrop-blur-md">
       <div className="mx-auto flex h-14 max-w-screen-lg items-center justify-between px-4">
-        <a href="/" className="text-lg font-bold tracking-tight">
-          <span className="text-primary-700">Camp</span>
-          <span className="text-warm-500">Us</span>
+        <a href="/" className="site-logo flex items-center gap-2">
+          {/* 텐트 아이콘 */}
+          <svg
+            width="22" height="20" viewBox="0 0 22 20" fill="none"
+            className="site-logo-icon text-primary-600"
+            aria-hidden="true"
+          >
+            <path
+              d="M11 1.5L20.5 17H1.5L11 1.5Z"
+              stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round"
+            />
+            <path
+              d="M9 17v-3.2a2 2 0 014 0V17"
+              stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"
+            />
+            <line
+              x1="1" y1="17" x2="21" y2="17"
+              stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"
+            />
+          </svg>
+          {/* 워드마크 */}
+          <span className="site-logo-wordmark text-[19px] font-black tracking-tight">
+            <span className="site-logo-camp text-primary-700">Camp</span>
+            <span className="site-logo-us text-warm-500">Us</span>
+          </span>
         </a>
 
         <nav>
