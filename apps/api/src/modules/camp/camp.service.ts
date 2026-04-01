@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { User } from '../user/entities/user.entity';
@@ -7,7 +7,9 @@ import { Camp } from './entities/camp.entity';
 import { CampMember } from './entities/camp-member.entity';
 import { CampChecklistGroup } from './entities/camp-checklist-group.entity';
 import { CampChecklistItem } from './entities/camp-checklist-item.entity';
+import { CampChecklistItemAssignee } from './entities/camp-checklist-item-assignee.entity';
 import { CreateCampDto } from './dto/create-camp.dto';
+import { SetItemAssigneesDto } from './dto/set-item-assignees.dto';
 
 @Injectable()
 export class CampService {
@@ -18,6 +20,10 @@ export class CampService {
     private readonly campMemberRepository: Repository<CampMember>,
     @InjectRepository(CampChecklistGroup)
     private readonly campChecklistGroupRepository: Repository<CampChecklistGroup>,
+    @InjectRepository(CampChecklistItem)
+    private readonly campChecklistItemRepository: Repository<CampChecklistItem>,
+    @InjectRepository(CampChecklistItemAssignee)
+    private readonly campChecklistItemAssigneeRepository: Repository<CampChecklistItemAssignee>,
     @InjectRepository(ChecklistTemplate)
     private readonly checklistTemplateRepository: Repository<ChecklistTemplate>,
     private readonly dataSource: DataSource,
@@ -40,7 +46,7 @@ export class CampService {
         userId: user.id,
         role: 'owner',
       });
-      await manager.save(CampMember, member);
+      const savedMember = await manager.save(CampMember, member);
 
       const template = await manager
         .createQueryBuilder(ChecklistTemplate, 't')
@@ -72,7 +78,11 @@ export class CampService {
               sortOrder: templateItem.sortOrder,
               isRequired: templateItem.isRequired,
             });
-            await manager.save(CampChecklistItem, campItem);
+            const savedItem = await manager.save(CampChecklistItem, campItem);
+            await manager.save(CampChecklistItemAssignee, manager.create(CampChecklistItemAssignee, {
+              itemId: savedItem.id,
+              memberId: savedMember.id,
+            }));
           }
         }
       }
@@ -102,17 +112,37 @@ export class CampService {
     };
   }
 
+  async getCampMembers(user: User, campId: string) {
+    const member = await this.campMemberRepository.findOne({
+      where: { campId, userId: user.id },
+    });
+    if (!member) throw new ForbiddenException();
+
+    const members = await this.campMemberRepository.find({
+      where: { campId },
+      relations: ['user'],
+      order: { createdAt: 'ASC' },
+    });
+
+    return {
+      members: members.map((m) => ({
+        memberId: m.id,
+        nickname: m.user.nickname,
+        profileImage: m.user.profileImage,
+        role: m.role,
+      })),
+    };
+  }
+
   async getCampChecklist(user: User, campId: string) {
     const member = await this.campMemberRepository.findOne({
       where: { campId, userId: user.id },
     });
-    if (!member) {
-      throw new ForbiddenException();
-    }
+    if (!member) throw new ForbiddenException();
 
     const groups = await this.campChecklistGroupRepository.find({
       where: { campId },
-      relations: ['items'],
+      relations: ['items', 'items.assignees', 'items.assignees.member', 'items.assignees.member.user'],
       order: { sortOrder: 'ASC', items: { sortOrder: 'ASC' } },
     });
 
@@ -127,8 +157,35 @@ export class CampService {
           isRequired: i.isRequired,
           sortOrder: i.sortOrder,
           memo: i.memo,
+          assignees: i.assignees.map((a) => ({
+            memberId: a.memberId,
+            nickname: a.member.user.nickname,
+            profileImage: a.member.user.profileImage,
+          })),
         })),
       })),
     };
+  }
+
+  async setItemAssignees(user: User, campId: string, itemId: string, dto: SetItemAssigneesDto) {
+    const member = await this.campMemberRepository.findOne({
+      where: { campId, userId: user.id },
+    });
+    if (!member) throw new ForbiddenException();
+
+    const item = await this.campChecklistItemRepository.findOne({
+      where: { id: itemId },
+      relations: ['group'],
+    });
+    if (!item || item.group.campId !== campId) throw new NotFoundException();
+
+    await this.campChecklistItemAssigneeRepository.delete({ itemId });
+
+    if (dto.memberIds.length > 0) {
+      const assignees = dto.memberIds.map((memberId) =>
+        this.campChecklistItemAssigneeRepository.create({ itemId, memberId }),
+      );
+      await this.campChecklistItemAssigneeRepository.save(assignees);
+    }
   }
 }

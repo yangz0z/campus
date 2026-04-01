@@ -17,12 +17,19 @@ export interface CreateCampResponse {
   campId: string;
 }
 
+export interface AssigneeInfo {
+  memberId: string;
+  nickname: string;
+  profileImage: string | null;
+}
+
 export interface ChecklistItem {
   id: string;
   title: string;
   isRequired: boolean;
   sortOrder: number;
   memo: string | null;
+  assignees: AssigneeInfo[];
 }
 
 export interface ChecklistGroup {
@@ -34,6 +41,21 @@ export interface ChecklistGroup {
 
 export interface GetChecklistResponse {
   groups: ChecklistGroup[];
+}
+
+export interface CampMemberInfo {
+  memberId: string;
+  nickname: string;
+  profileImage: string | null;
+  role: 'owner' | 'member';
+}
+
+export interface GetCampMembersResponse {
+  members: CampMemberInfo[];
+}
+
+export interface SetItemAssigneesRequest {
+  memberIds: string[];
 }
 
 export interface CampSummary {
