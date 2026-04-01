@@ -20,10 +20,12 @@ interface CampFormData {
 interface StepConfirmProps {
   formData: CampFormData;
   onConfirm: () => void;
+  isSubmitting?: boolean;
+  error?: string | null;
 }
 
 
-export default function StepConfirm({ formData, onConfirm }: StepConfirmProps) {
+export default function StepConfirm({ formData, onConfirm, isSubmitting, error }: StepConfirmProps) {
   const [showCard, setShowCard] = useState(false);
 
   const handleTypingDone = useCallback(() => setShowCard(true), []);
@@ -80,10 +82,14 @@ export default function StepConfirm({ formData, onConfirm }: StepConfirmProps) {
           >
             <button
               onClick={onConfirm}
-              className="w-full rounded-xl bg-primary-600 py-4 text-lg font-bold text-white shadow-lg shadow-primary-600/25 transition-colors hover:bg-primary-700"
+              disabled={isSubmitting}
+              className="w-full rounded-xl bg-primary-600 py-4 text-lg font-bold text-white shadow-lg shadow-primary-600/25 transition-colors hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              캠프 만들기
+              {isSubmitting ? '만드는 중...' : '캠프 만들기'}
             </button>
+            {error && (
+              <p className="mt-3 text-center text-sm text-red-500">{error}</p>
+            )}
           </motion.div>
         </motion.div>
       )}

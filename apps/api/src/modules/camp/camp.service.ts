@@ -48,7 +48,7 @@ export class CampService {
         .leftJoinAndSelect('g.items', 'i')
         .where("t.owner_type = 'system'")
         .andWhere('t.is_active = true')
-        .andWhere('t.seasons @> ARRAY[:season]::season[]', { season: dto.season })
+        .andWhere(':season = ANY(t.seasons)', { season: dto.season })
         .orderBy('g.sort_order', 'ASC')
         .addOrderBy('i.sort_order', 'ASC')
         .getOne();
@@ -81,6 +81,25 @@ export class CampService {
     });
 
     return { campId };
+  }
+
+  async getMyCamps(user: User) {
+    const members = await this.campMemberRepository.find({
+      where: { userId: user.id },
+      relations: ['camp'],
+      order: { createdAt: 'DESC' },
+    });
+
+    return {
+      camps: members.map((m) => ({
+        id: m.camp.id,
+        title: m.camp.title,
+        location: m.camp.location,
+        startDate: m.camp.startDate,
+        endDate: m.camp.endDate,
+        season: m.camp.season,
+      })),
+    };
   }
 
   async getCampChecklist(user: User, campId: string) {

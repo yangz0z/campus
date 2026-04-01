@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { detectSeason, getNextDay } from '@campus/shared';
+import { dayjs, detectSeason, getNextDay } from '@campus/shared';
 import ChatBubble from '../shared/ChatBubble';
 import TypewriterText from '../shared/TypewriterText';
 import SeasonBadge from '../shared/SeasonBadge';
@@ -15,7 +15,7 @@ interface StepDateProps {
 }
 
 export default function StepDate({ onNext }: StepDateProps) {
-  const [startDate, setStartDate] = useState('');
+  const [startDate, setStartDate] = useState(getNextDay(dayjs().format('YYYY-MM-DD')));
   const [endDate, setEndDate] = useState('');
   const [season, setSeason] = useState<string | null>(null);
   const [showInput, setShowInput] = useState(false);

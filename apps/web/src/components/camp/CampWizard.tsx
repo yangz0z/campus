@@ -2,15 +2,15 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { formatDateShort } from '@campus/shared';
+import { useAuth } from '@clerk/nextjs';
+import { formatDateShort, type Season } from '@campus/shared';
 import ChatBubble from './shared/ChatBubble';
 import ConfettiEffect from './shared/ConfettiEffect';
-import SeasonBadge from './shared/SeasonBadge';
 import StepName from './steps/StepName';
 import StepDate from './steps/StepDate';
 import StepConfirm from './steps/StepConfirm';
+import { createCamp } from '@/lib/api/camps';
 import { SEASONS } from '@/constants/home';
 
 const easeOut = [0.22, 1, 0.36, 1] as const;
@@ -33,9 +33,13 @@ export default function CampWizard() {
     season: null,
   });
   const [isCompleted, setIsCompleted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [campId, setCampId] = useState<string | null>(null);
   const activeRef = useRef<HTMLDivElement>(null);
   const prevStepRef = useRef(currentStep);
   const router = useRouter();
+  const { getToken } = useAuth();
 
   useEffect(() => {
     if (prevStepRef.current === currentStep && !isCompleted) return;
@@ -59,9 +63,29 @@ export default function CampWizard() {
     setCurrentStep(2);
   };
 
-  const handleConfirm = () => {
-    console.log('Camp created:', formData);
-    setIsCompleted(true);
+  const handleConfirm = async () => {
+    setIsSubmitting(true);
+    setError(null);
+    try {
+      const token = await getToken();
+      if (!token) throw new Error('로그인이 필요합니다.');
+      const result = await createCamp(token, {
+        title: formData.title,
+        location: formData.location || null,
+        startDate: formData.startDate,
+        endDate: formData.endDate,
+        season: formData.season as Season,
+      });
+      setCampId(result.campId);
+      setIsCompleted(true);
+      setTimeout(() => {
+        router.push(`/camp/${result.campId}/checklist`);
+      }, 2000);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '캠프 생성에 실패했어요. 다시 시도해 주세요.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -165,7 +189,7 @@ export default function CampWizard() {
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.5, ease: easeOut }}
             >
-              <StepConfirm formData={formData} onConfirm={handleConfirm} />
+              <StepConfirm formData={formData} onConfirm={handleConfirm} isSubmitting={isSubmitting} error={error} />
             </motion.div>
           )}
 
@@ -174,13 +198,13 @@ export default function CampWizard() {
               key="completed"
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, ease: easeOut }}
+              transition={{ duration: 0.4, ease: easeOut }}
               className="flex flex-col items-center py-16 text-center"
             >
               <motion.p
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 20, delay: 0.2 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 20, delay: 0.1 }}
                 className="text-6xl"
               >
                 🎉
@@ -188,18 +212,9 @@ export default function CampWizard() {
               <h2 className="mt-5 text-2xl font-bold text-gray-900">
                 캠프가 만들어졌어요!
               </h2>
-              <p className="mt-2 text-gray-500">
-                이제 체크리스트를 준비해 볼까요?
+              <p className="mt-2 text-sm text-gray-400">
+                체크리스트로 이동할게요...
               </p>
-              <div className="mt-3">
-                {formData.season && <SeasonBadge seasonId={formData.season} />}
-              </div>
-              <Link
-                href="/mypage"
-                className="mt-8 inline-flex rounded-xl bg-primary-600 px-8 py-3.5 text-base font-semibold text-white shadow-lg shadow-primary-600/25 transition-colors hover:bg-primary-700"
-              >
-                내 캠프로 돌아가기
-              </Link>
             </motion.div>
           )}
         </AnimatePresence>

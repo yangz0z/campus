@@ -1,5 +1,5 @@
 import { IsDateString, IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
-import { Season } from '../../../common/enums/season.enum';
+import { Season } from '@campus/shared';
 
 export class CreateCampDto {
   @IsNotEmpty()
