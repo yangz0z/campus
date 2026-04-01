@@ -1,11 +1,12 @@
 interface GroupNavFABProps {
   groupCount: number;
   currentGroupIdx: number;
+  isAtBottom: boolean;
   onScrollUp: () => void;
   onScrollDown: () => void;
 }
 
-export default function GroupNavFAB({ groupCount, currentGroupIdx, onScrollUp, onScrollDown }: GroupNavFABProps) {
+export default function GroupNavFAB({ groupCount, currentGroupIdx, isAtBottom, onScrollUp, onScrollDown }: GroupNavFABProps) {
   if (groupCount <= 1) return null;
 
   return (
@@ -22,7 +23,7 @@ export default function GroupNavFAB({ groupCount, currentGroupIdx, onScrollUp, o
       <button
         type="button"
         onClick={onScrollDown}
-        disabled={currentGroupIdx === groupCount - 1}
+        disabled={currentGroupIdx === groupCount - 1 && isAtBottom}
         className="checklist-group-nav-down flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.12)] transition-colors hover:bg-gray-50 active:bg-gray-100 disabled:opacity-30"
       >
         <svg width="12" height="8" viewBox="0 0 12 8" fill="none">

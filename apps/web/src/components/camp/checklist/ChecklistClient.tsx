@@ -51,6 +51,7 @@ export default function ChecklistClient({ campId, camp, initialGroups, myMemberI
   // 그룹 네비게이션
   const groupRefs = useRef<Map<string, HTMLElement>>(new Map());
   const [currentGroupIdx, setCurrentGroupIdx] = useState(0);
+  const [isAtBottom, setIsAtBottom] = useState(false);
 
   const setGroupRef = useCallback((id: string, el: HTMLElement | null) => {
     if (el) groupRefs.current.set(id, el);
@@ -65,6 +66,7 @@ export default function ChecklistClient({ campId, camp, initialGroups, myMemberI
       });
       const current = entries.filter((e) => e.top <= 120);
       setCurrentGroupIdx(current.length > 0 ? current[current.length - 1].i : 0);
+      setIsAtBottom(window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 10);
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
@@ -78,8 +80,11 @@ export default function ChecklistClient({ campId, camp, initialGroups, myMemberI
         groupRefs.current.get(groups[currentGroupIdx - 1].id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     } else {
-      const nextIdx = Math.min(currentGroupIdx + 1, groups.length - 1);
-      groupRefs.current.get(groups[nextIdx].id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (currentGroupIdx >= groups.length - 1) {
+        window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
+      } else {
+        groupRefs.current.get(groups[currentGroupIdx + 1].id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     }
   }
 
@@ -258,6 +263,7 @@ export default function ChecklistClient({ campId, camp, initialGroups, myMemberI
       <GroupNavFAB
         groupCount={groups.length}
         currentGroupIdx={currentGroupIdx}
+        isAtBottom={isAtBottom}
         onScrollUp={() => scrollToGroup('up')}
         onScrollDown={() => scrollToGroup('down')}
       />
