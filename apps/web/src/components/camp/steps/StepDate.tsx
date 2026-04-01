@@ -2,10 +2,11 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { dayjs, detectSeason, getNextDay } from '@campus/shared';
+import { dayjs, detectSeason, calcNights, formatDateWithDay } from '@campus/shared';
 import ChatBubble from '../shared/ChatBubble';
 import TypewriterText from '../shared/TypewriterText';
 import SeasonBadge from '../shared/SeasonBadge';
+import DateRangeCalendar from '../shared/DateRangeCalendar';
 import { SEASONS } from '@/constants/home';
 
 const easeOut = [0.22, 1, 0.36, 1] as const;
@@ -15,28 +16,18 @@ interface StepDateProps {
 }
 
 export default function StepDate({ onNext }: StepDateProps) {
-  const [startDate, setStartDate] = useState(getNextDay(dayjs().format('YYYY-MM-DD')));
+  const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [season, setSeason] = useState<string | null>(null);
   const [showInput, setShowInput] = useState(false);
-  const [error, setError] = useState('');
 
   const handleTypingDone = useCallback(() => setShowInput(true), []);
 
   useEffect(() => {
     if (startDate) {
       setSeason(detectSeason(startDate));
-      setEndDate(getNextDay(startDate));
     }
   }, [startDate]);
-
-  useEffect(() => {
-    if (startDate && endDate && endDate < startDate) {
-      setError('종료일은 시작일 이후여야 해요');
-    } else {
-      setError('');
-    }
-  }, [startDate, endDate]);
 
   const isValid = startDate && endDate && endDate >= startDate && season;
 
@@ -45,8 +36,13 @@ export default function StepDate({ onNext }: StepDateProps) {
     onNext(startDate, endDate, season);
   };
 
+  function handleDateChange(start: string, end: string) {
+    setStartDate(start);
+    setEndDate(end);
+  }
+
   return (
-    <div>
+    <div className="step-date">
       <ChatBubble variant="question">
         <TypewriterText
           text="언제부터 언제까지 가나요?"
@@ -59,51 +55,48 @@ export default function StepDate({ onNext }: StepDateProps) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, ease: easeOut }}
-          className="mt-6 space-y-5 px-2"
+          className="step-date-body mt-6 space-y-4 px-2"
         >
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="mb-1.5 block text-xs font-medium text-gray-400">
-                시작일
-              </label>
-              <input
-                autoFocus
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="w-full rounded-lg border border-earth-200 bg-white px-3 py-2.5 text-sm text-gray-800 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
-              />
-            </div>
-            <div>
-              <label className="mb-1.5 block text-xs font-medium text-gray-400">
-                종료일
-              </label>
-              <input
-                type="date"
-                value={endDate}
-                min={startDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="w-full rounded-lg border border-earth-200 bg-white px-3 py-2.5 text-sm text-gray-800 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
-              />
-            </div>
-          </div>
+          {/* 날짜 범위 달력 */}
+          <DateRangeCalendar
+            startDate={startDate}
+            endDate={endDate}
+            onChange={handleDateChange}
+            minDate={dayjs().format('YYYY-MM-DD')}
+          />
 
-          {error && (
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-sm text-red-500"
+          {/* 선택된 날짜 요약 */}
+          {startDate && (
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.25 }}
+              className="step-date-summary rounded-xl bg-primary-50 px-4 py-3 text-center"
             >
-              {error}
-            </motion.p>
+              <p className="step-date-range text-[14px] font-medium text-primary-700">
+                {formatDateWithDay(startDate)}
+                {endDate && (
+                  <>
+                    <span className="mx-2 text-primary-300">→</span>
+                    {formatDateWithDay(endDate)}
+                  </>
+                )}
+              </p>
+              {endDate && (
+                <p className="step-date-nights mt-0.5 text-[12px] text-primary-500">
+                  {calcNights(startDate, endDate)}
+                </p>
+              )}
+            </motion.div>
           )}
 
+          {/* 계절 선택 */}
           {season && (
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
-              className="space-y-2"
+              className="step-date-season space-y-2"
             >
               <p className="text-xs font-medium text-gray-400">계절</p>
               <div className="flex flex-wrap gap-2">
@@ -119,6 +112,7 @@ export default function StepDate({ onNext }: StepDateProps) {
             </motion.div>
           )}
 
+          {/* 다음 버튼 */}
           {isValid && (
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
@@ -128,7 +122,7 @@ export default function StepDate({ onNext }: StepDateProps) {
             >
               <button
                 onClick={handleSubmit}
-                className="w-full rounded-xl bg-primary-600 py-3.5 text-base font-semibold text-white shadow-lg shadow-primary-600/25 transition-colors hover:bg-primary-700"
+                className="step-date-submit w-full rounded-xl bg-primary-600 py-3.5 text-base font-semibold text-white shadow-lg shadow-primary-600/25 transition-colors hover:bg-primary-700"
               >
                 다음
               </button>
