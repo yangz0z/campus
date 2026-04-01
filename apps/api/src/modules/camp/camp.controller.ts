@@ -3,6 +3,8 @@ import { User } from '../user/entities/user.entity';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { CampService } from './camp.service';
 import { CreateCampDto } from './dto/create-camp.dto';
+import { CreateChecklistGroupDto } from './dto/create-checklist-group.dto';
+import { CreateChecklistItemDto } from './dto/create-checklist-item.dto';
 import { SetItemAssigneesDto } from './dto/set-item-assignees.dto';
 
 @Controller('camps')
@@ -22,12 +24,39 @@ export class CampController {
     return this.campService.createCamp(user, dto);
   }
 
+  @Get(':campId')
+  getCamp(
+    @CurrentUser() user: User,
+    @Param('campId', ParseUUIDPipe) campId: string,
+  ) {
+    return this.campService.getCamp(user, campId);
+  }
+
   @Get(':campId/members')
   getCampMembers(
     @CurrentUser() user: User,
     @Param('campId', ParseUUIDPipe) campId: string,
   ) {
     return this.campService.getCampMembers(user, campId);
+  }
+
+  @Post(':campId/checklist/groups')
+  createChecklistGroup(
+    @CurrentUser() user: User,
+    @Param('campId', ParseUUIDPipe) campId: string,
+    @Body() dto: CreateChecklistGroupDto,
+  ) {
+    return this.campService.createChecklistGroup(user, campId, dto);
+  }
+
+  @Post(':campId/checklist/groups/:groupId/items')
+  createChecklistItem(
+    @CurrentUser() user: User,
+    @Param('campId', ParseUUIDPipe) campId: string,
+    @Param('groupId', ParseUUIDPipe) groupId: string,
+    @Body() dto: CreateChecklistItemDto,
+  ) {
+    return this.campService.createChecklistItem(user, campId, groupId, dto);
   }
 
   @Get(':campId/checklist')

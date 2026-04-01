@@ -58,6 +58,29 @@ export interface SetItemAssigneesRequest {
   memberIds: string[];
 }
 
+export interface CreateChecklistGroupRequest {
+  title: string;
+}
+
+export interface CreateChecklistGroupResponse {
+  id: string;
+  title: string;
+  sortOrder: number;
+}
+
+export interface CreateChecklistItemRequest {
+  title: string;
+}
+
+export interface CreateChecklistItemResponse {
+  id: string;
+  title: string;
+  isRequired: boolean;
+  sortOrder: number;
+  memo: string | null;
+  assignees: AssigneeInfo[];
+}
+
 export interface CampSummary {
   id: string;
   title: string;

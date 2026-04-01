@@ -9,6 +9,8 @@ import { CampChecklistGroup } from './entities/camp-checklist-group.entity';
 import { CampChecklistItem } from './entities/camp-checklist-item.entity';
 import { CampChecklistItemAssignee } from './entities/camp-checklist-item-assignee.entity';
 import { CreateCampDto } from './dto/create-camp.dto';
+import { CreateChecklistGroupDto } from './dto/create-checklist-group.dto';
+import { CreateChecklistItemDto } from './dto/create-checklist-item.dto';
 import { SetItemAssigneesDto } from './dto/set-item-assignees.dto';
 
 @Injectable()
@@ -112,6 +114,24 @@ export class CampService {
     };
   }
 
+  async getCamp(user: User, campId: string) {
+    const member = await this.campMemberRepository.findOne({
+      where: { campId, userId: user.id },
+      relations: ['camp'],
+    });
+    if (!member) throw new ForbiddenException();
+
+    const camp = member.camp;
+    return {
+      id: camp.id,
+      title: camp.title,
+      location: camp.location,
+      startDate: camp.startDate,
+      endDate: camp.endDate,
+      season: camp.season,
+    };
+  }
+
   async getCampMembers(user: User, campId: string) {
     const member = await this.campMemberRepository.findOne({
       where: { campId, userId: user.id },
@@ -164,6 +184,56 @@ export class CampService {
           })),
         })),
       })),
+    };
+  }
+
+  async createChecklistGroup(user: User, campId: string, dto: CreateChecklistGroupDto) {
+    const member = await this.campMemberRepository.findOne({ where: { campId, userId: user.id } });
+    if (!member) throw new ForbiddenException();
+
+    const { max } = await this.campChecklistGroupRepository
+      .createQueryBuilder('g')
+      .select('MAX(g.sortOrder)', 'max')
+      .where('g.campId = :campId', { campId })
+      .getRawOne();
+
+    const group = this.campChecklistGroupRepository.create({
+      campId,
+      title: dto.title,
+      sortOrder: (max ?? -1) + 1,
+    });
+    const saved = await this.campChecklistGroupRepository.save(group);
+    return { id: saved.id, title: saved.title, sortOrder: saved.sortOrder };
+  }
+
+  async createChecklistItem(user: User, campId: string, groupId: string, dto: CreateChecklistItemDto) {
+    const member = await this.campMemberRepository.findOne({ where: { campId, userId: user.id } });
+    if (!member) throw new ForbiddenException();
+
+    const group = await this.campChecklistGroupRepository.findOne({ where: { id: groupId, campId } });
+    if (!group) throw new NotFoundException();
+
+    const { max } = await this.campChecklistItemRepository
+      .createQueryBuilder('i')
+      .select('MAX(i.sortOrder)', 'max')
+      .where('i.groupId = :groupId', { groupId })
+      .getRawOne();
+
+    const item = this.campChecklistItemRepository.create({
+      groupId,
+      title: dto.title,
+      sortOrder: (max ?? -1) + 1,
+      isRequired: false,
+      memo: null,
+    });
+    const saved = await this.campChecklistItemRepository.save(item);
+    return {
+      id: saved.id,
+      title: saved.title,
+      isRequired: saved.isRequired,
+      sortOrder: saved.sortOrder,
+      memo: saved.memo,
+      assignees: [],
     };
   }
 

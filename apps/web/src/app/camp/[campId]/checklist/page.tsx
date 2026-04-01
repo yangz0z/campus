@@ -1,23 +1,26 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import type { ChecklistGroup, CampMemberInfo, AssigneeInfo } from '@campus/shared';
-import { getCampChecklist, getCampMembers, setItemAssignees } from '@/lib/api/camps';
+import type { ChecklistGroup, CampMemberInfo, AssigneeInfo, CampSummary } from '@campus/shared';
+import { formatDateShort, calcNights } from '@campus/shared';
+import {
+  getCamp,
+  getCampChecklist,
+  getCampMembers,
+  setItemAssignees,
+  createChecklistGroup,
+  createChecklistItem,
+} from '@/lib/api/camps';
 
 function Avatar({ nickname, profileImage, size = 24 }: { nickname: string; profileImage: string | null; size?: number }) {
   const style = { width: size, height: size, fontSize: size * 0.4 };
   if (profileImage) {
     return (
       // eslint-disable-next-line @next/next/no-img-element
-      <img
-        src={profileImage}
-        alt={nickname}
-        style={style}
-        className="rounded-full object-cover ring-1 ring-white"
-      />
+      <img src={profileImage} alt={nickname} style={style} className="rounded-full object-cover ring-1 ring-white" />
     );
   }
   return (
@@ -33,25 +36,41 @@ function Avatar({ nickname, profileImage, size = 24 }: { nickname: string; profi
 export default function ChecklistPage() {
   const { campId } = useParams<{ campId: string }>();
   const { getToken } = useAuth();
+  const [camp, setCamp] = useState<CampSummary | null>(null);
   const [groups, setGroups] = useState<ChecklistGroup[]>([]);
   const [members, setMembers] = useState<CampMemberInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showMeta, setShowMeta] = useState(false);
 
-  // 담당자 지정 모달 상태
+  // 담당자 지정 바텀시트
   const [assigningItemId, setAssigningItemId] = useState<string | null>(null);
   const [pendingMemberIds, setPendingMemberIds] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
+
+  // 아이템 추가 인라인 입력
+  const [addingItemGroupId, setAddingItemGroupId] = useState<string | null>(null);
+  const [newItemTitle, setNewItemTitle] = useState('');
+  const [addingItem, setAddingItem] = useState(false);
+  const itemInputRef = useRef<HTMLInputElement>(null);
+
+  // 그룹 추가 인라인 입력
+  const [addingGroup, setAddingGroup] = useState(false);
+  const [newGroupTitle, setNewGroupTitle] = useState('');
+  const [addingGroupLoading, setAddingGroupLoading] = useState(false);
+  const groupInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     async function fetchData() {
       try {
         const token = await getToken();
         if (!token) return;
-        const [checklistData, membersData] = await Promise.all([
+        const [campData, checklistData, membersData] = await Promise.all([
+          getCamp(token, campId),
           getCampChecklist(token, campId),
           getCampMembers(token, campId),
         ]);
+        setCamp(campData);
         setGroups(checklistData.groups);
         setMembers(membersData.members);
       } catch {
@@ -63,6 +82,65 @@ export default function ChecklistPage() {
     fetchData();
   }, [campId, getToken]);
 
+  // 아이템 추가 입력창 열기
+  function openAddItem(groupId: string) {
+    setAddingItemGroupId(groupId);
+    setNewItemTitle('');
+    setTimeout(() => itemInputRef.current?.focus(), 50);
+  }
+
+  function cancelAddItem() {
+    setAddingItemGroupId(null);
+    setNewItemTitle('');
+  }
+
+  async function handleAddItem(groupId: string) {
+    const title = newItemTitle.trim();
+    if (!title) { cancelAddItem(); return; }
+    setAddingItem(true);
+    try {
+      const token = await getToken();
+      if (!token) return;
+      const newItem = await createChecklistItem(token, campId, groupId, { title });
+      setGroups((prev) =>
+        prev.map((g) => g.id === groupId ? { ...g, items: [...g.items, newItem] } : g),
+      );
+      setNewItemTitle('');
+      // 같은 그룹에서 계속 추가할 수 있도록 입력창 유지 후 포커스
+      setTimeout(() => itemInputRef.current?.focus(), 50);
+    } finally {
+      setAddingItem(false);
+    }
+  }
+
+  // 그룹 추가
+  function openAddGroup() {
+    setAddingGroup(true);
+    setNewGroupTitle('');
+    setTimeout(() => groupInputRef.current?.focus(), 50);
+  }
+
+  function cancelAddGroup() {
+    setAddingGroup(false);
+    setNewGroupTitle('');
+  }
+
+  async function handleAddGroup() {
+    const title = newGroupTitle.trim();
+    if (!title) { cancelAddGroup(); return; }
+    setAddingGroupLoading(true);
+    try {
+      const token = await getToken();
+      if (!token) return;
+      const newGroup = await createChecklistGroup(token, campId, { title });
+      setGroups((prev) => [...prev, { ...newGroup, items: [] }]);
+      cancelAddGroup();
+    } finally {
+      setAddingGroupLoading(false);
+    }
+  }
+
+  // 담당자 지정
   function openPicker(itemId: string, currentAssignees: AssigneeInfo[]) {
     setAssigningItemId(itemId);
     setPendingMemberIds(currentAssignees.map((a) => a.memberId));
@@ -74,14 +152,13 @@ export default function ChecklistPage() {
     );
   }
 
-  async function handleSave() {
+  async function handleSaveAssignees() {
     if (!assigningItemId) return;
     setSaving(true);
     try {
       const token = await getToken();
       if (!token) return;
       await setItemAssignees(token, campId, assigningItemId, { memberIds: pendingMemberIds });
-      // 로컬 상태 업데이트
       setGroups((prev) =>
         prev.map((g) => ({
           ...g,
@@ -105,17 +182,66 @@ export default function ChecklistPage() {
   }
 
   const Header = () => (
-    <header className="bg-[#F2F2F0] px-5 pb-3 pt-10">
-      <div className="mx-auto flex max-w-sm items-center gap-3">
+    <header className="bg-[#F2F2F0] px-5 pb-5 pt-5">
+      <div className="mx-auto max-w-sm">
+        {/* 뒤로가기 */}
         <Link
           href="/mypage"
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-200 hover:text-gray-600"
+          className="inline-flex items-center gap-1 text-[13px] text-gray-400 transition-colors hover:text-gray-600"
         >
-          <svg width="8" height="14" viewBox="0 0 8 14" fill="none">
-            <path d="M7 1L1 7L7 13" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+          <svg width="6" height="11" viewBox="0 0 6 11" fill="none">
+            <path d="M5.5 1L1 5.5L5.5 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
+          내 캠프
         </Link>
-        <h1 className="text-[22px] font-bold text-gray-900">체크리스트</h1>
+
+        {/* 캠프 정보 */}
+        {camp ? (
+          <div className="mt-3">
+            <button
+              type="button"
+              onClick={() => setShowMeta((v) => !v)}
+              className="group flex items-center gap-2 text-left"
+            >
+              <h1 className="text-[24px] font-bold leading-tight text-gray-900 group-hover:text-gray-700">
+                {camp.title}
+              </h1>
+              <svg
+                width="14" height="14" viewBox="0 0 14 14" fill="none"
+                className={`mt-1 shrink-0 text-gray-300 transition-transform duration-200 group-hover:text-gray-400 ${showMeta ? 'rotate-180' : ''}`}
+              >
+                <path d="M2 4.5L7 9.5L12 4.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+
+            <div className={`overflow-hidden transition-all duration-200 ease-in-out ${showMeta ? 'mt-2 max-h-20 opacity-100' : 'max-h-0 opacity-0'}`}>
+              <div className="space-y-1">
+                {camp.location && (
+                  <p className="flex items-center gap-1.5 text-[13px] text-gray-500">
+                    <svg width="11" height="13" viewBox="0 0 11 13" fill="none" className="shrink-0 text-gray-400" aria-hidden>
+                      <path d="M5.5 0C3.015 0 1 2.015 1 4.5c0 3.375 4.5 8.5 4.5 8.5s4.5-5.125 4.5-8.5C10 2.015 7.985 0 5.5 0zm0 6.5a2 2 0 110-4 2 2 0 010 4z" fill="currentColor" />
+                    </svg>
+                    {camp.location}
+                  </p>
+                )}
+                <p className="flex items-center gap-1.5 text-[13px] text-gray-400">
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="shrink-0" aria-hidden>
+                    <rect x="1" y="2" width="10" height="9" rx="1.5" stroke="currentColor" strokeWidth="1.2" />
+                    <path d="M1 5h10" stroke="currentColor" strokeWidth="1.2" />
+                    <path d="M4 1v2M8 1v2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+                  </svg>
+                  {formatDateShort(camp.startDate)} – {formatDateShort(camp.endDate)}
+                  <span aria-hidden className="text-gray-300">·</span>
+                  {calcNights(camp.startDate, camp.endDate)}
+                </p>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="mt-3">
+            <div className="h-7 w-2/5 animate-shimmer rounded-lg" />
+          </div>
+        )}
       </div>
     </header>
   );
@@ -160,30 +286,19 @@ export default function ChecklistPage() {
     );
   }
 
-  if (groups.length === 0) {
-    return (
-      <div className="min-h-screen bg-[#F2F2F0]">
-        <Header />
-        <main className="mx-auto max-w-sm px-4 pt-16 text-center">
-          <p className="text-[40px] leading-none">📋</p>
-          <p className="mt-5 text-[17px] font-bold text-gray-900">체크리스트가 아직 없어요</p>
-          <p className="mt-1.5 text-[14px] text-gray-400">캠프를 만들면 체크리스트가 생성돼요.</p>
-        </main>
-      </div>
-    );
-  }
-
-  // 현재 모달에서 편집 중인 아이템 제목
   const assigningItem = groups.flatMap((g) => g.items).find((i) => i.id === assigningItemId);
 
   return (
     <div className="min-h-screen bg-[#F2F2F0]">
       <Header />
-      <main className="mx-auto max-w-sm space-y-3 px-4 pb-20 pt-3">
+      <main className="mx-auto max-w-sm space-y-3 px-4 pb-24 pt-3">
+
         {groups.map((group) => (
           <section key={group.id}>
             <p className="mb-2 px-1 text-[12px] font-semibold text-gray-400">{group.title}</p>
             <div className="overflow-hidden rounded-2xl bg-white shadow-[0_2px_12px_rgba(0,0,0,0.06)]">
+
+              {/* 아이템 목록 */}
               {group.items.map((item, i) => (
                 <div key={item.id}>
                   {i !== 0 && <div className="mx-5 h-px bg-gray-100" />}
@@ -200,13 +315,11 @@ export default function ChecklistPage() {
                         <p className="mt-0.5 truncate text-[12px] text-gray-400">{item.memo}</p>
                       )}
                     </div>
-
-                    {/* 담당자 영역 — 멤버가 2명 이상일 때만 표시 */}
                     {members.length > 1 && (
                       <button
                         type="button"
                         onClick={() => openPicker(item.id, item.assignees)}
-                        className="flex shrink-0 items-center gap-1 rounded-full py-1 pl-1 pr-2 transition-colors hover:bg-gray-100 active:bg-gray-200"
+                        className="flex shrink-0 items-center rounded-full py-1 pl-1 pr-2 transition-colors hover:bg-gray-100 active:bg-gray-200"
                       >
                         {item.assignees.length === 0 ? (
                           <span className="flex h-6 w-6 items-center justify-center rounded-full border border-dashed border-gray-300 text-gray-400">
@@ -236,27 +349,120 @@ export default function ChecklistPage() {
                   </div>
                 </div>
               ))}
+
+              {/* 아이템 인라인 입력 */}
+              {addingItemGroupId === group.id ? (
+                <div>
+                  <div className="mx-5 h-px bg-gray-100" />
+                  <div className="flex items-center gap-3 px-5 py-2.5">
+                    <span className="h-4 w-4 shrink-0 rounded border border-gray-200" />
+                    <input
+                      ref={itemInputRef}
+                      value={newItemTitle}
+                      onChange={(e) => setNewItemTitle(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleAddItem(group.id);
+                        if (e.key === 'Escape') cancelAddItem();
+                      }}
+                      placeholder="항목 이름"
+                      disabled={addingItem}
+                      className="flex-1 bg-transparent text-[15px] text-gray-900 placeholder-gray-300 outline-none disabled:opacity-50"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleAddItem(group.id)}
+                      disabled={addingItem || !newItemTitle.trim()}
+                      className="text-[13px] font-semibold text-primary-600 disabled:text-gray-300"
+                    >
+                      추가
+                    </button>
+                    <button
+                      type="button"
+                      onClick={cancelAddItem}
+                      className="text-[13px] text-gray-400"
+                    >
+                      취소
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  {group.items.length > 0 && <div className="mx-5 h-px bg-gray-100" />}
+                  <button
+                    type="button"
+                    onClick={() => openAddItem(group.id)}
+                    className="flex w-full items-center gap-2 px-5 py-3 text-[13px] text-gray-400 transition-colors hover:text-gray-600"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                      <path d="M7 1v12M1 7h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                    </svg>
+                    항목 추가
+                  </button>
+                </div>
+              )}
             </div>
           </section>
         ))}
+
+        {/* 그룹 추가 */}
+        {addingGroup ? (
+          <div className="overflow-hidden rounded-2xl bg-white shadow-[0_2px_12px_rgba(0,0,0,0.06)]">
+            <div className="flex items-center gap-3 px-5 py-3.5">
+              <input
+                ref={groupInputRef}
+                value={newGroupTitle}
+                onChange={(e) => setNewGroupTitle(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleAddGroup();
+                  if (e.key === 'Escape') cancelAddGroup();
+                }}
+                placeholder="그룹 이름"
+                disabled={addingGroupLoading}
+                className="flex-1 bg-transparent text-[15px] font-semibold text-gray-900 placeholder-gray-300 outline-none disabled:opacity-50"
+              />
+              <button
+                type="button"
+                onClick={handleAddGroup}
+                disabled={addingGroupLoading || !newGroupTitle.trim()}
+                className="text-[13px] font-semibold text-primary-600 disabled:text-gray-300"
+              >
+                추가
+              </button>
+              <button
+                type="button"
+                onClick={cancelAddGroup}
+                className="text-[13px] text-gray-400"
+              >
+                취소
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={openAddGroup}
+            className="flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-gray-200 py-3.5 text-[13px] font-medium text-gray-400 transition-colors hover:border-gray-300 hover:text-gray-500"
+          >
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M7 1v12M1 7h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+            </svg>
+            그룹 추가
+          </button>
+        )}
+
       </main>
 
       {/* 담당자 지정 바텀시트 */}
       {assigningItemId && (
         <div className="fixed inset-0 z-50 flex flex-col justify-end">
-          {/* 백드롭 */}
           <div
             className="absolute inset-0 bg-black/40"
             onClick={() => !saving && setAssigningItemId(null)}
           />
-          {/* 시트 */}
           <div className="relative mx-auto w-full max-w-sm rounded-t-2xl bg-white px-5 pb-8 pt-5 shadow-xl">
-            {/* 핸들 */}
             <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-gray-200" />
-
             <p className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-gray-400">담당자 지정</p>
             <p className="mb-4 truncate text-[16px] font-semibold text-gray-900">{assigningItem?.title}</p>
-
             <ul className="space-y-1">
               {members.map((m) => {
                 const selected = pendingMemberIds.includes(m.memberId);
@@ -265,9 +471,7 @@ export default function ChecklistPage() {
                     <button
                       type="button"
                       onClick={() => toggleMember(m.memberId)}
-                      className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 transition-colors ${
-                        selected ? 'bg-primary-50' : 'hover:bg-gray-50'
-                      }`}
+                      className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 transition-colors ${selected ? 'bg-primary-50' : 'hover:bg-gray-50'}`}
                     >
                       <Avatar nickname={m.nickname} profileImage={m.profileImage} size={36} />
                       <span className={`flex-1 text-left text-[15px] font-medium ${selected ? 'text-primary-700' : 'text-gray-800'}`}>
@@ -286,10 +490,9 @@ export default function ChecklistPage() {
                 );
               })}
             </ul>
-
             <button
               type="button"
-              onClick={handleSave}
+              onClick={handleSaveAssignees}
               disabled={saving}
               className="mt-5 w-full rounded-xl bg-primary-600 py-3.5 text-[15px] font-semibold text-white transition-colors hover:bg-primary-700 active:bg-primary-800 disabled:opacity-60"
             >

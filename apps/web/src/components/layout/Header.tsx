@@ -45,12 +45,6 @@ export default function Header() {
             </SignInButton>
           ) : (
             <div className="flex items-center gap-3">
-              <a
-                href="/mypage"
-                className="text-sm font-medium text-gray-600 transition-colors hover:text-primary-700"
-              >
-                내 캠프
-              </a>
               <UserButton
                 appearance={{
                   elements: { avatarBox: 'h-8 w-8' },
