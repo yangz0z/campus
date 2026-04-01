@@ -72,6 +72,10 @@ export interface CreateChecklistItemRequest {
   title: string;
 }
 
+export interface UpdateChecklistItemMemoRequest {
+  memo: string | null;
+}
+
 export interface CreateChecklistItemResponse {
   id: string;
   title: string;

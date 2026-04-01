@@ -11,6 +11,7 @@ import {
   getCampChecklist,
   getCampMembers,
   setItemAssignees,
+  updateChecklistItemMemo,
   createChecklistGroup,
   createChecklistItem,
 } from '@/lib/api/camps';
@@ -47,6 +48,13 @@ export default function ChecklistPage() {
   const [assigningItemId, setAssigningItemId] = useState<string | null>(null);
   const [pendingMemberIds, setPendingMemberIds] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
+
+  // 메모 인라인 편집
+  const [editingMemoItemId, setEditingMemoItemId] = useState<string | null>(null);
+  const [pendingMemo, setPendingMemo] = useState('');
+  const longPressRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const longPressFiredRef = useRef(false);
+  const memoInputRef = useRef<HTMLInputElement>(null);
 
   // 아이템 추가 인라인 입력
   const [addingItemGroupId, setAddingItemGroupId] = useState<string | null>(null);
@@ -137,6 +145,57 @@ export default function ChecklistPage() {
       cancelAddGroup();
     } finally {
       setAddingGroupLoading(false);
+    }
+  }
+
+  // 메모 인라인 편집
+  useEffect(() => {
+    if (editingMemoItemId) {
+      // 모바일에서 long press 후 synthetic 이벤트(~300ms)가 포커스를 빼앗으므로
+      // 충분히 늦은 타이밍에 재포커스
+      const timer = setTimeout(() => memoInputRef.current?.focus(), 400);
+      return () => clearTimeout(timer);
+    }
+  }, [editingMemoItemId]);
+
+  function openMemoEditor(itemId: string, currentMemo: string | null) {
+    setEditingMemoItemId(itemId);
+    setPendingMemo(currentMemo ?? '');
+  }
+
+  async function handleSaveMemo() {
+    if (!editingMemoItemId) return;
+    const itemId = editingMemoItemId;
+    const memo = pendingMemo.trim() || null;
+    setEditingMemoItemId(null);
+    setGroups((prev) =>
+      prev.map((g) => ({
+        ...g,
+        items: g.items.map((i) => (i.id === itemId ? { ...i, memo } : i)),
+      })),
+    );
+    const token = await getToken();
+    if (token) await updateChecklistItemMemo(token, campId, itemId, { memo });
+  }
+
+  function startLongPress(itemId: string, memo: string | null) {
+    if (editingMemoItemId) return;
+    longPressFiredRef.current = false;
+    longPressRef.current = setTimeout(() => {
+      longPressFiredRef.current = true;
+      openMemoEditor(itemId, memo);
+      navigator?.vibrate?.(30);
+    }, 500);
+  }
+
+  function cancelLongPress(e?: React.TouchEvent) {
+    if (longPressRef.current) {
+      clearTimeout(longPressRef.current);
+      longPressRef.current = null;
+    }
+    if (longPressFiredRef.current) {
+      e?.preventDefault(); // synthetic click 방지 → 포커스 유지
+      longPressFiredRef.current = false;
     }
   }
 
@@ -300,21 +359,58 @@ export default function ChecklistPage() {
 
               {/* 아이템 목록 */}
               {group.items.map((item, i) => (
-                <div key={item.id}>
+                <div key={item.id} className="group">
                   {i !== 0 && <div className="mx-5 h-px bg-gray-100" />}
-                  <div className="flex items-center gap-3 px-5 py-3.5">
+                  <div className="flex items-center gap-2 px-5 py-3.5">
                     <span className="h-4 w-4 shrink-0 rounded border border-gray-300" />
-                    <div className="min-w-0 flex-1">
+
+                    {/* 텍스트 영역: 모바일 꾹 누르기 감지 */}
+                    <div
+                      className="min-w-0 flex-1 select-none"
+                      onTouchStart={() => startLongPress(item.id, item.memo)}
+                      onTouchEnd={(e) => cancelLongPress(e)}
+                      onTouchMove={() => cancelLongPress()}
+                      onContextMenu={(e) => e.preventDefault()}
+                    >
                       <p className="text-[15px] text-gray-900">
                         {item.title}
                         {item.isRequired && (
                           <span className="ml-1.5 text-[11px] font-bold text-red-500">필수</span>
                         )}
                       </p>
-                      {item.memo && (
-                        <p className="mt-0.5 truncate text-[12px] text-gray-400">{item.memo}</p>
+                      {editingMemoItemId === item.id ? (
+                        <input
+                          ref={memoInputRef}
+                          autoFocus
+                          value={pendingMemo}
+                          onChange={(e) => setPendingMemo(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') { e.preventDefault(); handleSaveMemo(); }
+                            if (e.key === 'Escape') { setEditingMemoItemId(null); }
+                          }}
+                          placeholder="메모 추가"
+                          className="mt-1 w-full border-b border-gray-200 bg-transparent pb-0.5 text-[12px] text-gray-500 outline-none placeholder:text-gray-300"
+                        />
+                      ) : (
+                        item.memo && (
+                          <p className="mt-0.5 truncate text-[12px] text-gray-400">{item.memo}</p>
+                        )
                       )}
                     </div>
+
+                    {/* 메모 버튼 — 웹 hover 시만 표시 */}
+                    <button
+                      type="button"
+                      onClick={() => openMemoEditor(item.id, item.memo)}
+                      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full opacity-0 transition-opacity group-hover:opacity-100 hover:bg-gray-100 active:bg-gray-200"
+                    >
+                      <svg width="13" height="13" viewBox="0 0 14 14" fill="none" className={item.memo ? 'text-primary-400' : 'text-gray-400'}>
+                        <path d="M2 9.5V12h2.5l6.5-6.5-2.5-2.5L2 9.5z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
+                        <path d="M9.5 3L11 4.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+                      </svg>
+                    </button>
+
+                    {/* 담당자 버튼 — 멤버가 2명 이상일 때만 표시 */}
                     {members.length > 1 && (
                       <button
                         type="button"

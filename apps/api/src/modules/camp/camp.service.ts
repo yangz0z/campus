@@ -11,6 +11,7 @@ import { CampChecklistItemAssignee } from './entities/camp-checklist-item-assign
 import { CreateCampDto } from './dto/create-camp.dto';
 import { CreateChecklistGroupDto } from './dto/create-checklist-group.dto';
 import { CreateChecklistItemDto } from './dto/create-checklist-item.dto';
+import { UpdateChecklistItemMemoDto } from './dto/update-checklist-item-memo.dto';
 import { SetItemAssigneesDto } from './dto/set-item-assignees.dto';
 
 @Injectable()
@@ -235,6 +236,20 @@ export class CampService {
       memo: saved.memo,
       assignees: [],
     };
+  }
+
+  async updateChecklistItemMemo(user: User, campId: string, itemId: string, dto: UpdateChecklistItemMemoDto) {
+    const member = await this.campMemberRepository.findOne({ where: { campId, userId: user.id } });
+    if (!member) throw new ForbiddenException();
+
+    const item = await this.campChecklistItemRepository.findOne({
+      where: { id: itemId },
+      relations: ['group'],
+    });
+    if (!item || item.group.campId !== campId) throw new NotFoundException();
+
+    item.memo = dto.memo ?? null;
+    await this.campChecklistItemRepository.save(item);
   }
 
   async setItemAssignees(user: User, campId: string, itemId: string, dto: SetItemAssigneesDto) {
