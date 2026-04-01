@@ -3,14 +3,13 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@clerk/nextjs';
 import { formatDateShort, type Season } from '@campus/shared';
 import ChatBubble from './shared/ChatBubble';
 import ConfettiEffect from './shared/ConfettiEffect';
 import StepName from './steps/StepName';
 import StepDate from './steps/StepDate';
 import StepConfirm from './steps/StepConfirm';
-import { createCamp } from '@/lib/api/camps';
+import { createCamp } from '@/actions/camp';
 import { SEASONS } from '@/constants/home';
 
 const easeOut = [0.22, 1, 0.36, 1] as const;
@@ -39,7 +38,6 @@ export default function CampWizard() {
   const activeRef = useRef<HTMLDivElement>(null);
   const prevStepRef = useRef(currentStep);
   const router = useRouter();
-  const { getToken } = useAuth();
 
   useEffect(() => {
     if (prevStepRef.current === currentStep && !isCompleted) return;
@@ -67,9 +65,7 @@ export default function CampWizard() {
     setIsSubmitting(true);
     setError(null);
     try {
-      const token = await getToken();
-      if (!token) throw new Error('로그인이 필요합니다.');
-      const result = await createCamp(token, {
+      const result = await createCamp({
         title: formData.title,
         location: formData.location || null,
         startDate: formData.startDate,
