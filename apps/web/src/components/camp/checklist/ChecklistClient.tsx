@@ -7,6 +7,8 @@ import {
   toggleChecklistItem,
   updateChecklistItem,
   deleteChecklistItem,
+  updateChecklistGroup,
+  deleteChecklistGroup,
   setItemAssignees,
   createChecklistGroup,
   createChecklistItem,
@@ -166,6 +168,18 @@ export default function ChecklistClient({ campId, camp, initialGroups, myMemberI
     );
   }
 
+  async function handleUpdateGroup(groupId: string, title: string) {
+    setGroups((prev) =>
+      prev.map((g) => (g.id === groupId ? { ...g, title } : g)),
+    );
+    await updateChecklistGroup(campId, groupId, title);
+  }
+
+  async function handleDeleteGroup(groupId: string) {
+    setGroups((prev) => prev.filter((g) => g.id !== groupId));
+    await deleteChecklistGroup(campId, groupId);
+  }
+
   async function handleAddGroup() {
     const title = newGroupTitle.trim();
     if (!title) { setAddingGroup(false); return; }
@@ -206,6 +220,8 @@ export default function ChecklistClient({ campId, camp, initialGroups, myMemberI
             showCompleted={showCompleted}
             delayedRemoveIds={delayedRemoveIds}
             members={members}
+            onUpdateGroup={(title) => handleUpdateGroup(group.id, title)}
+            onDeleteGroup={() => handleDeleteGroup(group.id)}
             onToggleCheck={handleToggleCheck}
             onDeleteItem={handleDeleteItem}
             onUpdateItem={handleUpdateItem}

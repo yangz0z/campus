@@ -22,6 +22,8 @@ interface ChecklistGroupSectionProps {
   showCompleted: boolean;
   delayedRemoveIds: Set<string>;
   members: CampMemberInfo[];
+  onUpdateGroup: (title: string) => void;
+  onDeleteGroup: () => void;
   onToggleCheck: (itemId: string, currentValue: boolean) => void;
   onDeleteItem: (itemId: string) => void;
   onUpdateItem: (itemId: string, title: string, memo: string | null) => void;
@@ -37,6 +39,8 @@ export default function ChecklistGroupSection({
   showCompleted,
   delayedRemoveIds,
   members,
+  onUpdateGroup,
+  onDeleteGroup,
   onToggleCheck,
   onDeleteItem,
   onUpdateItem,
@@ -44,6 +48,10 @@ export default function ChecklistGroupSection({
   onAddItem,
   setGroupRef,
 }: ChecklistGroupSectionProps) {
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [pendingTitle, setPendingTitle] = useState('');
+  const titleInputRef = useRef<HTMLInputElement>(null);
+
   const [isAddingItem, setIsAddingItem] = useState(false);
   const [newItemTitle, setNewItemTitle] = useState('');
   const [addingItem, setAddingItem] = useState(false);
@@ -53,6 +61,19 @@ export default function ChecklistGroupSection({
     ? group.items
     : group.items.filter((item) => getCheckStatus(item) !== 'complete' || delayedRemoveIds.has(item.id));
   const completedCount = group.items.filter((item) => getCheckStatus(item) === 'complete').length;
+  const isEmpty = group.items.length === 0;
+
+  function openTitleEditor() {
+    setPendingTitle(group.title);
+    setIsEditingTitle(true);
+    setTimeout(() => titleInputRef.current?.focus(), 50);
+  }
+
+  function handleSaveTitle() {
+    const title = pendingTitle.trim() || group.title;
+    setIsEditingTitle(false);
+    if (title !== group.title) onUpdateGroup(title);
+  }
 
   function openAddItem() {
     setIsAddingItem(true);
@@ -81,28 +102,63 @@ export default function ChecklistGroupSection({
   return (
     <section
       ref={(el) => setGroupRef(group.id, el)}
-      className="checklist-group"
+      className="checklist-group group/header"
     >
       <div className="checklist-group-header mb-2 flex items-center justify-between px-1">
-        <button
-          type="button"
-          onClick={onToggleCollapse}
-          className="checklist-group-collapse-btn flex items-center gap-1.5 text-[12px] font-semibold text-gray-400 transition-colors hover:text-gray-500"
-        >
-          <svg
-            width="10" height="10" viewBox="0 0 10 10" fill="none"
-            className={`shrink-0 transition-transform duration-200 ${isCollapsed ? '-rotate-90' : ''}`}
+        <div className="flex min-w-0 flex-1 items-center gap-1.5">
+          <button
+            type="button"
+            onClick={onToggleCollapse}
+            className="checklist-group-collapse-btn shrink-0 text-gray-400 transition-colors hover:text-gray-500"
           >
-            <path d="M2 3L5 6L8 3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-          {group.title}
-        </button>
-        <div className="checklist-group-meta flex items-center gap-2">
+            <svg
+              width="10" height="10" viewBox="0 0 10 10" fill="none"
+              className={`transition-transform duration-200 ${isCollapsed ? '-rotate-90' : ''}`}
+            >
+              <path d="M2 3L5 6L8 3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+
+          {isEditingTitle ? (
+            <input
+              ref={titleInputRef}
+              value={pendingTitle}
+              onChange={(e) => setPendingTitle(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') { e.preventDefault(); handleSaveTitle(); }
+                if (e.key === 'Escape') setIsEditingTitle(false);
+              }}
+              onBlur={handleSaveTitle}
+              className="min-w-0 flex-1 bg-transparent text-[12px] font-semibold text-gray-600 outline-none"
+            />
+          ) : (
+            <button
+              type="button"
+              onClick={openTitleEditor}
+              className="min-w-0 truncate text-[12px] font-semibold text-gray-400 transition-colors hover:text-gray-600"
+            >
+              {group.title}
+            </button>
+          )}
+        </div>
+
+        <div className="flex shrink-0 items-center gap-2">
           {!showCompleted && completedCount > 0 && (
             <p className="checklist-completed-count text-[11px] text-gray-300">{completedCount}개 완료</p>
           )}
           {isCollapsed && (
             <p className="checklist-item-count text-[11px] text-gray-300">{visibleItems.length}개 항목</p>
+          )}
+          {isEmpty && (
+            <button
+              type="button"
+              onClick={onDeleteGroup}
+              className="flex h-5 w-5 items-center justify-center rounded-full text-gray-300 transition-colors hover:bg-red-50 hover:text-red-400"
+            >
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                <path d="M1.5 1.5l7 7M8.5 1.5l-7 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
+            </button>
           )}
         </div>
       </div>

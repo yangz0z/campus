@@ -51,6 +51,27 @@ export class CampController {
     return this.campService.createChecklistGroup(user, campId, dto);
   }
 
+  @Patch(':campId/checklist/groups/:groupId')
+  @HttpCode(204)
+  updateChecklistGroup(
+    @CurrentUser() user: User,
+    @Param('campId', ParseUUIDPipe) campId: string,
+    @Param('groupId', ParseUUIDPipe) groupId: string,
+    @Body('title') title: string,
+  ) {
+    return this.campService.updateChecklistGroup(user, campId, groupId, title);
+  }
+
+  @Delete(':campId/checklist/groups/:groupId')
+  @HttpCode(204)
+  deleteChecklistGroup(
+    @CurrentUser() user: User,
+    @Param('campId', ParseUUIDPipe) campId: string,
+    @Param('groupId', ParseUUIDPipe) groupId: string,
+  ) {
+    return this.campService.deleteChecklistGroup(user, campId, groupId);
+  }
+
   @Post(':campId/checklist/groups/:groupId/items')
   createChecklistItem(
     @CurrentUser() user: User,

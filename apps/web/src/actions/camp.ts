@@ -54,6 +54,17 @@ export async function createChecklistGroup(
   });
 }
 
+export async function updateChecklistGroup(campId: string, groupId: string, title: string): Promise<void> {
+  return serverFetch<void>(`/camps/${campId}/checklist/groups/${groupId}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ title }),
+  });
+}
+
+export async function deleteChecklistGroup(campId: string, groupId: string): Promise<void> {
+  return serverFetch<void>(`/camps/${campId}/checklist/groups/${groupId}`, { method: 'DELETE' });
+}
+
 export async function createChecklistItem(
   campId: string,
   groupId: string,

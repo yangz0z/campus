@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { User } from '../user/entities/user.entity';
@@ -212,6 +212,31 @@ export class CampService {
     });
     const saved = await this.campChecklistGroupRepository.save(group);
     return { id: saved.id, title: saved.title, sortOrder: saved.sortOrder };
+  }
+
+  async updateChecklistGroup(user: User, campId: string, groupId: string, title: string) {
+    const member = await this.campMemberRepository.findOne({ where: { campId, userId: user.id } });
+    if (!member) throw new ForbiddenException();
+
+    const group = await this.campChecklistGroupRepository.findOne({ where: { id: groupId, campId } });
+    if (!group) throw new NotFoundException();
+
+    group.title = title;
+    await this.campChecklistGroupRepository.save(group);
+  }
+
+  async deleteChecklistGroup(user: User, campId: string, groupId: string) {
+    const member = await this.campMemberRepository.findOne({ where: { campId, userId: user.id } });
+    if (!member) throw new ForbiddenException();
+
+    const group = await this.campChecklistGroupRepository.findOne({
+      where: { id: groupId, campId },
+      relations: ['items'],
+    });
+    if (!group) throw new NotFoundException();
+    if (group.items.length > 0) throw new BadRequestException('Group has items');
+
+    await this.campChecklistGroupRepository.remove(group);
   }
 
   async createChecklistItem(user: User, campId: string, groupId: string, dto: CreateChecklistItemDto) {
