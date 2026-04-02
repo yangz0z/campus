@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import type { AssigneeInfo, CampMemberInfo, ChecklistGroup } from '@campus/shared';
 import ChecklistItem from './ChecklistItem';
 
@@ -19,7 +20,7 @@ interface ChecklistGroupSectionProps {
   isCollapsed: boolean;
   onToggleCollapse: () => void;
   showCompleted: boolean;
-  recentlyCheckedIds: Set<string>;
+  delayedRemoveIds: Set<string>;
   members: CampMemberInfo[];
   onToggleCheck: (itemId: string, currentValue: boolean) => void;
   onUpdateItem: (itemId: string, title: string, memo: string | null) => void;
@@ -33,7 +34,7 @@ export default function ChecklistGroupSection({
   isCollapsed,
   onToggleCollapse,
   showCompleted,
-  recentlyCheckedIds,
+  delayedRemoveIds,
   members,
   onToggleCheck,
   onUpdateItem,
@@ -48,7 +49,7 @@ export default function ChecklistGroupSection({
 
   const visibleItems = showCompleted
     ? group.items
-    : group.items.filter((item) => getCheckStatus(item) !== 'complete' || recentlyCheckedIds.has(item.id));
+    : group.items.filter((item) => getCheckStatus(item) !== 'complete' || delayedRemoveIds.has(item.id));
   const completedCount = group.items.filter((item) => getCheckStatus(item) === 'complete').length;
 
   function openAddItem() {
@@ -107,20 +108,27 @@ export default function ChecklistGroupSection({
       <div className={`checklist-group-card overflow-hidden rounded-2xl bg-white shadow-[0_2px_12px_rgba(0,0,0,0.06)] transition-all duration-200 ease-in-out ${
         isCollapsed ? 'max-h-0 opacity-0 shadow-none' : 'max-h-[2000px] opacity-100'
       }`}>
-        {visibleItems.map((item, i) => (
-          <ChecklistItem
-            key={item.id}
-            item={item}
-            isFirst={i === 0}
-            isFadingOut={recentlyCheckedIds.has(item.id)}
-            members={members}
-            checkStatus={getCheckStatus(item)}
-            onToggleCheck={() => onToggleCheck(item.id, item.isCheckedByMe)}
-            onUpdateItem={(title, memo) => onUpdateItem(item.id, title, memo)}
-            onOpenPicker={() => onOpenPicker(item.id, item.assignees)}
-            showAssignees={members.length > 1}
-          />
-        ))}
+        <AnimatePresence initial={false}>
+          {visibleItems.map((item, i) => (
+            <motion.div
+              key={item.id}
+              initial={{ opacity: 1, height: 'auto', scale: 1 }}
+              exit={{ opacity: 0, height: 0, scale: 0.95 }}
+              transition={{ duration: 0.4, ease: 'easeInOut' }}
+            >
+              <ChecklistItem
+                item={item}
+                isFirst={i === 0}
+                members={members}
+                checkStatus={getCheckStatus(item)}
+                onToggleCheck={() => onToggleCheck(item.id, item.isCheckedByMe)}
+                onUpdateItem={(title, memo) => onUpdateItem(item.id, title, memo)}
+                onOpenPicker={() => onOpenPicker(item.id, item.assignees)}
+                showAssignees={members.length > 1}
+              />
+            </motion.div>
+          ))}
+        </AnimatePresence>
 
         {/* 아이템 추가 */}
         {isAddingItem ? (

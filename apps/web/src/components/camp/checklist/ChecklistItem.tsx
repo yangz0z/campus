@@ -18,7 +18,6 @@ interface ChecklistItemData {
 interface ChecklistItemProps {
   item: ChecklistItemData;
   isFirst: boolean;
-  isFadingOut: boolean;
   members: CampMemberInfo[];
   checkStatus: CheckStatus;
   onToggleCheck: () => void;
@@ -30,7 +29,6 @@ interface ChecklistItemProps {
 export default function ChecklistItem({
   item,
   isFirst,
-  isFadingOut,
   members,
   checkStatus,
   onToggleCheck,
@@ -64,11 +62,7 @@ export default function ChecklistItem({
   }
 
   return (
-    <div
-      className={`checklist-item group overflow-hidden transition-all duration-500 ease-in-out ${
-        isFadingOut ? 'max-h-0 scale-95 opacity-0' : 'max-h-40 opacity-100'
-      }`}
-    >
+    <div className="checklist-item group">
       {!isFirst && <div className="checklist-item-divider mx-5 h-px bg-gray-100" />}
 
       <div className="checklist-item-row relative z-10 flex items-center gap-2 bg-white px-5 py-2.5">
@@ -76,7 +70,7 @@ export default function ChecklistItem({
         <button
           type="button"
           onClick={onToggleCheck}
-          className={`checklist-checkbox flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded transition-colors ${
+          className={`checklist-checkbox flex h-[18px] w-[18px] shrink-0 cursor-pointer items-center justify-center rounded transition-colors ${
             checkStatus === 'complete'
               ? 'bg-primary-600 text-white'
               : checkStatus === 'partial'

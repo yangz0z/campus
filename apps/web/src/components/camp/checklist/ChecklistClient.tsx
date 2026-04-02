@@ -36,7 +36,7 @@ interface ChecklistClientProps {
 export default function ChecklistClient({ campId, camp, initialGroups, myMemberId, members }: ChecklistClientProps) {
   const [groups, setGroups] = useState<ChecklistGroup[]>(initialGroups);
   const [showCompleted, setShowCompleted] = useState(false);
-  const [recentlyCheckedIds, setRecentlyCheckedIds] = useState<Set<string>>(new Set());
+  const [delayedRemoveIds, setDelayedRemoveIds] = useState<Set<string>>(new Set());
   const [collapsedGroupIds, setCollapsedGroupIds] = useState<Set<string>>(new Set());
 
   // 담당자 지정 시트
@@ -106,14 +106,14 @@ export default function ChecklistClient({ campId, camp, initialGroups, myMemberI
       })),
     );
     if (willBeComplete && !showCompleted) {
-      setRecentlyCheckedIds((prev) => new Set(prev).add(itemId));
+      setDelayedRemoveIds((prev) => new Set(prev).add(itemId));
       setTimeout(() => {
-        setRecentlyCheckedIds((prev) => {
+        setDelayedRemoveIds((prev) => {
           const next = new Set(prev);
           next.delete(itemId);
           return next;
         });
-      }, 500);
+      }, 200);
     }
     await toggleChecklistItem(campId, itemId, { isChecked: newValue });
   }
@@ -196,7 +196,7 @@ export default function ChecklistClient({ campId, camp, initialGroups, myMemberI
             isCollapsed={collapsedGroupIds.has(group.id)}
             onToggleCollapse={() => toggleCollapse(group.id)}
             showCompleted={showCompleted}
-            recentlyCheckedIds={recentlyCheckedIds}
+            delayedRemoveIds={delayedRemoveIds}
             members={members}
             onToggleCheck={handleToggleCheck}
             onUpdateItem={handleUpdateItem}
