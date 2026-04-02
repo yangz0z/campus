@@ -178,9 +178,7 @@ function CampRowClient({ camp, index, isLast, onEdit, onDelete }: CampRowClientP
               <span className={`shrink-0 rounded-full px-3 py-1 text-[12px] font-bold ${isSoon ? 'bg-warm-100 text-warm-500' : 'bg-primary-50 text-primary-600'}`}>
                 D-{diff}
               </span>
-            ) : (
-              <span className="shrink-0 rounded-full bg-earth-200 px-3 py-1 text-[12px] font-medium text-earth-500">종료</span>
-            )}
+            ) : null}
 
             <svg width="7" height="12" viewBox="0 0 7 12" fill="none" className="shrink-0 text-gray-300">
               <path d="M1 1L6 6L1 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
