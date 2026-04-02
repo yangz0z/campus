@@ -94,6 +94,11 @@ export interface CreateChecklistItemResponse {
   isCheckedByMe: boolean;
 }
 
+export interface CampSummaryMember {
+  nickname: string;
+  profileImage: string | null;
+}
+
 export interface CampSummary {
   id: string;
   title: string;
@@ -101,6 +106,7 @@ export interface CampSummary {
   startDate: string;
   endDate: string;
   season: Season;
+  members: CampSummaryMember[];
 }
 
 export interface GetMyCampsResponse {

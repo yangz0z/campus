@@ -104,7 +104,7 @@ export class CampService {
   async getMyCamps(user: User) {
     const members = await this.campMemberRepository.find({
       where: { userId: user.id },
-      relations: ['camp'],
+      relations: ['camp', 'camp.members', 'camp.members.user'],
       order: { createdAt: 'DESC' },
     });
 
@@ -116,6 +116,10 @@ export class CampService {
         startDate: m.camp.startDate,
         endDate: m.camp.endDate,
         season: m.camp.season,
+        members: m.camp.members.map((cm) => ({
+          nickname: cm.user.nickname,
+          profileImage: cm.user.profileImage,
+        })),
       })),
     };
   }

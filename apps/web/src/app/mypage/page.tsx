@@ -31,11 +31,45 @@ function CampRow({ camp, index }: { camp: CampSummary; index: number }) {
               <span className="truncate">{camp.location}</span>
             </p>
           )}
-          <p className="camp-meta mt-0.5 flex items-center gap-1 text-[13px] text-gray-400">
-            <span className="camp-meta-dates">{formatDateShort(camp.startDate)} – {formatDateShort(camp.endDate)}</span>
-            <span aria-hidden>·</span>
-            <span className="camp-meta-nights">{calcNights(camp.startDate, camp.endDate)}</span>
-          </p>
+          <div className="camp-meta mt-1 flex items-center gap-2">
+            <p className="flex items-center gap-1 text-[13px] text-gray-400">
+              <span className="camp-meta-dates">{formatDateShort(camp.startDate)} – {formatDateShort(camp.endDate)}</span>
+              <span aria-hidden>·</span>
+              <span className="camp-meta-nights">{calcNights(camp.startDate, camp.endDate)}</span>
+            </p>
+            {camp.members.length > 1 && (
+              <div className="camp-members flex items-center">
+                {camp.members.slice(0, 2).map((member, i) => (
+                  member.profileImage ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      key={i}
+                      src={member.profileImage}
+                      alt={member.nickname}
+                      style={{ marginLeft: i === 0 ? 0 : -5 }}
+                      className="h-[18px] w-[18px] rounded-full object-cover ring-1 ring-white"
+                    />
+                  ) : (
+                    <span
+                      key={i}
+                      style={{ marginLeft: i === 0 ? 0 : -5, fontSize: 7 }}
+                      className="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full bg-primary-100 font-semibold text-primary-700 ring-1 ring-white"
+                    >
+                      {member.nickname[0]}
+                    </span>
+                  )
+                ))}
+                {camp.members.length > 2 && (
+                  <span
+                    style={{ marginLeft: -5, fontSize: 7 }}
+                    className="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full bg-gray-100 font-semibold text-gray-500 ring-1 ring-white"
+                  >
+                    +{camp.members.length - 2}
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
         </div>
 
         {isToday ? (
