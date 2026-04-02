@@ -65,7 +65,6 @@ export default function StepDate({ onNext, initialStartDate, initialEndDate, ini
             startDate={startDate}
             endDate={endDate}
             onChange={handleDateChange}
-            minDate={dayjs().format('YYYY-MM-DD')}
           />
 
           {/* 선택된 날짜 요약 */}

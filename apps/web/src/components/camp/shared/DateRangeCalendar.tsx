@@ -19,7 +19,7 @@ export default function DateRangeCalendar({ startDate, endDate, onChange, minDat
   const [direction, setDirection] = useState(0);
 
   const today = dayjs().format('YYYY-MM-DD');
-  const min = minDate ?? today;
+  const min = minDate ?? null;
 
   // 달력 그리드 생성
   const calendarDays = useMemo(() => {
@@ -80,7 +80,7 @@ export default function DateRangeCalendar({ startDate, endDate, onChange, minDat
   }
 
   function getDayStyle(date: string, inMonth: boolean) {
-    const isDisabled = date < min;
+    const isDisabled = min !== null && date < min;
     const isToday = date === today;
     const isStart = date === startDate;
     const isEnd = date === endDate;
