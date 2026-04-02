@@ -163,8 +163,9 @@ export default function ChecklistGroupSection({
         </div>
       </div>
 
-      <div className={`checklist-group-card overflow-hidden rounded-2xl bg-white shadow-[0_2px_12px_rgba(0,0,0,0.06)] transition-all duration-200 ease-in-out ${
-        isCollapsed ? 'max-h-0 opacity-0 shadow-none' : 'max-h-[2000px] opacity-100'
+      <div className="checklist-group-card rounded-2xl bg-white shadow-[0_2px_12px_rgba(0,0,0,0.06)]">
+      <div className={`transition-all duration-200 ease-in-out ${
+        isCollapsed ? 'max-h-0 overflow-hidden opacity-0' : 'max-h-[2000px] overflow-visible opacity-100'
       }`}>
         <AnimatePresence initial={false}>
           {visibleItems.map((item, i) => (
@@ -191,7 +192,7 @@ export default function ChecklistGroupSection({
 
         {/* 아이템 추가 */}
         {isAddingItem ? (
-          <div className="checklist-add-item">
+          <div className="checklist-add-item rounded-b-2xl overflow-hidden">
             <div className="mx-5 h-px bg-gray-100" />
             <div className="checklist-add-item-row flex items-center gap-3 px-5 py-2.5">
               <span className="h-4 w-4 shrink-0 rounded border border-gray-200" />
@@ -221,7 +222,7 @@ export default function ChecklistGroupSection({
             </div>
           </div>
         ) : (
-          <div className="checklist-add-item-trigger">
+          <div className="checklist-add-item-trigger rounded-b-2xl overflow-hidden">
             {group.items.length > 0 && <div className="mx-5 h-px bg-gray-100" />}
             <button
               type="button"
@@ -235,6 +236,7 @@ export default function ChecklistGroupSection({
             </button>
           </div>
         )}
+      </div>
       </div>
     </section>
   );

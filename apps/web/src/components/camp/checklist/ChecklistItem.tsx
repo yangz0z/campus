@@ -114,11 +114,11 @@ export default function ChecklistItem({
   };
 
   return (
-    <div className="checklist-item group">
+    <div className="checklist-item group relative">
       {!isFirst && <div className="checklist-item-divider mx-5 h-px bg-gray-100" />}
 
       <div
-        className="relative overflow-hidden"
+        className={`relative overflow-hidden ${isFirst ? 'rounded-t-2xl' : ''}`}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
@@ -221,17 +221,6 @@ export default function ChecklistItem({
             )}
           </div>
 
-          {/* 삭제 버튼 — 웹 hover 시만 */}
-          <button
-            type="button"
-            onClick={(e) => { e.stopPropagation(); onDeleteItem(); }}
-            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full opacity-0 transition-opacity group-hover:opacity-100 hover:bg-red-50 active:bg-red-100"
-          >
-            <svg width="13" height="13" viewBox="0 0 14 14" fill="none" className="text-red-400">
-              <path d="M2 4h10M5 4V2.5h4V4M5.5 6.5v4M8.5 6.5v4M3 4l.7 7.5h6.6L11 4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
-
           {/* 담당자 버튼 — 2명 이상 */}
           {showAssignees && (
             <button
@@ -273,8 +262,20 @@ export default function ChecklistItem({
               )}
             </button>
           )}
+
         </div>
       </div>
+
+      {/* 삭제 버튼 — 웹 hover 시만, 카드 오른쪽 바깥 절대 위치 */}
+      <button
+        type="button"
+        onClick={onDeleteItem}
+        className="absolute right-0 top-1/2 hidden h-7 w-7 -translate-y-1/2 translate-x-[calc(100%+6px)] cursor-pointer items-center justify-center rounded-full opacity-0 transition-all group-hover:bg-gray-100 group-hover:opacity-100 hover:bg-red-50 active:bg-red-100 md:flex"
+      >
+        <svg width="13" height="13" viewBox="0 0 14 14" fill="none" className="text-red-400">
+          <path d="M2 4h10M5 4V2.5h4V4M5.5 6.5v4M8.5 6.5v4M3 4l.7 7.5h6.6L11 4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </button>
     </div>
   );
 }

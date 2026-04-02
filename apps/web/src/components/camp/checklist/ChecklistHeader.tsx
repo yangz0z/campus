@@ -15,19 +15,31 @@ interface ChecklistHeaderProps {
 
 export default function ChecklistHeader({ campId, camp, showCompleted, onToggleCompleted }: ChecklistHeaderProps) {
   const [showMeta, setShowMeta] = useState(false);
-  const [copyState, setCopyState] = useState<'idle' | 'copying' | 'copied'>('idle');
+  const [inviting, setInviting] = useState(false);
+  const [showToast, setShowToast] = useState(false);
 
   async function handleCopyInviteLink() {
-    if (copyState !== 'idle') return;
-    setCopyState('copying');
+    if (inviting) return;
+    setInviting(true);
     try {
       const { token } = await createCampInvite(campId);
       const url = `${window.location.origin}/invite/${token}`;
-      await navigator.clipboard.writeText(url);
-      setCopyState('copied');
-      setTimeout(() => setCopyState('idle'), 2000);
-    } catch {
-      setCopyState('idle');
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(url);
+      } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = url;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+      }
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3500);
+    } finally {
+      setInviting(false);
     }
   }
 
@@ -48,29 +60,11 @@ export default function ChecklistHeader({ campId, camp, showCompleted, onToggleC
           <button
             type="button"
             onClick={handleCopyInviteLink}
-            disabled={copyState === 'copying'}
-            className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[12px] font-semibold transition-all disabled:opacity-50 ${
-              copyState === 'copied'
-                ? 'bg-primary-100 text-primary-700'
-                : 'bg-gray-900 text-white hover:bg-gray-700 active:bg-gray-800'
-            }`}
+            disabled={inviting}
+            className="flex items-center gap-1.5 rounded-full bg-gray-900 px-3 py-1.5 text-[12px] font-semibold text-white transition-colors disabled:opacity-50 hover:bg-gray-700 active:bg-gray-800"
           >
-            {copyState === 'copied' ? (
-              <>
-                <svg width="11" height="11" viewBox="0 0 14 14" fill="none" className="shrink-0">
-                  <path d="M2 7.5L5.5 11L12 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-                복사됨
-              </>
-            ) : (
-              <>
-                <svg width="11" height="11" viewBox="0 0 14 14" fill="none" className="shrink-0">
-                  <path d="M8 1H2a1 1 0 00-1 1v9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                  <rect x="4" y="4" width="9" height="9" rx="1.2" stroke="currentColor" strokeWidth="1.5" />
-                </svg>
-                초대 링크 복사
-              </>
-            )}
+            <span>🙌</span>
+            같이 준비하기
           </button>
         </div>
 
@@ -145,6 +139,17 @@ export default function ChecklistHeader({ campId, camp, showCompleted, onToggleC
           </div>
         )}
       </div>
+      {showToast && (
+        <div className="pointer-events-none fixed bottom-24 left-1/2 z-50 w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 animate-fade-in-up">
+          <div className="flex items-start gap-3 rounded-2xl bg-gray-900 px-4 py-3.5 shadow-lg">
+            <span className="mt-0.5 text-base leading-none">🔗</span>
+            <p className="text-[13px] leading-relaxed text-white">
+              초대링크가 복사되었습니다.<br />
+              링크를 공유해 캠프에 초대해보세요.
+            </p>
+          </div>
+        </div>
+      )}
     </header>
   );
 }
