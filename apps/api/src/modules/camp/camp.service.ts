@@ -14,6 +14,7 @@ import { CreateCampDto } from './dto/create-camp.dto';
 import { CreateChecklistGroupDto } from './dto/create-checklist-group.dto';
 import { CreateChecklistItemDto } from './dto/create-checklist-item.dto';
 import { UpdateChecklistItemDto } from './dto/update-checklist-item.dto';
+import { UpdateCampDto } from './dto/update-camp.dto';
 import { SetItemAssigneesDto } from './dto/set-item-assignees.dto';
 import { ToggleChecklistItemDto } from './dto/toggle-checklist-item.dto';
 
@@ -122,6 +123,32 @@ export class CampService {
         })),
       })),
     };
+  }
+
+  async deleteCamp(user: User, campId: string) {
+    const member = await this.campMemberRepository.findOne({ where: { campId, userId: user.id } });
+    if (!member) throw new ForbiddenException();
+    if (member.role !== 'owner') throw new ForbiddenException('Only owner can delete camp');
+
+    const camp = await this.campRepository.findOne({ where: { id: campId } });
+    if (!camp) throw new NotFoundException();
+
+    await this.campRepository.remove(camp);
+  }
+
+  async updateCamp(user: User, campId: string, dto: UpdateCampDto) {
+    const member = await this.campMemberRepository.findOne({ where: { campId, userId: user.id } });
+    if (!member) throw new ForbiddenException();
+
+    const camp = await this.campRepository.findOne({ where: { id: campId } });
+    if (!camp) throw new NotFoundException();
+
+    camp.title = dto.title;
+    camp.location = dto.location ?? null;
+    camp.startDate = dto.startDate;
+    camp.endDate = dto.endDate;
+    camp.season = dto.season;
+    await this.campRepository.save(camp);
   }
 
   async getCamp(user: User, campId: string) {

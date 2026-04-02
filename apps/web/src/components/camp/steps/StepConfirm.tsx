@@ -22,22 +22,25 @@ interface StepConfirmProps {
   onConfirm: () => void;
   isSubmitting?: boolean;
   error?: string | null;
+  skipIntro?: boolean;
+  submitLabel?: string;
 }
 
-
-export default function StepConfirm({ formData, onConfirm, isSubmitting, error }: StepConfirmProps) {
-  const [showCard, setShowCard] = useState(false);
+export default function StepConfirm({ formData, onConfirm, isSubmitting, error, skipIntro, submitLabel = '캠프 만들기' }: StepConfirmProps) {
+  const [showCard, setShowCard] = useState(skipIntro ?? false);
 
   const handleTypingDone = useCallback(() => setShowCard(true), []);
 
   return (
     <div>
-      <ChatBubble variant="question">
-        <TypewriterText
-          text="준비된 캠프를 확인해 주세요!"
-          onComplete={handleTypingDone}
-        />
-      </ChatBubble>
+      {!skipIntro && (
+        <ChatBubble variant="question">
+          <TypewriterText
+            text="준비된 캠프를 확인해 주세요!"
+            onComplete={handleTypingDone}
+          />
+        </ChatBubble>
+      )}
 
       {showCard && (
         <motion.div
@@ -85,7 +88,7 @@ export default function StepConfirm({ formData, onConfirm, isSubmitting, error }
               disabled={isSubmitting}
               className="w-full rounded-xl bg-primary-600 py-4 text-lg font-bold text-white shadow-lg shadow-primary-600/25 transition-colors hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {isSubmitting ? '만드는 중...' : '캠프 만들기'}
+              {isSubmitting ? '저장 중...' : submitLabel}
             </button>
             {error && (
               <p className="mt-3 text-center text-sm text-red-500">{error}</p>

@@ -113,6 +113,14 @@ export interface GetMyCampsResponse {
   camps: CampSummary[];
 }
 
+export interface UpdateCampRequest {
+  title: string;
+  location?: string | null;
+  startDate: string;
+  endDate: string;
+  season: Season;
+}
+
 export interface CreateCampInviteResponse {
   token: string;
 }

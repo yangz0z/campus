@@ -16,6 +16,7 @@ import type {
   GetMyCampsResponse,
   SetItemAssigneesRequest,
   ToggleCheckRequest,
+  UpdateCampRequest,
   UpdateChecklistItemRequest,
 } from '@campus/shared';
 import { serverFetch } from '@/lib/api-server';
@@ -39,6 +40,17 @@ export async function getCampMembers(campId: string): Promise<GetCampMembersResp
 }
 
 // ── 뮤테이션 ──
+
+export async function updateCamp(campId: string, data: UpdateCampRequest): Promise<void> {
+  return serverFetch<void>(`/camps/${campId}`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteCamp(campId: string): Promise<void> {
+  return serverFetch<void>(`/camps/${campId}`, { method: 'DELETE' });
+}
 
 export async function createCamp(data: CreateCampRequest): Promise<CreateCampResponse> {
   return serverFetch<CreateCampResponse>('/camps', {

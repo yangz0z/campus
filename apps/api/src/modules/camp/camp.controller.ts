@@ -8,6 +8,7 @@ import { CreateChecklistGroupDto } from './dto/create-checklist-group.dto';
 import { CreateChecklistItemDto } from './dto/create-checklist-item.dto';
 import { ToggleChecklistItemDto } from './dto/toggle-checklist-item.dto';
 import { UpdateChecklistItemDto } from './dto/update-checklist-item.dto';
+import { UpdateCampDto } from './dto/update-camp.dto';
 import { SetItemAssigneesDto } from './dto/set-item-assignees.dto';
 
 @Controller('camps')
@@ -39,6 +40,25 @@ export class CampController {
     @Param('token') token: string,
   ) {
     return this.campService.acceptCampInvite(user, token);
+  }
+
+  @Delete(':campId')
+  @HttpCode(204)
+  deleteCamp(
+    @CurrentUser() user: User,
+    @Param('campId', ParseUUIDPipe) campId: string,
+  ) {
+    return this.campService.deleteCamp(user, campId);
+  }
+
+  @Patch(':campId')
+  @HttpCode(204)
+  updateCamp(
+    @CurrentUser() user: User,
+    @Param('campId', ParseUUIDPipe) campId: string,
+    @Body() dto: UpdateCampDto,
+  ) {
+    return this.campService.updateCamp(user, campId, dto);
   }
 
   @Get(':campId')
