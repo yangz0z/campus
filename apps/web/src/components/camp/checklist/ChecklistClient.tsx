@@ -5,7 +5,7 @@ import Link from 'next/link';
 import type { AssigneeInfo, CampMemberInfo, ChecklistGroup, CampSummary } from '@campus/shared';
 import {
   toggleChecklistItem,
-  updateChecklistItemMemo,
+  updateChecklistItem,
   setItemAssignees,
   createChecklistGroup,
   createChecklistItem,
@@ -118,14 +118,14 @@ export default function ChecklistClient({ campId, camp, initialGroups, myMemberI
     await toggleChecklistItem(campId, itemId, { isChecked: newValue });
   }
 
-  async function handleSaveMemo(itemId: string, memo: string | null) {
+  async function handleUpdateItem(itemId: string, title: string, memo: string | null) {
     setGroups((prev) =>
       prev.map((g) => ({
         ...g,
-        items: g.items.map((i) => (i.id === itemId ? { ...i, memo } : i)),
+        items: g.items.map((i) => (i.id === itemId ? { ...i, title, memo } : i)),
       })),
     );
-    await updateChecklistItemMemo(campId, itemId, { memo });
+    await updateChecklistItem(campId, itemId, { title, memo });
   }
 
   async function handleSaveAssignees(memberIds: string[]) {
@@ -199,7 +199,7 @@ export default function ChecklistClient({ campId, camp, initialGroups, myMemberI
             recentlyCheckedIds={recentlyCheckedIds}
             members={members}
             onToggleCheck={handleToggleCheck}
-            onSaveMemo={handleSaveMemo}
+            onUpdateItem={handleUpdateItem}
             onOpenPicker={(itemId, assignees) => {
               const item = groups.flatMap((g) => g.items).find((i) => i.id === itemId);
               if (item) setAssigningItem({ id: itemId, title: item.title, assignees });

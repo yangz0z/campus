@@ -13,7 +13,7 @@ import type {
   GetMyCampsResponse,
   SetItemAssigneesRequest,
   ToggleCheckRequest,
-  UpdateChecklistItemMemoRequest,
+  UpdateChecklistItemRequest,
 } from '@campus/shared';
 import { serverFetch } from '@/lib/api-server';
 
@@ -76,12 +76,12 @@ export async function toggleChecklistItem(
   });
 }
 
-export async function updateChecklistItemMemo(
+export async function updateChecklistItem(
   campId: string,
   itemId: string,
-  data: UpdateChecklistItemMemoRequest,
+  data: UpdateChecklistItemRequest,
 ): Promise<void> {
-  return serverFetch<void>(`/camps/${campId}/checklist/items/${itemId}/memo`, {
+  return serverFetch<void>(`/camps/${campId}/checklist/items/${itemId}`, {
     method: 'PATCH',
     body: JSON.stringify(data),
   });

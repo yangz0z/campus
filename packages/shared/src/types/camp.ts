@@ -75,7 +75,8 @@ export interface CreateChecklistItemRequest {
   title: string;
 }
 
-export interface UpdateChecklistItemMemoRequest {
+export interface UpdateChecklistItemRequest {
+  title: string;
   memo: string | null;
 }
 

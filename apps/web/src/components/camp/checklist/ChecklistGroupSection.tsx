@@ -22,7 +22,7 @@ interface ChecklistGroupSectionProps {
   recentlyCheckedIds: Set<string>;
   members: CampMemberInfo[];
   onToggleCheck: (itemId: string, currentValue: boolean) => void;
-  onSaveMemo: (itemId: string, memo: string | null) => void;
+  onUpdateItem: (itemId: string, title: string, memo: string | null) => void;
   onOpenPicker: (itemId: string, assignees: AssigneeInfo[]) => void;
   onAddItem: (groupId: string, title: string) => Promise<void>;
   setGroupRef: (id: string, el: HTMLElement | null) => void;
@@ -36,7 +36,7 @@ export default function ChecklistGroupSection({
   recentlyCheckedIds,
   members,
   onToggleCheck,
-  onSaveMemo,
+  onUpdateItem,
   onOpenPicker,
   onAddItem,
   setGroupRef,
@@ -116,7 +116,7 @@ export default function ChecklistGroupSection({
             members={members}
             checkStatus={getCheckStatus(item)}
             onToggleCheck={() => onToggleCheck(item.id, item.isCheckedByMe)}
-            onSaveMemo={(memo) => onSaveMemo(item.id, memo)}
+            onUpdateItem={(title, memo) => onUpdateItem(item.id, title, memo)}
             onOpenPicker={() => onOpenPicker(item.id, item.assignees)}
             showAssignees={members.length > 1}
           />
@@ -144,11 +144,11 @@ export default function ChecklistGroupSection({
                 type="button"
                 onClick={handleAddItem}
                 disabled={addingItem || !newItemTitle.trim()}
-                className="checklist-add-item-submit text-[13px] font-semibold text-primary-600 disabled:text-gray-300"
+                className="checklist-add-item-submit shrink-0 text-[13px] font-semibold text-primary-600 disabled:text-gray-300"
               >
                 추가
               </button>
-              <button type="button" onClick={cancelAddItem} className="checklist-add-item-cancel text-[13px] text-gray-400">
+              <button type="button" onClick={cancelAddItem} className="checklist-add-item-cancel shrink-0 text-[13px] text-gray-400">
                 취소
               </button>
             </div>
