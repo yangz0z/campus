@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, Param, ParseUUIDPipe, Patch, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, ParseUUIDPipe, Patch, Post, Put } from '@nestjs/common';
 import { User } from '../user/entities/user.entity';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { CampService } from './camp.service';
@@ -89,6 +89,16 @@ export class CampController {
     @Body() dto: UpdateChecklistItemDto,
   ) {
     return this.campService.updateChecklistItem(user, campId, itemId, dto);
+  }
+
+  @Delete(':campId/checklist/items/:itemId')
+  @HttpCode(204)
+  deleteChecklistItem(
+    @CurrentUser() user: User,
+    @Param('campId', ParseUUIDPipe) campId: string,
+    @Param('itemId', ParseUUIDPipe) itemId: string,
+  ) {
+    return this.campService.deleteChecklistItem(user, campId, itemId);
   }
 
   @Put(':campId/checklist/items/:itemId/assignees')

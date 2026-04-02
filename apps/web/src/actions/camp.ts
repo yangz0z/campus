@@ -87,6 +87,10 @@ export async function updateChecklistItem(
   });
 }
 
+export async function deleteChecklistItem(campId: string, itemId: string): Promise<void> {
+  return serverFetch<void>(`/camps/${campId}/checklist/items/${itemId}`, { method: 'DELETE' });
+}
+
 export async function setItemAssignees(
   campId: string,
   itemId: string,

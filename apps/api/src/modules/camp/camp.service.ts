@@ -284,6 +284,19 @@ export class CampService {
     await this.campChecklistItemRepository.save(item);
   }
 
+  async deleteChecklistItem(user: User, campId: string, itemId: string) {
+    const member = await this.campMemberRepository.findOne({ where: { campId, userId: user.id } });
+    if (!member) throw new ForbiddenException();
+
+    const item = await this.campChecklistItemRepository.findOne({
+      where: { id: itemId },
+      relations: ['group'],
+    });
+    if (!item || item.group.campId !== campId) throw new NotFoundException();
+
+    await this.campChecklistItemRepository.remove(item);
+  }
+
   async setItemAssignees(user: User, campId: string, itemId: string, dto: SetItemAssigneesDto) {
     const member = await this.campMemberRepository.findOne({
       where: { campId, userId: user.id },

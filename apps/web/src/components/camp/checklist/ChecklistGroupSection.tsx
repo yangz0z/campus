@@ -23,6 +23,7 @@ interface ChecklistGroupSectionProps {
   delayedRemoveIds: Set<string>;
   members: CampMemberInfo[];
   onToggleCheck: (itemId: string, currentValue: boolean) => void;
+  onDeleteItem: (itemId: string) => void;
   onUpdateItem: (itemId: string, title: string, memo: string | null) => void;
   onOpenPicker: (itemId: string, assignees: AssigneeInfo[]) => void;
   onAddItem: (groupId: string, title: string) => Promise<void>;
@@ -37,6 +38,7 @@ export default function ChecklistGroupSection({
   delayedRemoveIds,
   members,
   onToggleCheck,
+  onDeleteItem,
   onUpdateItem,
   onOpenPicker,
   onAddItem,
@@ -122,6 +124,7 @@ export default function ChecklistGroupSection({
                 members={members}
                 checkStatus={getCheckStatus(item)}
                 onToggleCheck={() => onToggleCheck(item.id, item.isCheckedByMe)}
+                onDeleteItem={() => onDeleteItem(item.id)}
                 onUpdateItem={(title, memo) => onUpdateItem(item.id, title, memo)}
                 onOpenPicker={() => onOpenPicker(item.id, item.assignees)}
                 showAssignees={members.length > 1}

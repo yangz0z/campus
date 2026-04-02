@@ -6,6 +6,7 @@ import type { AssigneeInfo, CampMemberInfo, ChecklistGroup, CampSummary } from '
 import {
   toggleChecklistItem,
   updateChecklistItem,
+  deleteChecklistItem,
   setItemAssignees,
   createChecklistGroup,
   createChecklistItem,
@@ -118,6 +119,13 @@ export default function ChecklistClient({ campId, camp, initialGroups, myMemberI
     await toggleChecklistItem(campId, itemId, { isChecked: newValue });
   }
 
+  async function handleDeleteItem(itemId: string) {
+    setGroups((prev) =>
+      prev.map((g) => ({ ...g, items: g.items.filter((i) => i.id !== itemId) })),
+    );
+    await deleteChecklistItem(campId, itemId);
+  }
+
   async function handleUpdateItem(itemId: string, title: string, memo: string | null) {
     setGroups((prev) =>
       prev.map((g) => ({
@@ -199,6 +207,7 @@ export default function ChecklistClient({ campId, camp, initialGroups, myMemberI
             delayedRemoveIds={delayedRemoveIds}
             members={members}
             onToggleCheck={handleToggleCheck}
+            onDeleteItem={handleDeleteItem}
             onUpdateItem={handleUpdateItem}
             onOpenPicker={(itemId, assignees) => {
               const item = groups.flatMap((g) => g.items).find((i) => i.id === itemId);
