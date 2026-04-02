@@ -106,3 +106,15 @@ export interface CampSummary {
 export interface GetMyCampsResponse {
   camps: CampSummary[];
 }
+
+export interface CreateCampInviteResponse {
+  token: string;
+}
+
+export interface GetCampInviteInfoResponse {
+  camp: CampSummary;
+}
+
+export interface AcceptCampInviteResponse {
+  campId: string;
+}

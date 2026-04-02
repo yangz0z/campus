@@ -205,6 +205,7 @@ export default function ChecklistClient({ campId, camp, initialGroups, myMemberI
   return (
     <div className="checklist-page min-h-screen bg-[#F2F2F0]">
       <ChecklistHeader
+        campId={campId}
         camp={camp}
         showCompleted={showCompleted}
         onToggleCompleted={() => setShowCompleted((v) => !v)}

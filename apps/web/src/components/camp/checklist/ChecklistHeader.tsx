@@ -4,28 +4,75 @@ import { useState } from 'react';
 import Link from 'next/link';
 import type { CampSummary } from '@campus/shared';
 import { formatDateShort, calcNights } from '@campus/shared';
+import { createCampInvite } from '@/actions/camp';
 
 interface ChecklistHeaderProps {
+  campId: string;
   camp: CampSummary | null;
   showCompleted: boolean;
   onToggleCompleted: () => void;
 }
 
-export default function ChecklistHeader({ camp, showCompleted, onToggleCompleted }: ChecklistHeaderProps) {
+export default function ChecklistHeader({ campId, camp, showCompleted, onToggleCompleted }: ChecklistHeaderProps) {
   const [showMeta, setShowMeta] = useState(false);
+  const [copyState, setCopyState] = useState<'idle' | 'copying' | 'copied'>('idle');
+
+  async function handleCopyInviteLink() {
+    if (copyState !== 'idle') return;
+    setCopyState('copying');
+    try {
+      const { token } = await createCampInvite(campId);
+      const url = `${window.location.origin}/invite/${token}`;
+      await navigator.clipboard.writeText(url);
+      setCopyState('copied');
+      setTimeout(() => setCopyState('idle'), 2000);
+    } catch {
+      setCopyState('idle');
+    }
+  }
 
   return (
     <header className="checklist-header bg-[#F2F2F0] px-5 pb-5 pt-5">
       <div className="checklist-header-inner mx-auto max-w-sm">
-        <Link
-          href="/mypage"
-          className="checklist-back inline-flex items-center gap-1 text-[13px] text-gray-400 transition-colors hover:text-gray-600"
-        >
-          <svg width="6" height="11" viewBox="0 0 6 11" fill="none">
-            <path d="M5.5 1L1 5.5L5.5 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-          내 캠프
-        </Link>
+        <div className="flex items-center justify-between">
+          <Link
+            href="/mypage"
+            className="checklist-back inline-flex items-center gap-1 text-[13px] text-gray-400 transition-colors hover:text-gray-600"
+          >
+            <svg width="6" height="11" viewBox="0 0 6 11" fill="none">
+              <path d="M5.5 1L1 5.5L5.5 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            내 캠프
+          </Link>
+
+          <button
+            type="button"
+            onClick={handleCopyInviteLink}
+            disabled={copyState === 'copying'}
+            className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[12px] font-semibold transition-all disabled:opacity-50 ${
+              copyState === 'copied'
+                ? 'bg-primary-100 text-primary-700'
+                : 'bg-gray-900 text-white hover:bg-gray-700 active:bg-gray-800'
+            }`}
+          >
+            {copyState === 'copied' ? (
+              <>
+                <svg width="11" height="11" viewBox="0 0 14 14" fill="none" className="shrink-0">
+                  <path d="M2 7.5L5.5 11L12 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                복사됨
+              </>
+            ) : (
+              <>
+                <svg width="11" height="11" viewBox="0 0 14 14" fill="none" className="shrink-0">
+                  <path d="M8 1H2a1 1 0 00-1 1v9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  <rect x="4" y="4" width="9" height="9" rx="1.2" stroke="currentColor" strokeWidth="1.5" />
+                </svg>
+                초대 링크 복사
+              </>
+            )}
+          </button>
+        </div>
 
         {camp ? (
           <div className="checklist-camp-info mt-3">
@@ -46,25 +93,27 @@ export default function ChecklistHeader({ camp, showCompleted, onToggleCompleted
                 </svg>
               </button>
 
-              <button
-                type="button"
-                onClick={onToggleCompleted}
-                className={`checklist-completed-toggle mt-1.5 flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-medium transition-colors ${
-                  showCompleted ? 'bg-primary-50 text-primary-600' : 'text-gray-400 hover:text-gray-500'
-                }`}
-              >
-                <svg width="11" height="11" viewBox="0 0 14 14" fill="none" className="shrink-0">
-                  {showCompleted ? (
-                    <path d="M2 7.5L5.5 11L12 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  ) : (
-                    <>
-                      <circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1.3" />
-                      <path d="M4.5 7L6.5 9L9.5 5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
-                    </>
-                  )}
-                </svg>
-                {showCompleted ? '숨기기' : '완료 보기'}
-              </button>
+              <div className="mt-1.5 flex shrink-0 items-center">
+                <button
+                  type="button"
+                  onClick={onToggleCompleted}
+                  className={`checklist-completed-toggle flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-medium transition-colors  ${
+                    showCompleted ? 'bg-primary-50 text-primary-600' : 'text-gray-400 hover:text-gray-500'
+                  }`}
+                >
+                  <svg width="11" height="11" viewBox="0 0 14 14" fill="none" className="shrink-0">
+                    {showCompleted ? (
+                      <path d="M2 7.5L5.5 11L12 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    ) : (
+                      <>
+                        <circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1.3" />
+                        <path d="M4.5 7L6.5 9L9.5 5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+                      </>
+                    )}
+                  </svg>
+                  {showCompleted ? '숨기기' : '완료 보기'}
+                </button>
+              </div>
             </div>
 
             <div className={`checklist-meta overflow-hidden transition-all duration-200 ease-in-out ${showMeta ? 'mt-2 max-h-20 opacity-100' : 'max-h-0 opacity-0'}`}>

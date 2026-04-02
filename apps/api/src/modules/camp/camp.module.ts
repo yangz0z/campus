@@ -6,6 +6,7 @@ import { CampMember } from './entities/camp-member.entity';
 import { CampChecklistGroup } from './entities/camp-checklist-group.entity';
 import { CampChecklistItem } from './entities/camp-checklist-item.entity';
 import { CampChecklistItemAssignee } from './entities/camp-checklist-item-assignee.entity';
+import { CampInvite } from './entities/camp-invite.entity';
 import { CampController } from './camp.controller';
 import { CampService } from './camp.service';
 
@@ -17,6 +18,7 @@ import { CampService } from './camp.service';
       CampChecklistGroup,
       CampChecklistItem,
       CampChecklistItemAssignee,
+      CampInvite,
     ]),
     ChecklistTemplateModule,
   ],

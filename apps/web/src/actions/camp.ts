@@ -1,13 +1,16 @@
 'use server';
 
 import type {
+  AcceptCampInviteResponse,
   CampSummary,
+  CreateCampInviteResponse,
   CreateCampRequest,
   CreateCampResponse,
   CreateChecklistGroupRequest,
   CreateChecklistGroupResponse,
   CreateChecklistItemRequest,
   CreateChecklistItemResponse,
+  GetCampInviteInfoResponse,
   GetCampMembersResponse,
   GetChecklistResponse,
   GetMyCampsResponse,
@@ -100,6 +103,18 @@ export async function updateChecklistItem(
 
 export async function deleteChecklistItem(campId: string, itemId: string): Promise<void> {
   return serverFetch<void>(`/camps/${campId}/checklist/items/${itemId}`, { method: 'DELETE' });
+}
+
+export async function createCampInvite(campId: string): Promise<CreateCampInviteResponse> {
+  return serverFetch<CreateCampInviteResponse>(`/camps/${campId}/invite`, { method: 'POST' });
+}
+
+export async function getCampInviteInfo(token: string): Promise<GetCampInviteInfoResponse> {
+  return serverFetch<GetCampInviteInfoResponse>(`/camps/invite/${token}`);
+}
+
+export async function acceptCampInvite(token: string): Promise<AcceptCampInviteResponse> {
+  return serverFetch<AcceptCampInviteResponse>(`/camps/invite/${token}/accept`, { method: 'POST' });
 }
 
 export async function setItemAssignees(

@@ -1,6 +1,7 @@
 import { Body, Controller, Delete, Get, HttpCode, Param, ParseUUIDPipe, Patch, Post, Put } from '@nestjs/common';
 import { User } from '../user/entities/user.entity';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { Public } from '../auth/decorators/public.decorator';
 import { CampService } from './camp.service';
 import { CreateCampDto } from './dto/create-camp.dto';
 import { CreateChecklistGroupDto } from './dto/create-checklist-group.dto';
@@ -26,6 +27,20 @@ export class CampController {
     return this.campService.createCamp(user, dto);
   }
 
+  @Public()
+  @Get('invite/:token')
+  getCampInviteInfo(@Param('token') token: string) {
+    return this.campService.getCampInviteInfo(token);
+  }
+
+  @Post('invite/:token/accept')
+  acceptCampInvite(
+    @CurrentUser() user: User,
+    @Param('token') token: string,
+  ) {
+    return this.campService.acceptCampInvite(user, token);
+  }
+
   @Get(':campId')
   getCamp(
     @CurrentUser() user: User,
@@ -40,6 +55,14 @@ export class CampController {
     @Param('campId', ParseUUIDPipe) campId: string,
   ) {
     return this.campService.getCampMembers(user, campId);
+  }
+
+  @Post(':campId/invite')
+  createCampInvite(
+    @CurrentUser() user: User,
+    @Param('campId', ParseUUIDPipe) campId: string,
+  ) {
+    return this.campService.createCampInvite(user, campId);
   }
 
   @Post(':campId/checklist/groups')
