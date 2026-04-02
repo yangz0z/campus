@@ -1,0 +1,72 @@
+@import 'tailwindcss';
+
+@theme {
+  /* Primary - 자연 그린 */
+  --color-primary-50: #f0fdf4;
+  --color-primary-100: #dcfce7;
+  --color-primary-200: #bbf7d0;
+  --color-primary-300: #86efac;
+  --color-primary-400: #4ade80;
+  --color-primary-500: #22c55e;
+  --color-primary-600: #16a34a;
+  --color-primary-700: #15803d;
+  --color-primary-800: #166534;
+  --color-primary-900: #14532d;
+
+  /* Warm - 캠프파이어 웜톤 */
+  --color-warm-50: #fffbeb;
+  --color-warm-100: #fef3c7;
+  --color-warm-200: #fde68a;
+  --color-warm-300: #fcd34d;
+  --color-warm-400: #fbbf24;
+  --color-warm-500: #f59e0b;
+
+  /* Earth - 어스톤 브라운 */
+  --color-earth-50: #faf8f5;
+  --color-earth-100: #f3efe8;
+  --color-earth-200: #e8e0d4;
+  --color-earth-300: #d4c5b0;
+  --color-earth-400: #b8a48a;
+  --color-earth-500: #9c8468;
+  --color-earth-600: #7a6650;
+
+  /* Font */
+  --font-sans: 'Pretendard Variable', Pretendard, -apple-system,
+    BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI',
+    'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', 'Apple Color Emoji',
+    'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shimmer {
+  from { background-position: -400px 0; }
+  to { background-position: 400px 0; }
+}
+
+@layer base {
+  body {
+    background-color: #F2F2F0;
+    @apply text-gray-800 antialiased;
+  }
+}
+
+@layer utilities {
+  .animate-fade-in-up {
+    animation: fade-in-up 0.45s ease-out both;
+  }
+  .animate-shimmer {
+    background: linear-gradient(90deg, #f0ece6 25%, #e8e0d4 50%, #f0ece6 75%);
+    background-size: 400px 100%;
+    animation: shimmer 1.4s infinite;
+  }
+}
