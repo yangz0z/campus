@@ -248,8 +248,17 @@ export default function ChecklistItem({
               ) : (
                 <span className="checklist-assignee-avatars flex items-center">
                   {item.assignees.slice(0, 3).map((a, idx) => (
-                    <span key={a.memberId} style={{ marginLeft: idx === 0 ? 0 : -6 }}>
-                      <Avatar nickname={a.nickname} profileImage={a.profileImage} size={24} />
+                    <span key={a.memberId} className="relative" style={{ marginLeft: idx === 0 ? 0 : -6 }}>
+                      <span className={checkStatus === 'partial' && a.isChecked ? 'opacity-30 grayscale' : ''}>
+                        <Avatar nickname={a.nickname} profileImage={a.profileImage} size={24} />
+                      </span>
+                      {checkStatus === 'partial' && a.isChecked && (
+                        <span className="absolute -bottom-0.5 -right-0.5 flex h-3 w-3 items-center justify-center rounded-full bg-primary-500 ring-1 ring-white">
+                          <svg width="6" height="5" viewBox="0 0 7 6" fill="none">
+                            <path d="M1 3L2.8 5L6 1" stroke="white" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        </span>
+                      )}
                     </span>
                   ))}
                   {item.assignees.length > 3 && (

@@ -299,6 +299,7 @@ export default function ChecklistClient({ campId, camp, initialGroups, myMemberI
           itemTitle={assigningItem.title}
           members={members}
           initialMemberIds={assigningItem.assignees.map((a) => a.memberId)}
+          assignees={assigningItem.assignees}
           onSave={handleSaveAssignees}
           onClose={() => setAssigningItem(null)}
         />
