@@ -58,16 +58,30 @@ export class CampService {
       });
       const savedMember = await manager.save(CampMember, member);
 
-      const template = await manager
+      // 유저 커스텀 템플릿 우선, 없으면 시스템 템플릿 사용
+      let template = await manager
         .createQueryBuilder(ChecklistTemplate, 't')
         .leftJoinAndSelect('t.groups', 'g')
         .leftJoinAndSelect('g.items', 'i')
-        .where("t.owner_type = 'system'")
+        .where("t.owner_type = 'user'")
+        .andWhere('t.user_id = :userId', { userId: user.id })
         .andWhere('t.is_active = true')
-        .andWhere(':season = ANY(t.seasons)', { season: dto.season })
         .orderBy('g.sort_order', 'ASC')
         .addOrderBy('i.sort_order', 'ASC')
         .getOne();
+
+      if (!template) {
+        template = await manager
+          .createQueryBuilder(ChecklistTemplate, 't')
+          .leftJoinAndSelect('t.groups', 'g')
+          .leftJoinAndSelect('g.items', 'i')
+          .where("t.owner_type = 'system'")
+          .andWhere('t.is_active = true')
+          .andWhere(':season = ANY(t.seasons)', { season: dto.season })
+          .orderBy('g.sort_order', 'ASC')
+          .addOrderBy('i.sort_order', 'ASC')
+          .getOne();
+      }
 
       if (template) {
         for (const templateGroup of template.groups) {
@@ -79,7 +93,10 @@ export class CampService {
           });
           const savedGroup = await manager.save(CampChecklistGroup, campGroup);
 
-          for (const templateItem of templateGroup.items) {
+          const seasonItems = templateGroup.items.filter(
+            (ti) => ti.seasons.includes(dto.season),
+          );
+          for (const templateItem of seasonItems) {
             const campItem = manager.create(CampChecklistItem, {
               groupId: savedGroup.id,
               sourceItemId: templateItem.id,

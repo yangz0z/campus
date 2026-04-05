@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { ClerkProvider } from '@clerk/nextjs';
 import { koKR } from '@clerk/localizations';
+import Providers from '@/components/ui/Providers';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -30,7 +31,9 @@ export default function RootLayout({
             href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
           />
         </head>
-        <body className="font-sans">{children}</body>
+        <body className="font-sans">
+          <Providers>{children}</Providers>
+        </body>
       </html>
     </ClerkProvider>
   );

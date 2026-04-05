@@ -11,13 +11,22 @@ export default async function MypagePage() {
       <header className="mypage-header bg-[#F2F2F0] px-5 pb-3 pt-10">
         <div className="mypage-header-inner mx-auto flex max-w-sm items-center justify-between">
           <h1 className="mypage-title text-[22px] font-bold text-gray-900">내 캠프</h1>
-          <Link
-            href="/camp/new"
-            className="new-camp-btn flex items-center gap-1.5 rounded-full bg-primary-600 px-4 py-2 text-[13px] font-semibold text-white shadow-[0_2px_8px_rgba(22,163,74,0.3)] transition-colors duration-100 hover:bg-primary-700 active:bg-primary-800"
-          >
-            <span className="new-camp-btn-icon text-sm leading-none">🏕️</span>
-            새 캠프 만들기
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/template"
+              className="flex items-center gap-1.5 rounded-full border border-primary-200 bg-white px-3.5 py-2 text-[13px] font-semibold text-primary-700 transition-colors duration-100 hover:bg-primary-50 active:bg-primary-100"
+            >
+              <span className="text-sm leading-none">📋</span>
+              템플릿 관리
+            </Link>
+            <Link
+              href="/camp/new"
+              className="new-camp-btn flex items-center gap-1.5 rounded-full bg-primary-600 px-4 py-2 text-[13px] font-semibold text-white shadow-[0_2px_8px_rgba(22,163,74,0.3)] transition-colors duration-100 hover:bg-primary-700 active:bg-primary-800"
+            >
+              <span className="new-camp-btn-icon text-sm leading-none">🏕️</span>
+              새 캠프 만들기
+            </Link>
+          </div>
         </div>
       </header>
 
