@@ -26,9 +26,10 @@ interface UseChecklistActionsParams {
   myMemberId: string;
   members: CampMemberInfo[];
   initialGroups: ChecklistGroup[];
+  socketId: string | null;
 }
 
-export function useChecklistActions({ campId, myMemberId, members, initialGroups }: UseChecklistActionsParams) {
+export function useChecklistActions({ campId, myMemberId, members, initialGroups, socketId }: UseChecklistActionsParams) {
   const [groups, setGroups] = useState<ChecklistGroup[]>(initialGroups);
   const [showCompleted, setShowCompleted] = useState(false);
   const [delayedRemoveIds, setDelayedRemoveIds] = useState<Set<string>>(new Set());
@@ -70,14 +71,14 @@ export function useChecklistActions({ campId, myMemberId, members, initialGroups
         });
       }, 200);
     }
-    await toggleChecklistItem(campId, itemId, { isChecked: newValue });
+    await toggleChecklistItem(campId, itemId, { isChecked: newValue }, socketId ?? undefined);
   }
 
   async function handleDeleteItem(itemId: string) {
     setGroups((prev) =>
       prev.map((g) => ({ ...g, items: g.items.filter((i) => i.id !== itemId) })),
     );
-    await deleteChecklistItem(campId, itemId);
+    await deleteChecklistItem(campId, itemId, socketId ?? undefined);
   }
 
   async function handleUpdateItem(itemId: string, title: string, memo: string | null) {
@@ -87,13 +88,13 @@ export function useChecklistActions({ campId, myMemberId, members, initialGroups
         items: g.items.map((i) => (i.id === itemId ? { ...i, title, memo } : i)),
       })),
     );
-    await updateChecklistItem(campId, itemId, { title, memo });
+    await updateChecklistItem(campId, itemId, { title, memo }, socketId ?? undefined);
   }
 
   async function handleSaveAssignees(memberIds: string[]) {
     if (!assigningItem) return;
     const itemId = assigningItem.id;
-    await setItemAssignees(campId, itemId, { memberIds });
+    await setItemAssignees(campId, itemId, { memberIds }, socketId ?? undefined);
     setGroups((prev) =>
       prev.map((g) => ({
         ...g,
@@ -114,7 +115,7 @@ export function useChecklistActions({ campId, myMemberId, members, initialGroups
   }
 
   async function handleAddItem(groupId: string, title: string) {
-    const newItem = await createChecklistItem(campId, groupId, { title });
+    const newItem = await createChecklistItem(campId, groupId, { title }, socketId ?? undefined);
     setGroups((prev) =>
       prev.map((g) => (g.id === groupId ? { ...g, items: [...g.items, newItem] } : g)),
     );
@@ -124,12 +125,12 @@ export function useChecklistActions({ campId, myMemberId, members, initialGroups
     setGroups((prev) =>
       prev.map((g) => (g.id === groupId ? { ...g, title } : g)),
     );
-    await updateChecklistGroup(campId, groupId, title);
+    await updateChecklistGroup(campId, groupId, title, socketId ?? undefined);
   }
 
   async function handleDeleteGroup(groupId: string) {
     setGroups((prev) => prev.filter((g) => g.id !== groupId));
-    await deleteChecklistGroup(campId, groupId);
+    await deleteChecklistGroup(campId, groupId, socketId ?? undefined);
   }
 
   async function handleAddGroup() {
@@ -137,7 +138,7 @@ export function useChecklistActions({ campId, myMemberId, members, initialGroups
     if (!title) { setAddingGroup(false); return; }
     setAddingGroupLoading(true);
     try {
-      const newGroup = await createChecklistGroup(campId, { title });
+      const newGroup = await createChecklistGroup(campId, { title }, socketId ?? undefined);
       setGroups((prev) => [...prev, { ...newGroup, items: [] }]);
       setAddingGroup(false);
       setNewGroupTitle('');

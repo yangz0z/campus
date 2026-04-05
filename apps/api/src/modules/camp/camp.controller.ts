@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, ParseUUIDPipe, Patch, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Headers, HttpCode, Param, ParseUUIDPipe, Patch, Post, Put } from '@nestjs/common';
 import { User } from '../user/entities/user.entity';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Public } from '../auth/decorators/public.decorator';
@@ -91,8 +91,9 @@ export class CampController {
     @CurrentUser() user: User,
     @Param('campId', ParseUUIDPipe) campId: string,
     @Body() dto: CreateChecklistGroupDto,
+    @Headers('x-socket-id') socketId?: string,
   ) {
-    return this.campService.createChecklistGroup(user, campId, dto);
+    return this.campService.createChecklistGroup(user, campId, dto, socketId);
   }
 
   @Patch(':campId/checklist/groups/reorder')
@@ -101,8 +102,9 @@ export class CampController {
     @CurrentUser() user: User,
     @Param('campId', ParseUUIDPipe) campId: string,
     @Body() dto: ReorderChecklistGroupsDto,
+    @Headers('x-socket-id') socketId?: string,
   ) {
-    return this.campService.reorderChecklistGroups(user, campId, dto);
+    return this.campService.reorderChecklistGroups(user, campId, dto, socketId);
   }
 
   @Patch(':campId/checklist/groups/:groupId')
@@ -112,8 +114,9 @@ export class CampController {
     @Param('campId', ParseUUIDPipe) campId: string,
     @Param('groupId', ParseUUIDPipe) groupId: string,
     @Body('title') title: string,
+    @Headers('x-socket-id') socketId?: string,
   ) {
-    return this.campService.updateChecklistGroup(user, campId, groupId, title);
+    return this.campService.updateChecklistGroup(user, campId, groupId, title, socketId);
   }
 
   @Delete(':campId/checklist/groups/:groupId')
@@ -122,8 +125,9 @@ export class CampController {
     @CurrentUser() user: User,
     @Param('campId', ParseUUIDPipe) campId: string,
     @Param('groupId', ParseUUIDPipe) groupId: string,
+    @Headers('x-socket-id') socketId?: string,
   ) {
-    return this.campService.deleteChecklistGroup(user, campId, groupId);
+    return this.campService.deleteChecklistGroup(user, campId, groupId, socketId);
   }
 
   @Post(':campId/checklist/groups/:groupId/items')
@@ -132,8 +136,9 @@ export class CampController {
     @Param('campId', ParseUUIDPipe) campId: string,
     @Param('groupId', ParseUUIDPipe) groupId: string,
     @Body() dto: CreateChecklistItemDto,
+    @Headers('x-socket-id') socketId?: string,
   ) {
-    return this.campService.createChecklistItem(user, campId, groupId, dto);
+    return this.campService.createChecklistItem(user, campId, groupId, dto, socketId);
   }
 
   @Get(':campId/checklist')
@@ -151,8 +156,9 @@ export class CampController {
     @Param('campId', ParseUUIDPipe) campId: string,
     @Param('itemId', ParseUUIDPipe) itemId: string,
     @Body() dto: ToggleChecklistItemDto,
+    @Headers('x-socket-id') socketId?: string,
   ) {
-    return this.campService.toggleChecklistItem(user, campId, itemId, dto);
+    return this.campService.toggleChecklistItem(user, campId, itemId, dto, socketId);
   }
 
   @Patch(':campId/checklist/items/:itemId')
@@ -162,8 +168,9 @@ export class CampController {
     @Param('campId', ParseUUIDPipe) campId: string,
     @Param('itemId', ParseUUIDPipe) itemId: string,
     @Body() dto: UpdateChecklistItemDto,
+    @Headers('x-socket-id') socketId?: string,
   ) {
-    return this.campService.updateChecklistItem(user, campId, itemId, dto);
+    return this.campService.updateChecklistItem(user, campId, itemId, dto, socketId);
   }
 
   @Delete(':campId/checklist/items/:itemId')
@@ -172,8 +179,9 @@ export class CampController {
     @CurrentUser() user: User,
     @Param('campId', ParseUUIDPipe) campId: string,
     @Param('itemId', ParseUUIDPipe) itemId: string,
+    @Headers('x-socket-id') socketId?: string,
   ) {
-    return this.campService.deleteChecklistItem(user, campId, itemId);
+    return this.campService.deleteChecklistItem(user, campId, itemId, socketId);
   }
 
   @Patch(':campId/checklist/groups/:groupId/items/reorder')
@@ -183,8 +191,9 @@ export class CampController {
     @Param('campId', ParseUUIDPipe) campId: string,
     @Param('groupId', ParseUUIDPipe) groupId: string,
     @Body() dto: ReorderChecklistItemsDto,
+    @Headers('x-socket-id') socketId?: string,
   ) {
-    return this.campService.reorderChecklistItems(user, campId, groupId, dto);
+    return this.campService.reorderChecklistItems(user, campId, groupId, dto, socketId);
   }
 
   @Put(':campId/checklist/items/:itemId/assignees')
@@ -194,7 +203,8 @@ export class CampController {
     @Param('campId', ParseUUIDPipe) campId: string,
     @Param('itemId', ParseUUIDPipe) itemId: string,
     @Body() dto: SetItemAssigneesDto,
+    @Headers('x-socket-id') socketId?: string,
   ) {
-    return this.campService.setItemAssignees(user, campId, itemId, dto);
+    return this.campService.setItemAssignees(user, campId, itemId, dto, socketId);
   }
 }

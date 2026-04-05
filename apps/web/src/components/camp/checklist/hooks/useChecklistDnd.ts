@@ -9,9 +9,10 @@ interface UseChecklistDndParams {
   campId: string;
   groups: ChecklistGroup[];
   setGroups: React.Dispatch<React.SetStateAction<ChecklistGroup[]>>;
+  socketId: string | null;
 }
 
-export function useChecklistDnd({ campId, groups, setGroups }: UseChecklistDndParams) {
+export function useChecklistDnd({ campId, groups, setGroups, socketId }: UseChecklistDndParams) {
   return useSortableList<ChecklistGroup, ChecklistGroup['items'][number]>({
     groups,
     setGroups,
@@ -20,10 +21,10 @@ export function useChecklistDnd({ campId, groups, setGroups }: UseChecklistDndPa
     getItemId: (i) => i.id,
     setItems: (g, items) => ({ ...g, items }),
     onGroupsReordered: (reordered) => {
-      reorderChecklistGroups(campId, { groupIds: reordered.map((g) => g.id) });
+      reorderChecklistGroups(campId, { groupIds: reordered.map((g) => g.id) }, socketId ?? undefined);
     },
     onItemsReordered: (group) => {
-      reorderChecklistItems(campId, group.id, { itemIds: group.items.map((i) => i.id) });
+      reorderChecklistItems(campId, group.id, { itemIds: group.items.map((i) => i.id) }, socketId ?? undefined);
     },
   });
 }

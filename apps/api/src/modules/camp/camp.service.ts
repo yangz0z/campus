@@ -18,6 +18,8 @@ import { UpdateCampDto } from './dto/update-camp.dto';
 import { SetItemAssigneesDto } from './dto/set-item-assignees.dto';
 import { ToggleChecklistItemDto } from './dto/toggle-checklist-item.dto';
 import { ReorderChecklistItemsDto, ReorderChecklistGroupsDto } from './dto/reorder-checklist.dto';
+import { CampGateway } from './camp.gateway';
+import { SocketEvents } from '@campus/shared';
 
 @Injectable()
 export class CampService {
@@ -37,6 +39,7 @@ export class CampService {
     @InjectRepository(CampInvite)
     private readonly campInviteRepository: Repository<CampInvite>,
     private readonly dataSource: DataSource,
+    private readonly campGateway: CampGateway,
   ) {}
 
   async createCamp(user: User, dto: CreateCampDto): Promise<{ campId: string }> {
@@ -248,7 +251,7 @@ export class CampService {
     };
   }
 
-  async createChecklistGroup(user: User, campId: string, dto: CreateChecklistGroupDto) {
+  async createChecklistGroup(user: User, campId: string, dto: CreateChecklistGroupDto, socketId?: string) {
     const member = await this.campMemberRepository.findOne({ where: { campId, userId: user.id } });
     if (!member) throw new ForbiddenException();
 
@@ -264,10 +267,14 @@ export class CampService {
       sortOrder: (max ?? -1) + 1,
     });
     const saved = await this.campChecklistGroupRepository.save(group);
-    return { id: saved.id, title: saved.title, sortOrder: saved.sortOrder };
+    const result = { id: saved.id, title: saved.title, sortOrder: saved.sortOrder };
+
+    this.campGateway.emitToCamp(campId, SocketEvents.GROUP_CREATED, { campId, group: result }, socketId);
+
+    return result;
   }
 
-  async updateChecklistGroup(user: User, campId: string, groupId: string, title: string) {
+  async updateChecklistGroup(user: User, campId: string, groupId: string, title: string, socketId?: string) {
     const member = await this.campMemberRepository.findOne({ where: { campId, userId: user.id } });
     if (!member) throw new ForbiddenException();
 
@@ -276,9 +283,11 @@ export class CampService {
 
     group.title = title;
     await this.campChecklistGroupRepository.save(group);
+
+    this.campGateway.emitToCamp(campId, SocketEvents.GROUP_UPDATED, { campId, groupId, title }, socketId);
   }
 
-  async deleteChecklistGroup(user: User, campId: string, groupId: string) {
+  async deleteChecklistGroup(user: User, campId: string, groupId: string, socketId?: string) {
     const member = await this.campMemberRepository.findOne({ where: { campId, userId: user.id } });
     if (!member) throw new ForbiddenException();
 
@@ -290,9 +299,11 @@ export class CampService {
     if (group.items.length > 0) throw new BadRequestException('Group has items');
 
     await this.campChecklistGroupRepository.remove(group);
+
+    this.campGateway.emitToCamp(campId, SocketEvents.GROUP_DELETED, { campId, groupId }, socketId);
   }
 
-  async createChecklistItem(user: User, campId: string, groupId: string, dto: CreateChecklistItemDto) {
+  async createChecklistItem(user: User, campId: string, groupId: string, dto: CreateChecklistItemDto, socketId?: string) {
     const member = await this.campMemberRepository.findOne({ where: { campId, userId: user.id } });
     if (!member) throw new ForbiddenException();
 
@@ -313,7 +324,7 @@ export class CampService {
       memo: null,
     });
     const saved = await this.campChecklistItemRepository.save(item);
-    return {
+    const result = {
       id: saved.id,
       title: saved.title,
       isRequired: saved.isRequired,
@@ -322,9 +333,13 @@ export class CampService {
       assignees: [],
       isCheckedByMe: false,
     };
+
+    this.campGateway.emitToCamp(campId, SocketEvents.ITEM_CREATED, { campId, groupId, item: result }, socketId);
+
+    return result;
   }
 
-  async toggleChecklistItem(user: User, campId: string, itemId: string, dto: ToggleChecklistItemDto) {
+  async toggleChecklistItem(user: User, campId: string, itemId: string, dto: ToggleChecklistItemDto, socketId?: string) {
     const member = await this.campMemberRepository.findOne({ where: { campId, userId: user.id } });
     if (!member) throw new ForbiddenException();
 
@@ -345,9 +360,13 @@ export class CampService {
     assignee.isChecked = dto.isChecked;
     assignee.checkedAt = dto.isChecked ? new Date() : null;
     await this.campChecklistItemAssigneeRepository.save(assignee);
+
+    this.campGateway.emitToCamp(campId, SocketEvents.CHECK_TOGGLED, {
+      campId, itemId, memberId: member.id, isChecked: dto.isChecked,
+    }, socketId);
   }
 
-  async updateChecklistItem(user: User, campId: string, itemId: string, dto: UpdateChecklistItemDto) {
+  async updateChecklistItem(user: User, campId: string, itemId: string, dto: UpdateChecklistItemDto, socketId?: string) {
     const member = await this.campMemberRepository.findOne({ where: { campId, userId: user.id } });
     if (!member) throw new ForbiddenException();
 
@@ -360,9 +379,13 @@ export class CampService {
     item.title = dto.title;
     item.memo = dto.memo ?? null;
     await this.campChecklistItemRepository.save(item);
+
+    this.campGateway.emitToCamp(campId, SocketEvents.ITEM_UPDATED, {
+      campId, itemId, title: item.title, memo: item.memo,
+    }, socketId);
   }
 
-  async deleteChecklistItem(user: User, campId: string, itemId: string) {
+  async deleteChecklistItem(user: User, campId: string, itemId: string, socketId?: string) {
     const member = await this.campMemberRepository.findOne({ where: { campId, userId: user.id } });
     if (!member) throw new ForbiddenException();
 
@@ -373,6 +396,8 @@ export class CampService {
     if (!item || item.group.campId !== campId) throw new NotFoundException();
 
     await this.campChecklistItemRepository.remove(item);
+
+    this.campGateway.emitToCamp(campId, SocketEvents.ITEM_DELETED, { campId, itemId }, socketId);
   }
 
   async createCampInvite(user: User, campId: string): Promise<{ token: string }> {
@@ -420,7 +445,7 @@ export class CampService {
     return { campId };
   }
 
-  async setItemAssignees(user: User, campId: string, itemId: string, dto: SetItemAssigneesDto) {
+  async setItemAssignees(user: User, campId: string, itemId: string, dto: SetItemAssigneesDto, socketId?: string) {
     const member = await this.campMemberRepository.findOne({
       where: { campId, userId: user.id },
     });
@@ -440,9 +465,25 @@ export class CampService {
       );
       await this.campChecklistItemAssigneeRepository.save(assignees);
     }
+
+    // 브로드캐스트를 위해 assignee 정보를 user join으로 다시 조회
+    const savedAssignees = await this.campChecklistItemAssigneeRepository.find({
+      where: { itemId },
+      relations: ['member', 'member.user'],
+    });
+    this.campGateway.emitToCamp(campId, SocketEvents.ASSIGNEES_SET, {
+      campId,
+      itemId,
+      assignees: savedAssignees.map((a) => ({
+        memberId: a.memberId,
+        nickname: a.member.user.nickname,
+        profileImage: a.member.user.profileImage,
+        isChecked: a.isChecked,
+      })),
+    }, socketId);
   }
 
-  async reorderChecklistItems(user: User, campId: string, targetGroupId: string, dto: ReorderChecklistItemsDto) {
+  async reorderChecklistItems(user: User, campId: string, targetGroupId: string, dto: ReorderChecklistItemsDto, socketId?: string) {
     const member = await this.campMemberRepository.findOne({ where: { campId, userId: user.id } });
     if (!member) throw new ForbiddenException();
 
@@ -489,9 +530,13 @@ export class CampService {
         }
       }
     });
+
+    this.campGateway.emitToCamp(campId, SocketEvents.ITEMS_REORDERED, {
+      campId, targetGroupId, itemIds: dto.itemIds,
+    }, socketId);
   }
 
-  async reorderChecklistGroups(user: User, campId: string, dto: ReorderChecklistGroupsDto) {
+  async reorderChecklistGroups(user: User, campId: string, dto: ReorderChecklistGroupsDto, socketId?: string) {
     const member = await this.campMemberRepository.findOne({ where: { campId, userId: user.id } });
     if (!member) throw new ForbiddenException();
 
@@ -505,5 +550,9 @@ export class CampService {
         await manager.update(CampChecklistGroup, { id: dto.groupIds[i], campId }, { sortOrder: i });
       }
     });
+
+    this.campGateway.emitToCamp(campId, SocketEvents.GROUPS_REORDERED, {
+      campId, groupIds: dto.groupIds,
+    }, socketId);
   }
 }

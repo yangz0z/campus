@@ -64,32 +64,43 @@ export async function createCamp(data: CreateCampRequest): Promise<CreateCampRes
 export async function createChecklistGroup(
   campId: string,
   data: CreateChecklistGroupRequest,
+  socketId?: string,
 ): Promise<CreateChecklistGroupResponse> {
   return serverFetch<CreateChecklistGroupResponse>(`/camps/${campId}/checklist/groups`, {
     method: 'POST',
     body: JSON.stringify(data),
+    ...(socketId ? { headers: { 'x-socket-id': socketId } } : {}),
   });
 }
 
-export async function updateChecklistGroup(campId: string, groupId: string, title: string): Promise<void> {
+export async function updateChecklistGroup(campId: string, groupId: string, title: string, socketId?: string): Promise<void> {
   return serverFetch<void>(`/camps/${campId}/checklist/groups/${groupId}`, {
     method: 'PATCH',
     body: JSON.stringify({ title }),
+    ...(socketId ? { headers: { 'x-socket-id': socketId } } : {}),
   });
 }
 
-export async function deleteChecklistGroup(campId: string, groupId: string): Promise<void> {
-  return serverFetch<void>(`/camps/${campId}/checklist/groups/${groupId}`, { method: 'DELETE' });
+export async function deleteChecklistGroup(campId: string, groupId: string, socketId?: string): Promise<void> {
+  return serverFetch<void>(`/camps/${campId}/checklist/groups/${groupId}`, {
+    method: 'DELETE',
+    ...(socketId ? { headers: { 'x-socket-id': socketId } } : {}),
+  });
 }
 
 export async function createChecklistItem(
   campId: string,
   groupId: string,
   data: CreateChecklistItemRequest,
+  socketId?: string,
 ): Promise<CreateChecklistItemResponse> {
   return serverFetch<CreateChecklistItemResponse>(
     `/camps/${campId}/checklist/groups/${groupId}/items`,
-    { method: 'POST', body: JSON.stringify(data) },
+    {
+      method: 'POST',
+      body: JSON.stringify(data),
+      ...(socketId ? { headers: { 'x-socket-id': socketId } } : {}),
+    },
   );
 }
 
@@ -97,10 +108,12 @@ export async function toggleChecklistItem(
   campId: string,
   itemId: string,
   data: ToggleCheckRequest,
+  socketId?: string,
 ): Promise<void> {
   return serverFetch<void>(`/camps/${campId}/checklist/items/${itemId}/check`, {
     method: 'PATCH',
     body: JSON.stringify(data),
+    ...(socketId ? { headers: { 'x-socket-id': socketId } } : {}),
   });
 }
 
@@ -108,15 +121,20 @@ export async function updateChecklistItem(
   campId: string,
   itemId: string,
   data: UpdateChecklistItemRequest,
+  socketId?: string,
 ): Promise<void> {
   return serverFetch<void>(`/camps/${campId}/checklist/items/${itemId}`, {
     method: 'PATCH',
     body: JSON.stringify(data),
+    ...(socketId ? { headers: { 'x-socket-id': socketId } } : {}),
   });
 }
 
-export async function deleteChecklistItem(campId: string, itemId: string): Promise<void> {
-  return serverFetch<void>(`/camps/${campId}/checklist/items/${itemId}`, { method: 'DELETE' });
+export async function deleteChecklistItem(campId: string, itemId: string, socketId?: string): Promise<void> {
+  return serverFetch<void>(`/camps/${campId}/checklist/items/${itemId}`, {
+    method: 'DELETE',
+    ...(socketId ? { headers: { 'x-socket-id': socketId } } : {}),
+  });
 }
 
 export async function createCampInvite(campId: string): Promise<CreateCampInviteResponse> {
@@ -135,20 +153,24 @@ export async function reorderChecklistItems(
   campId: string,
   groupId: string,
   data: ReorderChecklistItemsRequest,
+  socketId?: string,
 ): Promise<void> {
   return serverFetch<void>(`/camps/${campId}/checklist/groups/${groupId}/items/reorder`, {
     method: 'PATCH',
     body: JSON.stringify(data),
+    ...(socketId ? { headers: { 'x-socket-id': socketId } } : {}),
   });
 }
 
 export async function reorderChecklistGroups(
   campId: string,
   data: ReorderChecklistGroupsRequest,
+  socketId?: string,
 ): Promise<void> {
   return serverFetch<void>(`/camps/${campId}/checklist/groups/reorder`, {
     method: 'PATCH',
     body: JSON.stringify(data),
+    ...(socketId ? { headers: { 'x-socket-id': socketId } } : {}),
   });
 }
 
@@ -156,9 +178,11 @@ export async function setItemAssignees(
   campId: string,
   itemId: string,
   data: SetItemAssigneesRequest,
+  socketId?: string,
 ): Promise<void> {
   return serverFetch<void>(`/camps/${campId}/checklist/items/${itemId}/assignees`, {
     method: 'PUT',
     body: JSON.stringify(data),
+    ...(socketId ? { headers: { 'x-socket-id': socketId } } : {}),
   });
 }

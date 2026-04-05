@@ -5,6 +5,8 @@ import type { CampMemberInfo, CampSummary, ChecklistGroup, ChecklistItem } from 
 import { SortableContainer } from '@/components/ui/dnd';
 import { useChecklistActions } from './hooks/useChecklistActions';
 import { useChecklistDnd } from './hooks/useChecklistDnd';
+import { useCampSocket } from './hooks/useCampSocket';
+import { useChecklistSync } from './hooks/useChecklistSync';
 import ChecklistHeader from './ChecklistHeader';
 import ChecklistGroupSection from './ChecklistGroupSection';
 import AssigneeSheet from './AssigneeSheet';
@@ -19,7 +21,8 @@ interface ChecklistClientProps {
 }
 
 export default function ChecklistClient({ campId, camp, initialGroups, myMemberId, members }: ChecklistClientProps) {
-  const actions = useChecklistActions({ campId, myMemberId, members, initialGroups });
+  const { socket, socketId } = useCampSocket(campId);
+  const actions = useChecklistActions({ campId, myMemberId, members, initialGroups, socketId });
   const {
     groups, setGroups,
     showCompleted, setShowCompleted,
@@ -32,7 +35,8 @@ export default function ChecklistClient({ campId, camp, initialGroups, myMemberI
     openAssigneePicker, startAddGroup, cancelAddGroup,
   } = actions;
 
-  const dnd = useChecklistDnd({ campId, groups, setGroups });
+  const dnd = useChecklistDnd({ campId, groups, setGroups, socketId });
+  useChecklistSync({ socket, setGroups });
 
   // 그룹 네비게이션
   const groupRefs = useRef<Map<string, HTMLElement>>(new Map());
