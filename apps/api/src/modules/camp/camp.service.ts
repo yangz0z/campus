@@ -17,6 +17,7 @@ import { UpdateChecklistItemDto } from './dto/update-checklist-item.dto';
 import { UpdateCampDto } from './dto/update-camp.dto';
 import { SetItemAssigneesDto } from './dto/set-item-assignees.dto';
 import { ToggleChecklistItemDto } from './dto/toggle-checklist-item.dto';
+import { ReorderChecklistItemsDto, ReorderChecklistGroupsDto } from './dto/reorder-checklist.dto';
 
 @Injectable()
 export class CampService {
@@ -422,5 +423,70 @@ export class CampService {
       );
       await this.campChecklistItemAssigneeRepository.save(assignees);
     }
+  }
+
+  async reorderChecklistItems(user: User, campId: string, targetGroupId: string, dto: ReorderChecklistItemsDto) {
+    const member = await this.campMemberRepository.findOne({ where: { campId, userId: user.id } });
+    if (!member) throw new ForbiddenException();
+
+    const targetGroup = await this.campChecklistGroupRepository.findOne({ where: { id: targetGroupId, campId } });
+    if (!targetGroup) throw new NotFoundException();
+
+    await this.dataSource.transaction(async (manager) => {
+      // 이동 대상 아이템들의 원래 groupId 수집 (소스 그룹 재정렬용)
+      const items = await manager.find(CampChecklistItem, {
+        where: dto.itemIds.map((id) => ({ id })),
+        select: ['id', 'groupId'],
+      });
+      const sourceGroupIds = new Set(
+        items.filter((i) => i.groupId !== targetGroupId).map((i) => i.groupId),
+      );
+
+      // 1) 대상 아이템들: 음수 sortOrder로 초기화 (unique constraint 회피)
+      for (let i = 0; i < dto.itemIds.length; i++) {
+        await manager.update(CampChecklistItem, { id: dto.itemIds[i] }, {
+          groupId: targetGroupId,
+          sortOrder: -(i + 1),
+        });
+      }
+      // 2) 대상 아이템들: 새 순서로 재할당
+      for (let i = 0; i < dto.itemIds.length; i++) {
+        await manager.update(CampChecklistItem, { id: dto.itemIds[i] }, { sortOrder: i });
+      }
+
+      // 3) 소스 그룹에서 빠진 아이템들의 sortOrder 재정렬
+      for (const sourceGroupId of sourceGroupIds) {
+        const remaining = await manager.find(CampChecklistItem, {
+          where: { groupId: sourceGroupId },
+          order: { sortOrder: 'ASC' },
+        });
+        for (let i = 0; i < remaining.length; i++) {
+          if (remaining[i].sortOrder !== i) {
+            await manager.update(CampChecklistItem, { id: remaining[i].id }, { sortOrder: -(i + 1) });
+          }
+        }
+        for (let i = 0; i < remaining.length; i++) {
+          if (remaining[i].sortOrder !== i) {
+            await manager.update(CampChecklistItem, { id: remaining[i].id }, { sortOrder: i });
+          }
+        }
+      }
+    });
+  }
+
+  async reorderChecklistGroups(user: User, campId: string, dto: ReorderChecklistGroupsDto) {
+    const member = await this.campMemberRepository.findOne({ where: { campId, userId: user.id } });
+    if (!member) throw new ForbiddenException();
+
+    await this.dataSource.transaction(async (manager) => {
+      // 음수로 초기화하여 unique constraint 회피
+      for (let i = 0; i < dto.groupIds.length; i++) {
+        await manager.update(CampChecklistGroup, { id: dto.groupIds[i], campId }, { sortOrder: -(i + 1) });
+      }
+      // 새 순서로 재할당
+      for (let i = 0; i < dto.groupIds.length; i++) {
+        await manager.update(CampChecklistGroup, { id: dto.groupIds[i], campId }, { sortOrder: i });
+      }
+    });
   }
 }

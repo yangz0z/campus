@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react';
 import type { AssigneeInfo, CampMemberInfo } from '@campus/shared';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import Avatar from '../shared/Avatar';
 
 type CheckStatus = 'none' | 'partial' | 'complete';
@@ -17,6 +19,7 @@ interface ChecklistItemData {
 
 interface ChecklistItemProps {
   item: ChecklistItemData;
+  groupId: string;
   isFirst: boolean;
   members: CampMemberInfo[];
   checkStatus: CheckStatus;
@@ -32,6 +35,7 @@ const SWIPE_THRESHOLD = 32;
 
 export default function ChecklistItem({
   item,
+  groupId,
   isFirst,
   members,
   checkStatus,
@@ -41,6 +45,24 @@ export default function ChecklistItem({
   onOpenPicker,
   showAssignees,
 }: ChecklistItemProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
+    id: item.id,
+    data: { type: 'item', groupId },
+  });
+
+  const sortableStyle: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0 : 1,
+  };
+
   const [isEditing, setIsEditing] = useState(false);
   const [pendingTitle, setPendingTitle] = useState('');
   const [pendingMemo, setPendingMemo] = useState('');
@@ -114,7 +136,7 @@ export default function ChecklistItem({
   };
 
   return (
-    <div className="checklist-item group relative">
+    <div ref={setNodeRef} style={sortableStyle} {...attributes} {...listeners} className="checklist-item group relative">
       {!isFirst && <div className="checklist-item-divider mx-5 h-px bg-gray-100" />}
 
       <div

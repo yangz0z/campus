@@ -10,6 +10,7 @@ import { ToggleChecklistItemDto } from './dto/toggle-checklist-item.dto';
 import { UpdateChecklistItemDto } from './dto/update-checklist-item.dto';
 import { UpdateCampDto } from './dto/update-camp.dto';
 import { SetItemAssigneesDto } from './dto/set-item-assignees.dto';
+import { ReorderChecklistItemsDto, ReorderChecklistGroupsDto } from './dto/reorder-checklist.dto';
 
 @Controller('camps')
 export class CampController {
@@ -94,6 +95,16 @@ export class CampController {
     return this.campService.createChecklistGroup(user, campId, dto);
   }
 
+  @Patch(':campId/checklist/groups/reorder')
+  @HttpCode(204)
+  reorderChecklistGroups(
+    @CurrentUser() user: User,
+    @Param('campId', ParseUUIDPipe) campId: string,
+    @Body() dto: ReorderChecklistGroupsDto,
+  ) {
+    return this.campService.reorderChecklistGroups(user, campId, dto);
+  }
+
   @Patch(':campId/checklist/groups/:groupId')
   @HttpCode(204)
   updateChecklistGroup(
@@ -163,6 +174,17 @@ export class CampController {
     @Param('itemId', ParseUUIDPipe) itemId: string,
   ) {
     return this.campService.deleteChecklistItem(user, campId, itemId);
+  }
+
+  @Patch(':campId/checklist/groups/:groupId/items/reorder')
+  @HttpCode(204)
+  reorderChecklistItems(
+    @CurrentUser() user: User,
+    @Param('campId', ParseUUIDPipe) campId: string,
+    @Param('groupId', ParseUUIDPipe) groupId: string,
+    @Body() dto: ReorderChecklistItemsDto,
+  ) {
+    return this.campService.reorderChecklistItems(user, campId, groupId, dto);
   }
 
   @Put(':campId/checklist/items/:itemId/assignees')

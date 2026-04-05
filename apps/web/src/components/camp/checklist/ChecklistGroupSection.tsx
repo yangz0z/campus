@@ -3,6 +3,11 @@
 import { useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import type { AssigneeInfo, CampMemberInfo, ChecklistGroup } from '@campus/shared';
+import { useSortable } from '@dnd-kit/sortable';
+import { useDroppable } from '@dnd-kit/core';
+import { CSS } from '@dnd-kit/utilities';
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { getGroupDroppableId } from './hooks/useChecklistDnd';
 import ChecklistItem from './ChecklistItem';
 
 type CheckStatus = 'none' | 'partial' | 'complete';
@@ -22,6 +27,7 @@ interface ChecklistGroupSectionProps {
   showCompleted: boolean;
   delayedRemoveIds: Set<string>;
   members: CampMemberInfo[];
+  isDragging?: boolean;
   onUpdateGroup: (title: string) => void;
   onDeleteGroup: () => void;
   onToggleCheck: (itemId: string, currentValue: boolean) => void;
@@ -39,6 +45,7 @@ export default function ChecklistGroupSection({
   showCompleted,
   delayedRemoveIds,
   members,
+  isDragging,
   onUpdateGroup,
   onDeleteGroup,
   onToggleCheck,
@@ -56,6 +63,28 @@ export default function ChecklistGroupSection({
   const [newItemTitle, setNewItemTitle] = useState('');
   const [addingItem, setAddingItem] = useState(false);
   const itemInputRef = useRef<HTMLInputElement>(null);
+
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+  } = useSortable({
+    id: group.id,
+    data: { type: 'group' },
+  });
+
+  const { setNodeRef: setDroppableRef } = useDroppable({
+    id: getGroupDroppableId(group.id),
+    data: { type: 'group-container', groupId: group.id },
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0 : 1,
+  };
 
   const visibleItems = showCompleted
     ? group.items
@@ -101,10 +130,18 @@ export default function ChecklistGroupSection({
 
   return (
     <section
-      ref={(el) => setGroupRef(group.id, el)}
+      ref={(el) => {
+        setNodeRef(el);
+        setGroupRef(group.id, el);
+      }}
+      style={style}
       className="checklist-group group/header"
     >
-      <div className="checklist-group-header mb-2 flex items-center justify-between px-1">
+      <div
+        className="checklist-group-header mb-2 flex items-center justify-between px-1"
+        {...attributes}
+        {...listeners}
+      >
         <div className="flex min-w-0 flex-1 items-center gap-1.5">
           <button
             type="button"
@@ -163,10 +200,11 @@ export default function ChecklistGroupSection({
         </div>
       </div>
 
-      <div className="checklist-group-card rounded-2xl bg-white shadow-[0_2px_12px_rgba(0,0,0,0.06)]">
+      <div ref={setDroppableRef} className="checklist-group-card rounded-2xl bg-white shadow-[0_2px_12px_rgba(0,0,0,0.06)]">
       <div className={`transition-all duration-200 ease-in-out ${
         isCollapsed ? 'max-h-0 overflow-hidden opacity-0' : 'max-h-[2000px] overflow-visible opacity-100'
       }`}>
+        <SortableContext items={visibleItems.map((i) => i.id)} strategy={verticalListSortingStrategy}>
         <AnimatePresence initial={false}>
           {visibleItems.map((item, i) => (
             <motion.div
@@ -177,6 +215,7 @@ export default function ChecklistGroupSection({
             >
               <ChecklistItem
                 item={item}
+                groupId={group.id}
                 isFirst={i === 0}
                 members={members}
                 checkStatus={getCheckStatus(item)}
@@ -189,6 +228,7 @@ export default function ChecklistGroupSection({
             </motion.div>
           ))}
         </AnimatePresence>
+        </SortableContext>
 
         {/* 아이템 추가 */}
         {isAddingItem ? (

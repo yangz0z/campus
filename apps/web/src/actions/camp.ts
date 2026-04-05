@@ -18,6 +18,8 @@ import type {
   ToggleCheckRequest,
   UpdateCampRequest,
   UpdateChecklistItemRequest,
+  ReorderChecklistItemsRequest,
+  ReorderChecklistGroupsRequest,
 } from '@campus/shared';
 import { serverFetch } from '@/lib/api-server';
 
@@ -127,6 +129,27 @@ export async function getCampInviteInfo(token: string): Promise<GetCampInviteInf
 
 export async function acceptCampInvite(token: string): Promise<AcceptCampInviteResponse> {
   return serverFetch<AcceptCampInviteResponse>(`/camps/invite/${token}/accept`, { method: 'POST' });
+}
+
+export async function reorderChecklistItems(
+  campId: string,
+  groupId: string,
+  data: ReorderChecklistItemsRequest,
+): Promise<void> {
+  return serverFetch<void>(`/camps/${campId}/checklist/groups/${groupId}/items/reorder`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function reorderChecklistGroups(
+  campId: string,
+  data: ReorderChecklistGroupsRequest,
+): Promise<void> {
+  return serverFetch<void>(`/camps/${campId}/checklist/groups/reorder`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
 }
 
 export async function setItemAssignees(

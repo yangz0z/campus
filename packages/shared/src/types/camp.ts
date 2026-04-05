@@ -132,3 +132,11 @@ export interface GetCampInviteInfoResponse {
 export interface AcceptCampInviteResponse {
   campId: string;
 }
+
+export interface ReorderChecklistItemsRequest {
+  itemIds: string[];
+}
+
+export interface ReorderChecklistGroupsRequest {
+  groupIds: string[];
+}
