@@ -1,9 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { CampMemberInfo, CampSummary } from '@campus/shared';
-import { DndContext, DragOverlay } from '@dnd-kit/core';
-import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import type { CampMemberInfo, CampSummary, ChecklistGroup, ChecklistItem } from '@campus/shared';
+import { SortableContainer } from '@/components/ui/dnd';
 import { useChecklistActions } from './hooks/useChecklistActions';
 import { useChecklistDnd } from './hooks/useChecklistDnd';
 import ChecklistHeader from './ChecklistHeader';
@@ -34,11 +33,6 @@ export default function ChecklistClient({ campId, camp, initialGroups, myMemberI
   } = actions;
 
   const dnd = useChecklistDnd({ campId, groups, setGroups });
-  const {
-    sensors, collisionDetection,
-    activeItem, activeGroup,
-    handleDragStart, handleDragOver, handleDragEnd,
-  } = dnd;
 
   // 그룹 네비게이션
   const groupRefs = useRef<Map<string, HTMLElement>>(new Map());
@@ -89,36 +83,43 @@ export default function ChecklistClient({ campId, camp, initialGroups, myMemberI
         onToggleCompleted={() => setShowCompleted((v) => !v)}
       />
 
-      <DndContext
-        sensors={sensors}
-        collisionDetection={collisionDetection}
-        onDragStart={handleDragStart}
-        onDragOver={handleDragOver}
-        onDragEnd={handleDragEnd}
+      <SortableContainer<ChecklistGroup, ChecklistItem>
+        dnd={dnd}
+        groupIds={groups.map((g) => g.id)}
+        renderItemOverlay={(item) => (
+          <div className="rounded-xl bg-white px-5 py-2.5 shadow-lg ring-1 ring-black/5">
+            <p className="text-[15px] text-gray-900">{item.title}</p>
+            {item.memo && <p className="mt-0.5 truncate text-[12px] text-gray-400">{item.memo}</p>}
+          </div>
+        )}
+        renderGroupOverlay={(group) => (
+          <div className="rounded-xl bg-gray-50 px-4 py-2 shadow-lg ring-1 ring-black/5">
+            <p className="text-[12px] font-semibold text-gray-600">{group.title}</p>
+            <p className="text-[11px] text-gray-400">{group.items.length}개 항목</p>
+          </div>
+        )}
       >
         <main className="checklist-content mx-auto max-w-sm space-y-2.5 px-4 pb-24 pt-3">
-          <SortableContext items={groups.map((g) => g.id)} strategy={verticalListSortingStrategy}>
-            {groups.map((group) => (
-              <ChecklistGroupSection
-                key={group.id}
-                group={group}
-                isCollapsed={collapsedGroupIds.has(group.id)}
-                onToggleCollapse={() => toggleCollapse(group.id)}
-                showCompleted={showCompleted}
-                delayedRemoveIds={delayedRemoveIds}
-                members={members}
-                isDragging={dnd.activeId === group.id}
-                onUpdateGroup={(title) => handleUpdateGroup(group.id, title)}
-                onDeleteGroup={() => handleDeleteGroup(group.id)}
-                onToggleCheck={handleToggleCheck}
-                onDeleteItem={handleDeleteItem}
-                onUpdateItem={handleUpdateItem}
-                onOpenPicker={(itemId, assignees) => openAssigneePicker(itemId, assignees)}
-                onAddItem={handleAddItem}
-                setGroupRef={setGroupRef}
-              />
-            ))}
-          </SortableContext>
+          {groups.map((group) => (
+            <ChecklistGroupSection
+              key={group.id}
+              group={group}
+              isCollapsed={collapsedGroupIds.has(group.id)}
+              onToggleCollapse={() => toggleCollapse(group.id)}
+              showCompleted={showCompleted}
+              delayedRemoveIds={delayedRemoveIds}
+              members={members}
+              isDragging={dnd.activeId === group.id}
+              onUpdateGroup={(title) => handleUpdateGroup(group.id, title)}
+              onDeleteGroup={() => handleDeleteGroup(group.id)}
+              onToggleCheck={handleToggleCheck}
+              onDeleteItem={handleDeleteItem}
+              onUpdateItem={handleUpdateItem}
+              onOpenPicker={(itemId, assignees) => openAssigneePicker(itemId, assignees)}
+              onAddItem={handleAddItem}
+              setGroupRef={setGroupRef}
+            />
+          ))}
 
           {/* 그룹 추가 */}
           {addingGroup ? (
@@ -166,22 +167,7 @@ export default function ChecklistClient({ campId, camp, initialGroups, myMemberI
             </button>
           )}
         </main>
-
-        <DragOverlay dropAnimation={null}>
-          {activeItem && (
-            <div className="rounded-xl bg-white px-5 py-2.5 shadow-lg ring-1 ring-black/5">
-              <p className="text-[15px] text-gray-900">{activeItem.title}</p>
-              {activeItem.memo && <p className="mt-0.5 truncate text-[12px] text-gray-400">{activeItem.memo}</p>}
-            </div>
-          )}
-          {activeGroup && (
-            <div className="rounded-xl bg-gray-50 px-4 py-2 shadow-lg ring-1 ring-black/5">
-              <p className="text-[12px] font-semibold text-gray-600">{activeGroup.title}</p>
-              <p className="text-[11px] text-gray-400">{activeGroup.items.length}개 항목</p>
-            </div>
-          )}
-        </DragOverlay>
-      </DndContext>
+      </SortableContainer>
 
       <GroupNavFAB
         groupCount={groups.length}

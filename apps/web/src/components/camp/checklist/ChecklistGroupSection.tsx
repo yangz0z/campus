@@ -3,11 +3,7 @@
 import { useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import type { AssigneeInfo, CampMemberInfo, ChecklistGroup } from '@campus/shared';
-import { useSortable } from '@dnd-kit/sortable';
-import { useDroppable } from '@dnd-kit/core';
-import { CSS } from '@dnd-kit/utilities';
-import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { getGroupDroppableId } from './hooks/useChecklistDnd';
+import { useSortableStyle, SortableGroupDropzone } from '@/components/ui/dnd';
 import ChecklistItem from './ChecklistItem';
 
 type CheckStatus = 'none' | 'partial' | 'complete';
@@ -68,23 +64,11 @@ export default function ChecklistGroupSection({
     attributes,
     listeners,
     setNodeRef,
-    transform,
-    transition,
-  } = useSortable({
-    id: group.id,
-    data: { type: 'group' },
-  });
-
-  const { setNodeRef: setDroppableRef } = useDroppable({
-    id: getGroupDroppableId(group.id),
-    data: { type: 'group-container', groupId: group.id },
-  });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0 : 1,
-  };
+    style,
+  } = useSortableStyle(
+    { id: group.id, data: { type: 'group' } },
+    { dragOpacity: isDragging ? 0 : 1 },
+  );
 
   const visibleItems = showCompleted
     ? group.items
@@ -200,11 +184,15 @@ export default function ChecklistGroupSection({
         </div>
       </div>
 
-      <div ref={setDroppableRef} className="checklist-group-card rounded-2xl bg-white shadow-[0_2px_12px_rgba(0,0,0,0.06)]">
+      <SortableGroupDropzone
+        groupId={group.id}
+        itemIds={visibleItems.map((i) => i.id)}
+        data={{ groupId: group.id }}
+        className="checklist-group-card rounded-2xl bg-white shadow-[0_2px_12px_rgba(0,0,0,0.06)]"
+      >
       <div className={`transition-all duration-200 ease-in-out ${
         isCollapsed ? 'max-h-0 overflow-hidden opacity-0' : 'max-h-[2000px] overflow-visible opacity-100'
       }`}>
-        <SortableContext items={visibleItems.map((i) => i.id)} strategy={verticalListSortingStrategy}>
         <AnimatePresence initial={false}>
           {visibleItems.map((item, i) => (
             <motion.div
@@ -228,7 +216,6 @@ export default function ChecklistGroupSection({
             </motion.div>
           ))}
         </AnimatePresence>
-        </SortableContext>
 
         {/* 아이템 추가 */}
         {isAddingItem ? (
@@ -277,7 +264,7 @@ export default function ChecklistGroupSection({
           </div>
         )}
       </div>
-      </div>
+      </SortableGroupDropzone>
     </section>
   );
 }

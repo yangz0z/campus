@@ -2,8 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import type { AssigneeInfo, CampMemberInfo } from '@campus/shared';
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
+import { useSortableStyle } from '@/components/ui/dnd';
 import Avatar from '../shared/Avatar';
 
 type CheckStatus = 'none' | 'partial' | 'complete';
@@ -49,19 +48,11 @@ export default function ChecklistItem({
     attributes,
     listeners,
     setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({
-    id: item.id,
-    data: { type: 'item', groupId },
-  });
-
-  const sortableStyle: React.CSSProperties = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0 : 1,
-  };
+    style: sortableStyle,
+  } = useSortableStyle(
+    { id: item.id, data: { type: 'item', groupId } },
+    { dragOpacity: 0 },
+  );
 
   const [isEditing, setIsEditing] = useState(false);
   const [pendingTitle, setPendingTitle] = useState('');
