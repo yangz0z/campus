@@ -1,10 +1,12 @@
 FROM node:22-alpine AS base
 RUN corepack enable && corepack prepare pnpm@10.29.3 --activate
+ENV PNPM_HOME="/root/.local/share/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN pnpm add -g turbo@^2.4.0
 WORKDIR /app
 
 # --- prune: extract api and its dependencies ---
 FROM base AS pruner
-RUN pnpm add -g turbo@^2.4.0
 COPY . .
 RUN turbo prune api --docker
 
@@ -25,11 +27,9 @@ WORKDIR /app
 RUN addgroup --system --gid 1001 nestjs && \
     adduser --system --uid 1001 nestjs
 
-COPY --from=builder --chown=nestjs:nestjs /app/apps/api/dist ./dist
-COPY --from=builder --chown=nestjs:nestjs /app/apps/api/node_modules ./node_modules
-COPY --from=builder --chown=nestjs:nestjs /app/apps/api/package.json ./package.json
+COPY --from=builder --chown=nestjs:nestjs /app/ .
 
 USER nestjs
 EXPOSE 4000
 ENV NODE_ENV=production
-CMD ["node", "dist/main"]
+CMD ["node", "apps/api/dist/main"]
