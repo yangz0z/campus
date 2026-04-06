@@ -53,7 +53,7 @@ export default function DateRangeCalendar({ startDate, endDate, onChange, minDat
   }, [viewDate]);
 
   function handleDateClick(date: string) {
-    if (date < min) return;
+    if (min && date < min) return;
 
     // 범위가 이미 잡혀있거나, startDate만 있는데 클릭 날짜가 더 이전이면 → 리셋
     if (startDate && endDate) {
@@ -180,7 +180,7 @@ export default function DateRangeCalendar({ startDate, endDate, onChange, minDat
           className="calendar-grid grid grid-cols-7"
         >
           {calendarDays.map(({ date, day, inMonth }) => {
-            const isDisabled = !inMonth || date < min;
+            const isDisabled = !inMonth || (min !== null && date < min);
             const isStart = date === startDate;
             const isEnd = date === endDate;
             const isInRange = startDate && endDate && date > startDate && date < endDate;
