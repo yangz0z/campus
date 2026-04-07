@@ -5,6 +5,8 @@ import Link from 'next/link';
 import type { CampSummary } from '@campus/shared';
 import { formatDateShort, calcNights } from '@campus/shared';
 import { createCampInvite } from '@/actions/camp';
+import { useToast } from '@/components/ui/Toast';
+import { useAction } from '@/hooks/useAction';
 
 interface ChecklistHeaderProps {
   campId: string;
@@ -16,14 +18,15 @@ interface ChecklistHeaderProps {
 export default function ChecklistHeader({ campId, camp, showCompleted, onToggleCompleted }: ChecklistHeaderProps) {
   const [showMeta, setShowMeta] = useState(false);
   const [inviting, setInviting] = useState(false);
-  const [showToast, setShowToast] = useState(false);
+  const { toast } = useToast();
+  const action = useAction();
 
   async function handleCopyInviteLink() {
     if (inviting) return;
     setInviting(true);
-    try {
-      const { token } = await createCampInvite(campId);
-      const url = `${window.location.origin}/invite/${token}`;
+    const result = await action(() => createCampInvite(campId), '초대 링크 생성에 실패했어요.');
+    if (result.ok) {
+      const url = `${window.location.origin}/invite/${result.data.token}`;
       if (navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(url);
       } else {
@@ -36,11 +39,9 @@ export default function ChecklistHeader({ campId, camp, showCompleted, onToggleC
         document.execCommand('copy');
         document.body.removeChild(textarea);
       }
-      setShowToast(true);
-      setTimeout(() => setShowToast(false), 3500);
-    } finally {
-      setInviting(false);
+      toast('초대링크가 복사되었습니다. 링크를 공유해 캠프에 초대해보세요.');
     }
+    setInviting(false);
   }
 
   return (
@@ -139,17 +140,6 @@ export default function ChecklistHeader({ campId, camp, showCompleted, onToggleC
           </div>
         )}
       </div>
-      {showToast && (
-        <div className="pointer-events-none fixed bottom-24 left-1/2 z-50 w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 animate-fade-in-up">
-          <div className="flex items-start gap-3 rounded-2xl bg-gray-900 px-4 py-3.5 shadow-lg">
-            <span className="mt-0.5 text-base leading-none">🔗</span>
-            <p className="text-[13px] leading-relaxed text-white">
-              초대링크가 복사되었습니다.<br />
-              링크를 공유해 캠프에 초대해보세요.
-            </p>
-          </div>
-        </div>
-      )}
     </header>
   );
 }

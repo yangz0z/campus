@@ -9,6 +9,7 @@ import StepDate from './steps/StepDate';
 import StepConfirm from './steps/StepConfirm';
 import { SEASONS } from '@/constants/home';
 import { updateCamp } from '@/actions/camp';
+import { useAction } from '@/hooks/useAction';
 
 const easeOut = [0.22, 1, 0.36, 1] as const;
 
@@ -36,7 +37,7 @@ export default function CampEditSheet({ camp, onClose, onUpdated }: CampEditShee
     season: camp.season,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const action = useAction();
 
   const activeRef = useRef<HTMLDivElement>(null);
 
@@ -58,15 +59,17 @@ export default function CampEditSheet({ camp, onClose, onUpdated }: CampEditShee
   async function handleConfirm() {
     if (!formData.season) return;
     setIsSubmitting(true);
-    setError(null);
-    try {
-      await updateCamp(camp.id, {
+    const result = await action(
+      () => updateCamp(camp.id, {
         title: formData.title,
         location: formData.location || null,
         startDate: formData.startDate,
         endDate: formData.endDate,
         season: formData.season as Season,
-      });
+      }),
+      '수정에 실패했어요. 다시 시도해 주세요.',
+    );
+    if (result.ok) {
       onUpdated({
         ...camp,
         title: formData.title,
@@ -75,11 +78,8 @@ export default function CampEditSheet({ camp, onClose, onUpdated }: CampEditShee
         endDate: formData.endDate,
         season: formData.season as Season,
       });
-    } catch (e) {
-      setError(e instanceof Error ? e.message : '수정에 실패했어요. 다시 시도해 주세요.');
-    } finally {
-      setIsSubmitting(false);
     }
+    setIsSubmitting(false);
   }
 
   return (
@@ -206,7 +206,6 @@ export default function CampEditSheet({ camp, onClose, onUpdated }: CampEditShee
                     formData={formData}
                     onConfirm={handleConfirm}
                     isSubmitting={isSubmitting}
-                    error={error}
                     skipIntro
                     submitLabel="수정 완료"
                   />

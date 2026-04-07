@@ -8,6 +8,7 @@ import type { GetMyTemplateResponse } from '@campus/shared';
 import { saveMyTemplate } from '@/actions/template';
 import { useToast } from '@/components/ui/Toast';
 import { useConfirm } from '@/components/ui/Confirm';
+import { useAction } from '@/hooks/useAction';
 import {
   GripHandle, SortableContainer, SortableGroupDropzone,
   useSortableList, useSortableStyle,
@@ -304,6 +305,7 @@ export default function TemplateEditorClient({ initialData }: Props) {
   const router = useRouter();
   const { toast } = useToast();
   const { confirm } = useConfirm();
+  const action = useAction();
 
   const [groups, setGroups] = useState<LocalGroup[]>(() => toLocal(initialData));
   const [savedSnapshot, setSavedSnapshot] = useState<string>(() => JSON.stringify(toLocal(initialData)));
@@ -397,21 +399,21 @@ export default function TemplateEditorClient({ initialData }: Props) {
 
   const handleSave = useCallback(async () => {
     setSaving(true);
-    try {
-      await saveMyTemplate({
+    const result = await action(
+      () => saveMyTemplate({
         groups: groups.map((g) => ({
           title: g.title,
           items: g.items.map((i) => ({ title: i.title, seasons: i.seasons })),
         })),
-      });
+      }),
+      '저장에 실패했습니다. 다시 시도해 주세요.',
+    );
+    if (result.ok) {
       setSavedSnapshot(JSON.stringify(groups));
       toast('저장되었습니다');
-    } catch {
-      toast('저장에 실패했습니다. 다시 시도해 주세요.');
-    } finally {
-      setSaving(false);
     }
-  }, [groups, toast]);
+    setSaving(false);
+  }, [groups, toast, action]);
 
   const handleDiscard = useCallback(async () => {
     const ok = await confirm({ title: '변경 사항 되돌리기', description: '저장하지 않은 변경 사항이 모두 사라집니다. 되돌릴까요?', confirmLabel: '되돌리기' });

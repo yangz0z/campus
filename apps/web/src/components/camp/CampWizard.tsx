@@ -11,6 +11,7 @@ import StepDate from './steps/StepDate';
 import StepConfirm from './steps/StepConfirm';
 import { createCamp } from '@/actions/camp';
 import { SEASONS } from '@/constants/home';
+import { useAction } from '@/hooks/useAction';
 
 const easeOut = [0.22, 1, 0.36, 1] as const;
 
@@ -33,8 +34,8 @@ export default function CampWizard() {
   });
   const [isCompleted, setIsCompleted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [campId, setCampId] = useState<string | null>(null);
+  const action = useAction();
   const activeRef = useRef<HTMLDivElement>(null);
   const prevStepRef = useRef(currentStep);
   const router = useRouter();
@@ -63,25 +64,22 @@ export default function CampWizard() {
 
   const handleConfirm = async () => {
     setIsSubmitting(true);
-    setError(null);
-    try {
-      const result = await createCamp({
+    const result = await action(
+      () => createCamp({
         title: formData.title,
         location: formData.location || null,
         startDate: formData.startDate,
         endDate: formData.endDate,
         season: formData.season as Season,
-      });
-      setCampId(result.campId);
+      }),
+      '캠프 생성에 실패했어요. 다시 시도해 주세요.',
+    );
+    if (result.ok) {
+      setCampId(result.data.campId);
       setIsCompleted(true);
-      setTimeout(() => {
-        router.push(`/camp/${result.campId}/checklist`);
-      }, 2000);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : '캠프 생성에 실패했어요. 다시 시도해 주세요.');
-    } finally {
-      setIsSubmitting(false);
+      setTimeout(() => router.push(`/camp/${result.data.campId}/checklist`), 2000);
     }
+    setIsSubmitting(false);
   };
 
   return (
@@ -206,7 +204,7 @@ export default function CampWizard() {
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.5, ease: easeOut }}
             >
-              <StepConfirm formData={formData} onConfirm={handleConfirm} isSubmitting={isSubmitting} error={error} />
+              <StepConfirm formData={formData} onConfirm={handleConfirm} isSubmitting={isSubmitting} />
             </motion.div>
           )}
 
