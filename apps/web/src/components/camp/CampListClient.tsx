@@ -137,7 +137,7 @@ function CampRowClient({ camp, index, isLast, onEdit, onDelete }: CampRowClientP
         <button
           type="button"
           onClick={onEdit}
-          className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-full transition-colors hover:bg-primary-50 active:bg-primary-100"
+          className="flex h-7 w-7 items-center justify-center rounded-full transition-colors hover:bg-primary-50 active:bg-primary-100"
           title="수정"
         >
           <svg width="13" height="13" viewBox="0 0 15 15" fill="none" className="text-primary-500">
@@ -147,7 +147,7 @@ function CampRowClient({ camp, index, isLast, onEdit, onDelete }: CampRowClientP
         <button
           type="button"
           onClick={onDelete}
-          className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-full transition-colors hover:bg-red-50 active:bg-red-100"
+          className="flex h-7 w-7 items-center justify-center rounded-full transition-colors hover:bg-red-50 active:bg-red-100"
           title="삭제"
         >
           <svg width="13" height="13" viewBox="0 0 14 14" fill="none" className="text-red-400">

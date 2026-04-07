@@ -125,13 +125,13 @@ function SortableGroup({
         <div className="flex shrink-0 items-center gap-1">
           <button
             onClick={() => onAddItemStart(group.localId)}
-            className="cursor-pointer rounded-lg px-2 py-1 text-[12px] font-semibold text-primary-600 transition-colors hover:bg-primary-50"
+            className="rounded-lg px-2 py-1 text-[12px] font-semibold text-primary-600 transition-colors hover:bg-primary-50"
           >
             + 아이템
           </button>
           <button
             onClick={() => onDeleteGroup(group.localId)}
-            className="cursor-pointer rounded-lg p-1.5 text-gray-300 transition-colors hover:bg-red-50 hover:text-red-500"
+            className="rounded-lg p-1.5 text-gray-300 transition-colors hover:bg-red-50 hover:text-red-500"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M3 6h18" /><path d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2" /><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
@@ -236,7 +236,7 @@ function SortableItem({ item, groupLocalId, isEditing, onEdit, onTitleSave, onDe
             <button
               key={s}
               onClick={() => onSeasonToggle(item.localId, s)}
-              className={`cursor-pointer rounded-md px-1 py-0.5 text-[11px] transition-colors ${active ? badge.active : badge.inactive}`}
+              className={`rounded-md px-1 py-0.5 text-[11px] transition-colors ${active ? badge.active : badge.inactive}`}
               title={`${SEASON_TABS.find((t) => t.id === s)?.name}`}
             >
               {badge.icon}
@@ -247,7 +247,7 @@ function SortableItem({ item, groupLocalId, isEditing, onEdit, onTitleSave, onDe
 
       <button
         onClick={() => onDelete(item.localId)}
-        className="shrink-0 cursor-pointer rounded-lg p-1 text-gray-300 transition-colors hover:bg-red-50 hover:text-red-500"
+        className="shrink-0 rounded-lg p-1 text-gray-300 transition-colors hover:bg-red-50 hover:text-red-500"
       >
         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
@@ -431,12 +431,12 @@ export default function TemplateEditorClient({ initialData }: Props) {
       {/* Header */}
       <header className="sticky top-0 z-10 bg-[#F2F2F0] px-5 pb-3 pt-10">
         <div className="flex items-center gap-3">
-          <button onClick={handleBack} className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-gray-200">
+          <button onClick={handleBack} className="flex h-8 w-8 items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-gray-200">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
           </button>
           <h1 className="flex-1 text-[20px] font-bold text-gray-900">나의 체크리스트 템플릿</h1>
           {isDirty && (
-            <button onClick={handleDiscard} className="cursor-pointer rounded-lg px-2.5 py-1.5 text-[13px] font-medium text-gray-400 transition-colors hover:bg-gray-200 hover:text-gray-600">
+            <button onClick={handleDiscard} className="rounded-lg px-2.5 py-1.5 text-[13px] font-medium text-gray-400 transition-colors hover:bg-gray-200 hover:text-gray-600">
               되돌리기
             </button>
           )}
@@ -450,7 +450,7 @@ export default function TemplateEditorClient({ initialData }: Props) {
             <button
               key={tab.id}
               onClick={() => setActiveSeason(tab.id)}
-              className={`flex flex-1 cursor-pointer items-center justify-center gap-1 whitespace-nowrap rounded-lg px-3 py-2 text-[13px] font-semibold transition-colors ${
+              className={`flex flex-1 items-center justify-center gap-1 whitespace-nowrap rounded-lg px-3 py-2 text-[13px] font-semibold transition-colors ${
                 activeSeason === tab.id ? 'bg-primary-600 text-white shadow-sm' : 'text-gray-500 hover:bg-gray-50'
               }`}
             >
@@ -505,7 +505,7 @@ export default function TemplateEditorClient({ initialData }: Props) {
           ) : (
             <button
               onClick={() => setAddingGroup(true)}
-              className="w-full cursor-pointer rounded-2xl border-2 border-dashed border-gray-200 py-4 text-center text-[14px] font-semibold text-gray-400 transition-colors hover:border-primary-300 hover:text-primary-600"
+              className="w-full rounded-2xl border-2 border-dashed border-gray-200 py-4 text-center text-[14px] font-semibold text-gray-400 transition-colors hover:border-primary-300 hover:text-primary-600"
             >
               + 새 그룹 추가
             </button>
@@ -520,7 +520,7 @@ export default function TemplateEditorClient({ initialData }: Props) {
             <button
               onClick={handleSave}
               disabled={saving}
-              className="w-full cursor-pointer rounded-2xl bg-primary-600 py-3.5 text-[15px] font-bold text-white shadow-[0_4px_20px_rgba(22,163,74,0.4)] transition-colors hover:bg-primary-700 active:bg-primary-800 disabled:opacity-60"
+              className="w-full rounded-2xl bg-primary-600 py-3.5 text-[15px] font-bold text-white shadow-[0_4px_20px_rgba(22,163,74,0.4)] transition-colors hover:bg-primary-700 active:bg-primary-800 disabled:opacity-60"
             >
               {saving ? '저장 중...' : '변경 사항 저장'}
             </button>

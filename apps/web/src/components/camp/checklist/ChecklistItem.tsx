@@ -112,7 +112,7 @@ export default function ChecklistItem({
                 if (isSwipeOpen) { e.stopPropagation(); closeSwipe(); return; }
                 onToggleCheck();
               }}
-              className={`checklist-checkbox flex h-[18px] w-[18px] shrink-0 cursor-pointer items-center justify-center rounded transition-colors ${
+              className={`checklist-checkbox flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded transition-colors ${
                 checkStatus === 'complete'
                   ? 'bg-primary-600 text-white'
                   : checkStatus === 'partial'
@@ -134,7 +134,7 @@ export default function ChecklistItem({
 
             {/* 텍스트 영역 */}
             <div
-              className="checklist-item-body min-w-0 flex-1 cursor-pointer select-none"
+              className="checklist-item-body min-w-0 flex-1 select-none"
               onClick={(e) => {
                 if (isSwipeOpen) { e.stopPropagation(); closeSwipe(); return; }
                 if (!isEditing) openEditor();
@@ -230,7 +230,7 @@ export default function ChecklistItem({
       <button
         type="button"
         onClick={onDeleteItem}
-        className="absolute right-0 top-1/2 hidden h-7 w-7 -translate-y-1/2 translate-x-[calc(100%+6px)] cursor-pointer items-center justify-center rounded-full opacity-0 transition-all group-hover:bg-gray-100 group-hover:opacity-100 hover:bg-red-50 active:bg-red-100 md:flex"
+        className="absolute right-0 top-1/2 hidden h-7 w-7 -translate-y-1/2 translate-x-[calc(100%+6px)] items-center justify-center rounded-full opacity-0 transition-all group-hover:bg-gray-100 group-hover:opacity-100 hover:bg-red-50 active:bg-red-100 md:flex"
       >
         <svg width="13" height="13" viewBox="0 0 14 14" fill="none" className="text-red-400">
           <path d="M2 4h10M5 4V2.5h4V4M5.5 6.5v4M8.5 6.5v4M3 4l.7 7.5h6.6L11 4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />

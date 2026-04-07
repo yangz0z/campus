@@ -88,13 +88,13 @@ function ConfirmModal({
         <div className="flex gap-2 px-5 pb-5 pt-4">
           <button
             onClick={() => onClose(false)}
-            className="flex-1 cursor-pointer rounded-xl bg-gray-100 py-2.5 text-[14px] font-semibold text-gray-600 transition-colors hover:bg-gray-200"
+            className="flex-1 rounded-xl bg-gray-100 py-2.5 text-[14px] font-semibold text-gray-600 transition-colors hover:bg-gray-200"
           >
             {state.cancelLabel ?? '취소'}
           </button>
           <button
             onClick={() => onClose(true)}
-            className="flex-1 cursor-pointer rounded-xl bg-red-500 py-2.5 text-[14px] font-semibold text-white transition-colors hover:bg-red-600"
+            className="flex-1 rounded-xl bg-red-500 py-2.5 text-[14px] font-semibold text-white transition-colors hover:bg-red-600"
           >
             {state.confirmLabel ?? '삭제'}
           </button>
