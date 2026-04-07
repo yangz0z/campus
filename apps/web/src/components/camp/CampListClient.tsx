@@ -1,17 +1,14 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import type { CampSummary } from '@campus/shared';
 import { dayjs, formatDateShort, calcNights } from '@campus/shared';
+import SwipeRow from '@/components/ui/SwipeRow';
 import CampEditSheet from './CampEditSheet';
 import CampDeleteSheet from './CampDeleteSheet';
-
-// 스와이프 설정 — 수정(64) + 삭제(64)
-const SWIPE_OPEN_WIDTH = 128;
-const SWIPE_THRESHOLD = 64;
 
 interface CampRowClientProps {
   camp: CampSummary;
@@ -27,165 +24,113 @@ function CampRowClient({ camp, index, isLast, onEdit, onDelete }: CampRowClientP
   const isSoon = diff > 0 && diff <= 7;
   const isPast = diff < 0;
 
-  // 스와이프 상태
-  const [swipeX, setSwipeX] = useState(0);
-  const [isSwiping, setIsSwiping] = useState(false);
-  const touchStartXRef = useRef(0);
-  const touchStartYRef = useRef(0);
-  const swipeBaseRef = useRef(0);
-  const directionRef = useRef<'h' | 'v' | null>(null);
+  const editAction = {
+    key: 'edit',
+    label: '수정',
+    icon: (
+      <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+        <path d="M10.5 2.5l2 2-8 8H2.5v-2l8-8zM9 4l2 2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    ),
+    onClick: onEdit,
+    className: 'bg-primary-50 text-primary-600',
+  };
 
-  function handleTouchStart(e: React.TouchEvent) {
-    touchStartXRef.current = e.touches[0].clientX;
-    touchStartYRef.current = e.touches[0].clientY;
-    swipeBaseRef.current = swipeX;
-    directionRef.current = null;
-    setIsSwiping(true);
-  }
-
-  function handleTouchMove(e: React.TouchEvent) {
-    const dx = touchStartXRef.current - e.touches[0].clientX;
-    const dy = Math.abs(e.touches[0].clientY - touchStartYRef.current);
-
-    if (directionRef.current === null) {
-      if (Math.abs(dx) < 5 && dy < 5) return;
-      directionRef.current = Math.abs(dx) > dy ? 'h' : 'v';
-    }
-    if (directionRef.current === 'v') { setIsSwiping(false); return; }
-
-    const raw = swipeBaseRef.current + dx;
-    setSwipeX(Math.max(0, Math.min(SWIPE_OPEN_WIDTH, raw)));
-  }
-
-  function handleTouchEnd() {
-    setIsSwiping(false);
-    if (directionRef.current !== 'h') return;
-    setSwipeX(swipeX >= SWIPE_THRESHOLD ? SWIPE_OPEN_WIDTH : 0);
-    directionRef.current = null;
-  }
-
-  function closeSwipe() { setSwipeX(0); }
-
-  const isSwipeOpen = swipeX > 0;
-  const contentStyle: React.CSSProperties = {
-    marginRight: swipeX,
-    transition: isSwiping ? 'none' : 'margin-right 0.2s ease',
+  const deleteAction = {
+    key: 'delete',
+    label: '삭제',
+    icon: (
+      <svg width="15" height="15" viewBox="0 0 14 14" fill="none">
+        <path d="M2 4h10M5 4V2.5h4V4M5.5 6.5v4M8.5 6.5v4M3 4l.7 7.5h6.6L11 4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    ),
+    onClick: onDelete,
+    className: 'bg-red-50 text-red-500',
   };
 
   return (
     <div className="camp-list-item group relative">
       {index !== 0 && <div className="camp-list-divider mx-5 h-px bg-gray-100" />}
 
-      <div
-        className={`relative overflow-hidden ${index === 0 ? 'rounded-t-2xl' : ''} ${isLast ? 'rounded-b-2xl' : ''}`}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
+      <SwipeRow
+        actions={[editAction, deleteAction]}
+        className={`${index === 0 ? 'rounded-t-2xl' : ''} ${isLast ? 'rounded-b-2xl' : ''}`}
       >
-        {/* 스와이프 액션 버튼 영역 (모바일) */}
-        <div
-          className="absolute bottom-0 right-0 top-0 flex"
-          style={{ width: SWIPE_OPEN_WIDTH }}
-        >
-          {/* 수정 버튼 */}
-          <button
-            type="button"
-            onClick={() => { closeSwipe(); onEdit(); }}
-            className="flex flex-1 flex-col items-center justify-center gap-1 bg-primary-50 text-primary-600"
-          >
-            <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
-              <path d="M10.5 2.5l2 2-8 8H2.5v-2l8-8zM9 4l2 2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            <span className="text-[10px] font-medium">수정</span>
-          </button>
-
-          {/* 삭제 버튼 */}
-          <button
-            type="button"
-            onClick={() => { closeSwipe(); onDelete(); }}
-            className="flex flex-1 flex-col items-center justify-center gap-1 bg-red-50 text-red-500"
-          >
-            <svg width="15" height="15" viewBox="0 0 14 14" fill="none">
-              <path d="M2 4h10M5 4V2.5h4V4M5.5 6.5v4M8.5 6.5v4M3 4l.7 7.5h6.6L11 4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            <span className="text-[10px] font-medium">삭제</span>
-          </button>
-        </div>
-
-        {/* 콘텐츠 */}
-        <div style={contentStyle} className="relative z-10 bg-white">
-          <Link
-            href={`/camp/${camp.id}/checklist`}
-            onClick={(e) => { if (isSwipeOpen) { e.preventDefault(); closeSwipe(); } }}
-            className="camp-list-link flex items-center gap-3 px-5 py-4 transition-colors duration-100 active:bg-gray-50"
-          >
-            <div className="camp-info min-w-0 flex-1">
-              <p className={`camp-name truncate text-[16px] font-semibold ${isPast ? 'text-gray-400' : 'text-gray-900'}`}>
-                {camp.title}
-              </p>
-              {camp.location && (
-                <p className="camp-meta-location mt-0.5 flex items-center gap-1 truncate text-[13px] text-gray-500">
-                  <svg width="11" height="13" viewBox="0 0 11 13" fill="none" className="shrink-0 text-gray-400" aria-hidden="true">
-                    <path d="M5.5 0C3.015 0 1 2.015 1 4.5c0 3.375 4.5 8.5 4.5 8.5s4.5-5.125 4.5-8.5C10 2.015 7.985 0 5.5 0zm0 6.5a2 2 0 110-4 2 2 0 010 4z" fill="currentColor" />
-                  </svg>
-                  <span className="truncate">{camp.location}</span>
+        {({ contentStyle, isSwipeOpen, closeSwipe }) => (
+          <div style={contentStyle} className="relative z-10 bg-white">
+            <Link
+              href={`/camp/${camp.id}/checklist`}
+              onClick={(e) => { if (isSwipeOpen) { e.preventDefault(); closeSwipe(); } }}
+              className="camp-list-link flex items-center gap-3 px-5 py-4 transition-colors duration-100 active:bg-gray-50"
+            >
+              <div className="camp-info min-w-0 flex-1">
+                <p className={`camp-name truncate text-[16px] font-semibold ${isPast ? 'text-gray-400' : 'text-gray-900'}`}>
+                  {camp.title}
                 </p>
-              )}
-              <div className="camp-meta mt-1 flex items-center gap-2">
-                <p className="flex items-center gap-1 text-[13px] text-gray-400">
-                  <span>{formatDateShort(camp.startDate)} – {formatDateShort(camp.endDate)}</span>
-                  <span aria-hidden>·</span>
-                  <span>{calcNights(camp.startDate, camp.endDate)}</span>
-                </p>
-                {camp.members.length > 1 && (
-                  <div className="camp-members flex items-center">
-                    {camp.members.slice(0, 2).map((member, i) => (
-                      member.profileImage ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          key={i}
-                          src={member.profileImage}
-                          alt={member.nickname}
-                          style={{ marginLeft: i === 0 ? 0 : -5 }}
-                          className="h-[18px] w-[18px] rounded-full object-cover ring-1 ring-white"
-                        />
-                      ) : (
-                        <span
-                          key={i}
-                          style={{ marginLeft: i === 0 ? 0 : -5, fontSize: 7 }}
-                          className="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full bg-primary-100 font-semibold text-primary-700 ring-1 ring-white"
-                        >
-                          {member.nickname[0]}
-                        </span>
-                      )
-                    ))}
-                    {camp.members.length > 2 && (
-                      <span
-                        style={{ marginLeft: -5, fontSize: 7 }}
-                        className="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full bg-gray-100 font-semibold text-gray-500 ring-1 ring-white"
-                      >
-                        +{camp.members.length - 2}
-                      </span>
-                    )}
-                  </div>
+                {camp.location && (
+                  <p className="camp-meta-location mt-0.5 flex items-center gap-1 truncate text-[13px] text-gray-500">
+                    <svg width="11" height="13" viewBox="0 0 11 13" fill="none" className="shrink-0 text-gray-400" aria-hidden="true">
+                      <path d="M5.5 0C3.015 0 1 2.015 1 4.5c0 3.375 4.5 8.5 4.5 8.5s4.5-5.125 4.5-8.5C10 2.015 7.985 0 5.5 0zm0 6.5a2 2 0 110-4 2 2 0 010 4z" fill="currentColor" />
+                    </svg>
+                    <span className="truncate">{camp.location}</span>
+                  </p>
                 )}
+                <div className="camp-meta mt-1 flex items-center gap-2">
+                  <p className="flex items-center gap-1 text-[13px] text-gray-400">
+                    <span>{formatDateShort(camp.startDate)} – {formatDateShort(camp.endDate)}</span>
+                    <span aria-hidden>·</span>
+                    <span>{calcNights(camp.startDate, camp.endDate)}</span>
+                  </p>
+                  {camp.members.length > 1 && (
+                    <div className="camp-members flex items-center">
+                      {camp.members.slice(0, 2).map((member, i) => (
+                        member.profileImage ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            key={i}
+                            src={member.profileImage}
+                            alt={member.nickname}
+                            style={{ marginLeft: i === 0 ? 0 : -5 }}
+                            className="h-[18px] w-[18px] rounded-full object-cover ring-1 ring-white"
+                          />
+                        ) : (
+                          <span
+                            key={i}
+                            style={{ marginLeft: i === 0 ? 0 : -5, fontSize: 7 }}
+                            className="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full bg-primary-100 font-semibold text-primary-700 ring-1 ring-white"
+                          >
+                            {member.nickname[0]}
+                          </span>
+                        )
+                      ))}
+                      {camp.members.length > 2 && (
+                        <span
+                          style={{ marginLeft: -5, fontSize: 7 }}
+                          className="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full bg-gray-100 font-semibold text-gray-500 ring-1 ring-white"
+                        >
+                          +{camp.members.length - 2}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
 
-            {isToday ? (
-              <span className="shrink-0 rounded-full bg-primary-100 px-3 py-1 text-[12px] font-bold text-primary-700">D-Day</span>
-            ) : diff > 0 ? (
-              <span className={`shrink-0 rounded-full px-3 py-1 text-[12px] font-bold ${isSoon ? 'bg-warm-100 text-warm-500' : 'bg-primary-50 text-primary-600'}`}>
-                D-{diff}
-              </span>
-            ) : null}
+              {isToday ? (
+                <span className="shrink-0 rounded-full bg-primary-100 px-3 py-1 text-[12px] font-bold text-primary-700">D-Day</span>
+              ) : diff > 0 ? (
+                <span className={`shrink-0 rounded-full px-3 py-1 text-[12px] font-bold ${isSoon ? 'bg-warm-100 text-warm-500' : 'bg-primary-50 text-primary-600'}`}>
+                  D-{diff}
+                </span>
+              ) : null}
 
-            <svg width="7" height="12" viewBox="0 0 7 12" fill="none" className="shrink-0 text-gray-300">
-              <path d="M1 1L6 6L1 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </Link>
-        </div>
-      </div>
+              <svg width="7" height="12" viewBox="0 0 7 12" fill="none" className="shrink-0 text-gray-300">
+                <path d="M1 1L6 6L1 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </Link>
+          </div>
+        )}
+      </SwipeRow>
 
       {/* 웹 hover 버튼 — 카드 오른쪽 바깥 절대 위치 */}
       <div className="absolute right-0 top-1/2 hidden -translate-y-1/2 translate-x-[calc(100%+6px)] items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100 md:flex">
