@@ -106,29 +106,27 @@ export function useChecklistActions({ campId, myMemberId, members, initialGroups
   async function handleSaveAssignees(memberIds: string[]) {
     if (!assigningItem) return;
     const itemId = assigningItem.id;
-    const result = await action(
+    setGroups((prev) =>
+      prev.map((g) => ({
+        ...g,
+        items: g.items.map((i) =>
+          i.id === itemId
+            ? {
+                ...i,
+                assignees: memberIds.map((mid) => {
+                  const m = members.find((m) => m.memberId === mid)!;
+                  return { memberId: mid, nickname: m.nickname, profileImage: m.profileImage, isChecked: false };
+                }),
+              }
+            : i,
+        ),
+      })),
+    );
+    setAssigningItem(null);
+    await action(
       () => setItemAssignees(campId, itemId, { memberIds }, socketId ?? undefined),
       '담당자 지정에 실패했어요.',
     );
-    if (result.ok) {
-      setGroups((prev) =>
-        prev.map((g) => ({
-          ...g,
-          items: g.items.map((i) =>
-            i.id === itemId
-              ? {
-                  ...i,
-                  assignees: memberIds.map((mid) => {
-                    const m = members.find((m) => m.memberId === mid)!;
-                    return { memberId: mid, nickname: m.nickname, profileImage: m.profileImage, isChecked: false };
-                  }),
-                }
-              : i,
-          ),
-        })),
-      );
-      setAssigningItem(null);
-    }
   }
 
   async function handleAddItem(groupId: string, title: string) {
