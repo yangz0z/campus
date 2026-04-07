@@ -1,4 +1,4 @@
-import type { AssigneeInfo, CreateChecklistGroupResponse, CreateChecklistItemResponse } from './camp';
+import type { AssigneeInfo, CampMemberInfo, CreateChecklistGroupResponse, CreateChecklistItemResponse } from './camp';
 
 // ── Socket Event Names ──
 
@@ -18,6 +18,7 @@ export const SocketEvents = {
   ITEMS_REORDERED: 'checklist:items:reordered',
   CHECK_TOGGLED: 'checklist:check:toggled',
   ASSIGNEES_SET: 'checklist:assignees:set',
+  MEMBER_JOINED: 'camp:member:joined',
 } as const;
 
 // ── Client → Server Payloads ──
@@ -88,4 +89,9 @@ export interface AssigneesSetPayload {
   campId: string;
   itemId: string;
   assignees: AssigneeInfo[];
+}
+
+export interface MemberJoinedPayload {
+  campId: string;
+  member: CampMemberInfo;
 }

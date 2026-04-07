@@ -454,6 +454,17 @@ export class CampService {
 
     const member = this.campMemberRepository.create({ campId, userId: user.id, role: 'member' });
     await this.campMemberRepository.save(member);
+
+    this.campGateway.emitToCamp(campId, SocketEvents.MEMBER_JOINED, {
+      campId,
+      member: {
+        memberId: member.id,
+        nickname: user.nickname,
+        profileImage: user.profileImage,
+        role: member.role,
+      },
+    });
+
     return { campId };
   }
 
