@@ -17,16 +17,20 @@ export default function TermsPage() {
         <section>
           <h2 className="mb-3 text-lg font-semibold text-gray-900">제1조 (목적)</h2>
           <p>
-            이 약관은 CampUs(이하 &quot;서비스&quot;)가 제공하는 캠핑 체크리스트 관리 및
-            관련 서비스의 이용과 관련하여 서비스와 이용자 간의 권리, 의무 및 책임사항,
-            기타 필요한 사항을 규정함을 목적으로 합니다.
+            이 약관은 CampUs(이하 &quot;서비스&quot;)가 제공하는 서비스의 이용과 관련하여
+            서비스와 이용자 간의 권리, 의무 및 책임사항, 기타 필요한 사항을 규정함을 목적으로 합니다.
+          </p>
+          <p className="mt-2">
+            CampUs는 캠핑 준비물 체크리스트를 생성·관리하는 웹 애플리케이션으로,
+            계절별 캠핑 준비물 추천, 체크리스트 템플릿 공유, 멤버별 역할 분담,
+            캠핑 일정 관리 등 캠핑 준비 과정을 체계적으로 지원하는 것을 목적으로 합니다.
           </p>
         </section>
 
         <section>
           <h2 className="mb-3 text-lg font-semibold text-gray-900">제2조 (정의)</h2>
           <ul className="list-disc space-y-1 pl-5">
-            <li>&quot;서비스&quot;란 CampUs가 제공하는 캠핑 체크리스트 관리, 템플릿 공유, 캠핑 정보 제공 등 관련 제반 서비스를 의미합니다.</li>
+            <li>&quot;서비스&quot;란 CampUs가 제공하는 캠핑 체크리스트 생성·관리, 계절별 준비물 추천, 템플릿 공유, 멤버별 역할 분담, 캠핑 일정 관리 등 관련 제반 서비스를 의미합니다.</li>
             <li>&quot;이용자&quot;란 이 약관에 따라 서비스가 제공하는 서비스를 받는 회원 및 비회원을 말합니다.</li>
             <li>&quot;회원&quot;이란 서비스에 회원등록을 한 자로서, 서비스가 제공하는 서비스를 이용할 수 있는 자를 말합니다.</li>
           </ul>
@@ -43,27 +47,40 @@ export default function TermsPage() {
 
         <section>
           <h2 className="mb-3 text-lg font-semibold text-gray-900">제4조 (서비스의 제공)</h2>
-          <p>서비스는 다음과 같은 서비스를 제공합니다.</p>
+          <p>서비스는 다음과 같은 기능을 제공합니다.</p>
           <ul className="mt-2 list-disc space-y-1 pl-5">
-            <li>캠핑 체크리스트 생성 및 관리</li>
-            <li>체크리스트 템플릿 제공 및 공유</li>
-            <li>캠핑 관련 정보 제공</li>
-            <li>기타 서비스가 정하는 서비스</li>
+            <li>캠핑 체크리스트 생성, 수정, 삭제 및 관리</li>
+            <li>계절별·상황별 캠핑 준비물 추천</li>
+            <li>체크리스트 템플릿 생성 및 다른 이용자와의 공유</li>
+            <li>캠핑 멤버 초대 및 역할별 준비물 분담</li>
+            <li>캠핑 일정(날짜, 장소) 관리</li>
+            <li>기타 서비스가 정하는 부가 기능</li>
           </ul>
         </section>
 
         <section>
-          <h2 className="mb-3 text-lg font-semibold text-gray-900">제5조 (회원가입)</h2>
-          <ul className="list-decimal space-y-1 pl-5">
-            <li>이용자는 서비스가 정한 가입 양식에 따라 회원정보를 기입한 후 이 약관에 동의한다는 의사표시를 함으로서 회원가입을 신청합니다.</li>
-            <li>서비스는 전항과 같이 회원으로 가입할 것을 신청한 이용자 중 다음 각 호에 해당하지 않는 한 회원으로 등록합니다.</li>
+          <h2 className="mb-3 text-lg font-semibold text-gray-900">제5조 (회원가입 및 제3자 로그인)</h2>
+          <ul className="list-decimal space-y-2 pl-5">
+            <li>이용자는 서비스가 정한 가입 양식에 따라 회원정보를 기입한 후 이 약관에 동의한다는 의사표시를 함으로써 회원가입을 신청합니다.</li>
+            <li>
+              이용자는 Google 등 제3자 계정을 이용하여 간편하게 회원가입 및 로그인할 수 있습니다.
+              제3자 로그인을 이용할 경우, 해당 서비스에서 제공하는 이름, 이메일 주소, 프로필 사진 정보가
+              회원 식별 및 로그인 처리 목적으로 수집됩니다.
+              자세한 내용은 <Link href="/privacy" className="text-primary-600 underline">개인정보처리방침</Link>을 참고하시기 바랍니다.
+            </li>
+            <li>서비스는 가입을 신청한 이용자 중 다음 각 호에 해당하지 않는 한 회원으로 등록합니다.
+              <ul className="mt-1 list-disc space-y-1 pl-5">
+                <li>가입 신청 시 허위 내용을 등록한 경우</li>
+                <li>기술적 사유로 가입이 불가능한 경우</li>
+              </ul>
+            </li>
           </ul>
         </section>
 
         <section>
           <h2 className="mb-3 text-lg font-semibold text-gray-900">제6조 (회원 탈퇴 및 자격 상실)</h2>
           <ul className="list-decimal space-y-1 pl-5">
-            <li>회원은 서비스에 언제든지 탈퇴를 요청할 수 있으며, 서비스는 즉시 회원탈퇴를 처리합니다.</li>
+            <li>회원은 서비스에 언제든지 탈퇴를 요청할 수 있으며, 서비스는 즉시 회원탈퇴를 처리합니다. 탈퇴 시 해당 회원의 개인정보는 즉시 삭제됩니다.</li>
             <li>회원이 다음 각 호의 사유에 해당하는 경우 서비스는 회원자격을 제한 또는 정지시킬 수 있습니다.
               <ul className="mt-1 list-disc space-y-1 pl-5">
                 <li>가입 신청 시 허위 내용을 등록한 경우</li>
@@ -80,7 +97,7 @@ export default function TermsPage() {
           <ul className="mt-2 list-disc space-y-1 pl-5">
             <li>신청 또는 변경 시 허위내용의 등록</li>
             <li>타인의 정보 도용</li>
-            <li>서비스에 게시된 정보의 변경</li>
+            <li>서비스에 게시된 정보의 무단 변경</li>
             <li>서비스가 정한 정보 이외의 정보 등의 송신 또는 게시</li>
             <li>서비스 및 기타 제3자의 저작권 등 지적재산권에 대한 침해</li>
             <li>서비스 및 기타 제3자의 명예를 손상시키거나 업무를 방해하는 행위</li>
