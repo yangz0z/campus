@@ -107,6 +107,7 @@ export interface CampSummary {
   startDate: string;
   endDate: string;
   season: Season;
+  myRole: 'owner' | 'member';
   members: CampSummaryMember[];
 }
 

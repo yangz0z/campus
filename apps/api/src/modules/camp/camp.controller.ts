@@ -43,6 +43,15 @@ export class CampController {
     return this.campService.acceptCampInvite(user, token);
   }
 
+  @Post(':campId/leave')
+  @HttpCode(204)
+  leaveCamp(
+    @CurrentUser() user: User,
+    @Param('campId', ParseUUIDPipe) campId: string,
+  ) {
+    return this.campService.leaveCamp(user, campId);
+  }
+
   @Delete(':campId')
   @HttpCode(204)
   deleteCamp(

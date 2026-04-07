@@ -138,6 +138,7 @@ export class CampService {
         startDate: m.camp.startDate,
         endDate: m.camp.endDate,
         season: m.camp.season,
+        myRole: m.role,
         members: [...m.camp.members]
           .sort((a, b) => {
             if (a.role === 'owner' && b.role !== 'owner') return -1;
@@ -151,6 +152,17 @@ export class CampService {
           })),
       })),
     };
+  }
+
+  async leaveCamp(user: User, campId: string) {
+    const member = await this.campMemberRepository.findOne({ where: { campId, userId: user.id } });
+    if (!member) throw new ForbiddenException();
+    if (member.role === 'owner') throw new ForbiddenException('방장은 캠프를 나갈 수 없어요. 캠프를 삭제해주세요.');
+
+    const memberId = member.id;
+    await this.campMemberRepository.remove(member);
+
+    this.campGateway.emitToCamp(campId, SocketEvents.MEMBER_LEFT, { campId, memberId });
   }
 
   async deleteCamp(user: User, campId: string) {
@@ -194,6 +206,8 @@ export class CampService {
       startDate: camp.startDate,
       endDate: camp.endDate,
       season: camp.season,
+      myRole: member.role,
+      members: [],
     };
   }
 
@@ -455,7 +469,7 @@ export class CampService {
     const member = this.campMemberRepository.create({ campId, userId: user.id, role: 'member' });
     await this.campMemberRepository.save(member);
 
-    this.campGateway.emitToCamp(campId, SocketEvents.MEMBER_JOINED, {
+    const memberPayload = {
       campId,
       member: {
         memberId: member.id,
@@ -463,7 +477,9 @@ export class CampService {
         profileImage: user.profileImage,
         role: member.role,
       },
-    });
+    };
+    console.log(`[CampService] Emitting MEMBER_JOINED to camp:${campId} - member: ${member.id} (${user.nickname})`);
+    this.campGateway.emitToCamp(campId, SocketEvents.MEMBER_JOINED, memberPayload);
 
     return { campId };
   }

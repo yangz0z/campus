@@ -94,8 +94,11 @@ export class CampGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.logger.log(`Client ${client.id} left camp:${data.campId}`);
   }
 
-  emitToCamp(campId: string, event: string, payload: unknown, excludeSocketId?: string) {
-    const room = this.server.to(`camp:${campId}`);
+  async emitToCamp(campId: string, event: string, payload: unknown, excludeSocketId?: string) {
+    const roomName = `camp:${campId}`;
+    const sockets = await this.server.in(roomName).fetchSockets();
+    this.logger.log(`emitToCamp ${event} to ${roomName} — ${sockets.length} socket(s) in room`);
+    const room = this.server.to(roomName);
     if (excludeSocketId) {
       room.except(excludeSocketId).emit(event, payload);
     } else {

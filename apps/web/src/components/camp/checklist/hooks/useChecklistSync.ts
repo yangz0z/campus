@@ -16,6 +16,7 @@ import {
   type CheckToggledPayload,
   type AssigneesSetPayload,
   type MemberJoinedPayload,
+  type MemberLeftPayload,
 } from '@campus/shared';
 
 interface UseChecklistSyncParams {
@@ -134,7 +135,21 @@ export function useChecklistSync({ socket, setGroups, setMembers }: UseChecklist
       });
     }
 
+    function onMemberLeft(data: MemberLeftPayload) {
+      setMembers((prev) => prev.filter((m) => m.memberId !== data.memberId));
+      setGroups((prev) =>
+        prev.map((g) => ({
+          ...g,
+          items: g.items.map((i) => ({
+            ...i,
+            assignees: i.assignees.filter((a) => a.memberId !== data.memberId),
+          })),
+        })),
+      );
+    }
+
     socket.on(SocketEvents.MEMBER_JOINED, onMemberJoined);
+    socket.on(SocketEvents.MEMBER_LEFT, onMemberLeft);
     socket.on(SocketEvents.GROUP_CREATED, onGroupCreated);
     socket.on(SocketEvents.GROUP_UPDATED, onGroupUpdated);
     socket.on(SocketEvents.GROUP_DELETED, onGroupDeleted);
@@ -148,6 +163,7 @@ export function useChecklistSync({ socket, setGroups, setMembers }: UseChecklist
 
     return () => {
       socket.off(SocketEvents.MEMBER_JOINED, onMemberJoined);
+      socket.off(SocketEvents.MEMBER_LEFT, onMemberLeft);
       socket.off(SocketEvents.GROUP_CREATED, onGroupCreated);
       socket.off(SocketEvents.GROUP_UPDATED, onGroupUpdated);
       socket.off(SocketEvents.GROUP_DELETED, onGroupDeleted);

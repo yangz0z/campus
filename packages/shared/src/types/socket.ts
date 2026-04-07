@@ -19,6 +19,7 @@ export const SocketEvents = {
   CHECK_TOGGLED: 'checklist:check:toggled',
   ASSIGNEES_SET: 'checklist:assignees:set',
   MEMBER_JOINED: 'camp:member:joined',
+  MEMBER_LEFT: 'camp:member:left',
 } as const;
 
 // ── Client → Server Payloads ──
@@ -94,4 +95,9 @@ export interface AssigneesSetPayload {
 export interface MemberJoinedPayload {
   campId: string;
   member: CampMemberInfo;
+}
+
+export interface MemberLeftPayload {
+  campId: string;
+  memberId: string;
 }
