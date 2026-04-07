@@ -58,6 +58,14 @@
     background-color: #F2F2F0;
     @apply text-gray-800 antialiased;
   }
+
+  button,
+  [role='button'],
+  a,
+  select,
+  summary {
+    cursor: pointer;
+  }
 }
 
 @layer utilities {

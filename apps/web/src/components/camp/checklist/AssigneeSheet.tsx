@@ -16,7 +16,6 @@ interface AssigneeSheetProps {
 export default function AssigneeSheet({ itemTitle, members, initialMemberIds, assignees, onSave, onClose }: AssigneeSheetProps) {
   const [pendingMemberIds, setPendingMemberIds] = useState<string[]>(initialMemberIds);
   const assigneeMap = new Map(assignees.map((a) => [a.memberId, a.isChecked]));
-  const [saving, setSaving] = useState(false);
 
   function toggleMember(memberId: string) {
     setPendingMemberIds((prev) =>
@@ -24,18 +23,13 @@ export default function AssigneeSheet({ itemTitle, members, initialMemberIds, as
     );
   }
 
-  async function handleSave() {
-    setSaving(true);
-    try {
-      await onSave(pendingMemberIds);
-    } finally {
-      setSaving(false);
-    }
+  function handleSave() {
+    onSave(pendingMemberIds);
   }
 
   return (
     <div className="checklist-assignee-sheet fixed inset-0 z-50 flex flex-col justify-end">
-      <div className="checklist-assignee-backdrop absolute inset-0 bg-black/40" onClick={() => !saving && onClose()} />
+      <div className="checklist-assignee-backdrop absolute inset-0 bg-black/40" onClick={onClose} />
       <div className="checklist-assignee-panel relative mx-auto w-full max-w-sm rounded-t-2xl bg-white px-5 pb-8 pt-5 shadow-xl">
         <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-gray-200" />
         <p className="checklist-assignee-label mb-1 text-[11px] font-semibold uppercase tracking-wider text-gray-400">담당자 지정</p>
@@ -92,10 +86,9 @@ export default function AssigneeSheet({ itemTitle, members, initialMemberIds, as
         <button
           type="button"
           onClick={handleSave}
-          disabled={saving}
-          className="checklist-assignee-submit mt-5 w-full rounded-xl bg-primary-600 py-3.5 text-[15px] font-semibold text-white transition-colors hover:bg-primary-700 active:bg-primary-800 disabled:opacity-60"
+          className="checklist-assignee-submit mt-5 w-full rounded-xl bg-primary-600 py-3.5 text-[15px] font-semibold text-white transition-colors hover:bg-primary-700 active:bg-primary-800"
         >
-          {saving ? '저장 중...' : '확인'}
+          확인
         </button>
       </div>
     </div>

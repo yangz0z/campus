@@ -5,7 +5,10 @@ const WS_URL = process.env.NEXT_PUBLIC_WS_URL ?? 'http://localhost:4000';
 let socket: Socket | null = null;
 
 export function getSocket(token: string): Socket {
-  if (socket?.connected) return socket;
+  if (socket) {
+    socket.auth = { token };
+    return socket;
+  }
 
   socket = io(WS_URL, {
     auth: { token },
@@ -18,7 +21,7 @@ export function getSocket(token: string): Socket {
   return socket;
 }
 
-export function disconnectSocket() {
+export function disconnectSocket(): void {
   if (socket) {
     socket.disconnect();
     socket = null;

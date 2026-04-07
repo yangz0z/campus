@@ -138,18 +138,37 @@ export class CampService {
         startDate: m.camp.startDate,
         endDate: m.camp.endDate,
         season: m.camp.season,
-        members: m.camp.members.map((cm) => ({
-          nickname: cm.user.nickname,
-          profileImage: cm.user.profileImage,
-        })),
+        myRole: m.role,
+        members: [...m.camp.members]
+          .sort((a, b) => {
+            if (a.role === 'owner' && b.role !== 'owner') return -1;
+            if (a.role !== 'owner' && b.role === 'owner') return 1;
+            return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+          })
+          .map((cm) => ({
+            nickname: cm.user.nickname,
+            profileImage: cm.user.profileImage,
+            role: cm.role,
+          })),
       })),
     };
+  }
+
+  async leaveCamp(user: User, campId: string) {
+    const member = await this.campMemberRepository.findOne({ where: { campId, userId: user.id } });
+    if (!member) throw new ForbiddenException();
+    if (member.role === 'owner') throw new ForbiddenException('방장은 캠프를 나갈 수 없어요. 캠프를 삭제해주세요.');
+
+    const memberId = member.id;
+    await this.campMemberRepository.remove(member);
+
+    this.campGateway.emitToCamp(campId, SocketEvents.MEMBER_LEFT, { campId, memberId });
   }
 
   async deleteCamp(user: User, campId: string) {
     const member = await this.campMemberRepository.findOne({ where: { campId, userId: user.id } });
     if (!member) throw new ForbiddenException();
-    if (member.role !== 'owner') throw new ForbiddenException('Only owner can delete camp');
+    if (member.role !== 'owner') throw new ForbiddenException('캠프 소유자만 삭제할 수 있어요.');
 
     const camp = await this.campRepository.findOne({ where: { id: campId } });
     if (!camp) throw new NotFoundException();
@@ -187,6 +206,8 @@ export class CampService {
       startDate: camp.startDate,
       endDate: camp.endDate,
       season: camp.season,
+      myRole: member.role,
+      members: [],
     };
   }
 
@@ -349,11 +370,16 @@ export class CampService {
     });
     if (!item || item.group.campId !== campId) throw new NotFoundException();
 
-    let assignee = await this.campChecklistItemAssigneeRepository.findOne({
-      where: { itemId, memberId: member.id },
+    const assignees = await this.campChecklistItemAssigneeRepository.find({
+      where: { itemId },
     });
 
+    let assignee = assignees.find((a) => a.memberId === member.id);
+
     if (!assignee) {
+      if (assignees.length > 0) {
+        throw new ForbiddenException('담당자만 체크할 수 있습니다.');
+      }
       assignee = this.campChecklistItemAssigneeRepository.create({ itemId, memberId: member.id });
     }
 
@@ -442,6 +468,19 @@ export class CampService {
 
     const member = this.campMemberRepository.create({ campId, userId: user.id, role: 'member' });
     await this.campMemberRepository.save(member);
+
+    const memberPayload = {
+      campId,
+      member: {
+        memberId: member.id,
+        nickname: user.nickname,
+        profileImage: user.profileImage,
+        role: member.role,
+      },
+    };
+    console.log(`[CampService] Emitting MEMBER_JOINED to camp:${campId} - member: ${member.id} (${user.nickname})`);
+    this.campGateway.emitToCamp(campId, SocketEvents.MEMBER_JOINED, memberPayload);
+
     return { campId };
   }
 

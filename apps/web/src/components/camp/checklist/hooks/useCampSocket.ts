@@ -1,10 +1,9 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import { useAuth } from '@clerk/nextjs';
+import { useEffect, useState } from 'react';
 import type { Socket } from 'socket.io-client';
 import { SocketEvents } from '@campus/shared';
-import { getSocket, disconnectSocket } from '@/lib/socket';
+import { useSocket } from '@/components/ui/SocketProvider';
 
 interface UseCampSocketResult {
   socket: Socket | null;
@@ -12,67 +11,28 @@ interface UseCampSocketResult {
 }
 
 export function useCampSocket(campId: string): UseCampSocketResult {
-  const { getToken } = useAuth();
-  const [socket, setSocket] = useState<Socket | null>(null);
+  const socket = useSocket();
   const [socketId, setSocketId] = useState<string | null>(null);
-  const campIdRef = useRef(campId);
-  campIdRef.current = campId;
 
   useEffect(() => {
-    let mounted = true;
+    if (!socket) return;
 
-    async function connect() {
-      const token = await getToken();
-      if (!token || !mounted) return;
-
-      const sock = getSocket(token);
-
-      sock.on('connect', () => {
-        if (!mounted) return;
-        setSocketId(sock.id ?? null);
-        sock.emit(SocketEvents.JOIN_CAMP, { campId: campIdRef.current });
-      });
-
-      sock.on('reconnect', async () => {
-        // 재연결 시 새 토큰으로 갱신 후 다시 join
-        const freshToken = await getToken();
-        if (freshToken) {
-          sock.auth = { token: freshToken };
-        }
-        sock.emit(SocketEvents.JOIN_CAMP, { campId: campIdRef.current });
-      });
-
-      sock.on('connect_error', async (err) => {
-        if (err.message?.includes('auth') || err.message?.includes('unauthorized')) {
-          const freshToken = await getToken();
-          if (freshToken) {
-            sock.auth = { token: freshToken };
-            sock.connect();
-          }
-        }
-      });
-
-      if (sock.connected) {
-        setSocketId(sock.id ?? null);
-        sock.emit(SocketEvents.JOIN_CAMP, { campId });
-      }
-
-      setSocket(sock);
+    function joinRoom() {
+      socket!.emit(SocketEvents.JOIN_CAMP, { campId });
+      setSocketId(socket!.id ?? null);
     }
 
-    connect();
+    if (socket.connected) joinRoom();
+    socket.on('connect', joinRoom);
 
     return () => {
-      mounted = false;
-      if (socket) {
+      socket.off('connect', joinRoom);
+      if (socket.connected) {
         socket.emit(SocketEvents.LEAVE_CAMP, { campId });
       }
-      disconnectSocket();
-      setSocket(null);
       setSocketId(null);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [campId]);
+  }, [socket, campId]);
 
   return { socket, socketId };
 }

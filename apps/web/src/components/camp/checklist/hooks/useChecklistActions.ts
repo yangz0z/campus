@@ -10,6 +10,7 @@ import {
   createChecklistGroup,
   createChecklistItem,
 } from '@/actions/camp';
+import { useAction } from '@/hooks/useAction';
 
 type CheckStatus = 'none' | 'partial' | 'complete';
 
@@ -44,7 +45,15 @@ export function useChecklistActions({ campId, myMemberId, members, initialGroups
   const [addingGroupLoading, setAddingGroupLoading] = useState(false);
   const groupInputRef = useRef<HTMLInputElement>(null);
 
+  const action = useAction();
+
   async function handleToggleCheck(itemId: string, currentValue: boolean) {
+    const targetItem = groups.flatMap((g) => g.items).find((i) => i.id === itemId);
+    if (targetItem && targetItem.assignees.length > 0 && !targetItem.assignees.some((a) => a.memberId === myMemberId)) {
+      action(() => Promise.reject(), '담당자만 체크할 수 있어요. 담당자를 수정해주세요.');
+      return;
+    }
+
     const newValue = !currentValue;
     let willBeComplete = false;
     setGroups((prev) =>
@@ -71,14 +80,20 @@ export function useChecklistActions({ campId, myMemberId, members, initialGroups
         });
       }, 200);
     }
-    await toggleChecklistItem(campId, itemId, { isChecked: newValue }, socketId ?? undefined);
+    await action(
+      () => toggleChecklistItem(campId, itemId, { isChecked: newValue }, socketId ?? undefined),
+      '체크 상태 변경에 실패했어요.',
+    );
   }
 
   async function handleDeleteItem(itemId: string) {
     setGroups((prev) =>
       prev.map((g) => ({ ...g, items: g.items.filter((i) => i.id !== itemId) })),
     );
-    await deleteChecklistItem(campId, itemId, socketId ?? undefined);
+    await action(
+      () => deleteChecklistItem(campId, itemId, socketId ?? undefined),
+      '아이템 삭제에 실패했어요.',
+    );
   }
 
   async function handleUpdateItem(itemId: string, title: string, memo: string | null) {
@@ -88,13 +103,15 @@ export function useChecklistActions({ campId, myMemberId, members, initialGroups
         items: g.items.map((i) => (i.id === itemId ? { ...i, title, memo } : i)),
       })),
     );
-    await updateChecklistItem(campId, itemId, { title, memo }, socketId ?? undefined);
+    await action(
+      () => updateChecklistItem(campId, itemId, { title, memo }, socketId ?? undefined),
+      '아이템 수정에 실패했어요.',
+    );
   }
 
   async function handleSaveAssignees(memberIds: string[]) {
     if (!assigningItem) return;
     const itemId = assigningItem.id;
-    await setItemAssignees(campId, itemId, { memberIds }, socketId ?? undefined);
     setGroups((prev) =>
       prev.map((g) => ({
         ...g,
@@ -112,38 +129,55 @@ export function useChecklistActions({ campId, myMemberId, members, initialGroups
       })),
     );
     setAssigningItem(null);
+    await action(
+      () => setItemAssignees(campId, itemId, { memberIds }, socketId ?? undefined),
+      '담당자 지정에 실패했어요.',
+    );
   }
 
   async function handleAddItem(groupId: string, title: string) {
-    const newItem = await createChecklistItem(campId, groupId, { title }, socketId ?? undefined);
-    setGroups((prev) =>
-      prev.map((g) => (g.id === groupId ? { ...g, items: [...g.items, newItem] } : g)),
+    const result = await action(
+      () => createChecklistItem(campId, groupId, { title }, socketId ?? undefined),
+      '아이템 추가에 실패했어요.',
     );
+    if (result.ok) {
+      setGroups((prev) =>
+        prev.map((g) => (g.id === groupId ? { ...g, items: [...g.items, result.data] } : g)),
+      );
+    }
   }
 
   async function handleUpdateGroup(groupId: string, title: string) {
     setGroups((prev) =>
       prev.map((g) => (g.id === groupId ? { ...g, title } : g)),
     );
-    await updateChecklistGroup(campId, groupId, title, socketId ?? undefined);
+    await action(
+      () => updateChecklistGroup(campId, groupId, title, socketId ?? undefined),
+      '그룹 수정에 실패했어요.',
+    );
   }
 
   async function handleDeleteGroup(groupId: string) {
     setGroups((prev) => prev.filter((g) => g.id !== groupId));
-    await deleteChecklistGroup(campId, groupId, socketId ?? undefined);
+    await action(
+      () => deleteChecklistGroup(campId, groupId, socketId ?? undefined),
+      '그룹 삭제에 실패했어요.',
+    );
   }
 
   async function handleAddGroup() {
     const title = newGroupTitle.trim();
     if (!title) { setAddingGroup(false); return; }
     setAddingGroupLoading(true);
-    try {
-      const newGroup = await createChecklistGroup(campId, { title }, socketId ?? undefined);
-      setGroups((prev) => [...prev, { ...newGroup, items: [] }]);
+    const result = await action(
+      () => createChecklistGroup(campId, { title }, socketId ?? undefined),
+      '그룹 추가에 실패했어요.',
+    );
+    setAddingGroupLoading(false);
+    if (result.ok) {
+      setGroups((prev) => [...prev, { ...result.data, items: [] }]);
       setAddingGroup(false);
       setNewGroupTitle('');
-    } finally {
-      setAddingGroupLoading(false);
     }
   }
 

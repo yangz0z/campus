@@ -25,7 +25,7 @@ export default function SeasonBadge({ seasonId, selected = true, onClick }: Seas
         selected
           ? season.color
           : 'border-earth-200 bg-earth-50 text-gray-400'
-      } ${onClick ? 'cursor-pointer' : ''}`}
+      }`}
     >
       <span className="text-base">{season.icon}</span>
       {season.name}

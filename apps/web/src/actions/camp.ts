@@ -54,6 +54,10 @@ export async function deleteCamp(campId: string): Promise<void> {
   return serverFetch<void>(`/camps/${campId}`, { method: 'DELETE' });
 }
 
+export async function leaveCamp(campId: string): Promise<void> {
+  return serverFetch<void>(`/camps/${campId}/leave`, { method: 'POST' });
+}
+
 export async function createCamp(data: CreateCampRequest): Promise<CreateCampResponse> {
   return serverFetch<CreateCampResponse>('/camps', {
     method: 'POST',

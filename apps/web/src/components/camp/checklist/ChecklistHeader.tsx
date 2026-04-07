@@ -2,31 +2,36 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import type { CampSummary } from '@campus/shared';
+import type { CampMemberInfo, CampSummary } from '@campus/shared';
+import AvatarGroup from '../shared/AvatarGroup';
 import { formatDateShort, calcNights } from '@campus/shared';
 import { createCampInvite } from '@/actions/camp';
+import { useToast } from '@/components/ui/Toast';
+import { useAction } from '@/hooks/useAction';
 
 interface ChecklistHeaderProps {
   campId: string;
   camp: CampSummary | null;
+  members: CampMemberInfo[];
   showCompleted: boolean;
   onToggleCompleted: () => void;
 }
 
-export default function ChecklistHeader({ campId, camp, showCompleted, onToggleCompleted }: ChecklistHeaderProps) {
+export default function ChecklistHeader({ campId, camp, members, showCompleted, onToggleCompleted }: ChecklistHeaderProps) {
   const [showMeta, setShowMeta] = useState(false);
   const [inviting, setInviting] = useState(false);
-  const [showToast, setShowToast] = useState(false);
+  const { toast } = useToast();
+  const action = useAction();
 
   async function handleCopyInviteLink() {
     if (inviting) return;
     setInviting(true);
-    try {
-      const { token } = await createCampInvite(campId);
-      const url = `${window.location.origin}/invite/${token}`;
-      if (navigator.clipboard?.writeText) {
+    const result = await action(() => createCampInvite(campId), '초대 링크 생성에 실패했어요.');
+    if (result.ok) {
+      const url = `${window.location.origin}/invite/${result.data.token}`;
+      try {
         await navigator.clipboard.writeText(url);
-      } else {
+      } catch {
         const textarea = document.createElement('textarea');
         textarea.value = url;
         textarea.style.position = 'fixed';
@@ -36,11 +41,9 @@ export default function ChecklistHeader({ campId, camp, showCompleted, onToggleC
         document.execCommand('copy');
         document.body.removeChild(textarea);
       }
-      setShowToast(true);
-      setTimeout(() => setShowToast(false), 3500);
-    } finally {
-      setInviting(false);
+      toast('초대링크가 복사되었습니다. 링크를 공유해 캠프에 초대해보세요.');
     }
+    setInviting(false);
   }
 
   return (
@@ -110,7 +113,7 @@ export default function ChecklistHeader({ campId, camp, showCompleted, onToggleC
               </div>
             </div>
 
-            <div className={`checklist-meta overflow-hidden transition-all duration-200 ease-in-out ${showMeta ? 'mt-2 max-h-20 opacity-100' : 'max-h-0 opacity-0'}`}>
+            <div className={`checklist-meta overflow-hidden transition-all duration-200 ease-in-out ${showMeta ? 'mt-2 max-h-32 opacity-100' : 'max-h-0 opacity-0'}`}>
               <div className="checklist-meta-inner space-y-1">
                 {camp.location && (
                   <p className="checklist-location flex items-center gap-1.5 text-[13px] text-gray-500">
@@ -130,6 +133,14 @@ export default function ChecklistHeader({ campId, camp, showCompleted, onToggleC
                   <span aria-hidden className="text-gray-300">·</span>
                   {calcNights(camp.startDate, camp.endDate)}
                 </p>
+                {members.length >= 2 && (
+                  <div className="flex items-center gap-2">
+                    <AvatarGroup members={members} size={22} />
+                    <span className="text-[13px] text-gray-500">
+                      {members.length}명 참여 중
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -139,17 +150,6 @@ export default function ChecklistHeader({ campId, camp, showCompleted, onToggleC
           </div>
         )}
       </div>
-      {showToast && (
-        <div className="pointer-events-none fixed bottom-24 left-1/2 z-50 w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 animate-fade-in-up">
-          <div className="flex items-start gap-3 rounded-2xl bg-gray-900 px-4 py-3.5 shadow-lg">
-            <span className="mt-0.5 text-base leading-none">🔗</span>
-            <p className="text-[13px] leading-relaxed text-white">
-              초대링크가 복사되었습니다.<br />
-              링크를 공유해 캠프에 초대해보세요.
-            </p>
-          </div>
-        </div>
-      )}
     </header>
   );
 }

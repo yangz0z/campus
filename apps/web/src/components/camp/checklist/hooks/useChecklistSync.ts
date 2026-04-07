@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import type { Socket } from 'socket.io-client';
-import type { ChecklistGroup } from '@campus/shared';
+import type { CampMemberInfo, ChecklistGroup } from '@campus/shared';
 import {
   SocketEvents,
   type GroupCreatedPayload,
@@ -15,14 +15,17 @@ import {
   type ItemsReorderedPayload,
   type CheckToggledPayload,
   type AssigneesSetPayload,
+  type MemberJoinedPayload,
+  type MemberLeftPayload,
 } from '@campus/shared';
 
 interface UseChecklistSyncParams {
   socket: Socket | null;
   setGroups: React.Dispatch<React.SetStateAction<ChecklistGroup[]>>;
+  setMembers: React.Dispatch<React.SetStateAction<CampMemberInfo[]>>;
 }
 
-export function useChecklistSync({ socket, setGroups }: UseChecklistSyncParams) {
+export function useChecklistSync({ socket, setGroups, setMembers }: UseChecklistSyncParams) {
   useEffect(() => {
     if (!socket) return;
 
@@ -125,6 +128,28 @@ export function useChecklistSync({ socket, setGroups }: UseChecklistSyncParams) 
       );
     }
 
+    function onMemberJoined(data: MemberJoinedPayload) {
+      setMembers((prev) => {
+        if (prev.some((m) => m.memberId === data.member.memberId)) return prev;
+        return [...prev, data.member];
+      });
+    }
+
+    function onMemberLeft(data: MemberLeftPayload) {
+      setMembers((prev) => prev.filter((m) => m.memberId !== data.memberId));
+      setGroups((prev) =>
+        prev.map((g) => ({
+          ...g,
+          items: g.items.map((i) => ({
+            ...i,
+            assignees: i.assignees.filter((a) => a.memberId !== data.memberId),
+          })),
+        })),
+      );
+    }
+
+    socket.on(SocketEvents.MEMBER_JOINED, onMemberJoined);
+    socket.on(SocketEvents.MEMBER_LEFT, onMemberLeft);
     socket.on(SocketEvents.GROUP_CREATED, onGroupCreated);
     socket.on(SocketEvents.GROUP_UPDATED, onGroupUpdated);
     socket.on(SocketEvents.GROUP_DELETED, onGroupDeleted);
@@ -137,6 +162,8 @@ export function useChecklistSync({ socket, setGroups }: UseChecklistSyncParams) 
     socket.on(SocketEvents.ASSIGNEES_SET, onAssigneesSet);
 
     return () => {
+      socket.off(SocketEvents.MEMBER_JOINED, onMemberJoined);
+      socket.off(SocketEvents.MEMBER_LEFT, onMemberLeft);
       socket.off(SocketEvents.GROUP_CREATED, onGroupCreated);
       socket.off(SocketEvents.GROUP_UPDATED, onGroupUpdated);
       socket.off(SocketEvents.GROUP_DELETED, onGroupDeleted);
@@ -148,5 +175,5 @@ export function useChecklistSync({ socket, setGroups }: UseChecklistSyncParams) 
       socket.off(SocketEvents.CHECK_TOGGLED, onCheckToggled);
       socket.off(SocketEvents.ASSIGNEES_SET, onAssigneesSet);
     };
-  }, [socket, setGroups]);
+  }, [socket, setGroups, setMembers]);
 }

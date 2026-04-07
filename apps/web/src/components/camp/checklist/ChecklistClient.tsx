@@ -20,7 +20,8 @@ interface ChecklistClientProps {
   members: CampMemberInfo[];
 }
 
-export default function ChecklistClient({ campId, camp, initialGroups, myMemberId, members }: ChecklistClientProps) {
+export default function ChecklistClient({ campId, camp, initialGroups, myMemberId, members: initialMembers }: ChecklistClientProps) {
+  const [members, setMembers] = useState(initialMembers);
   const { socket, socketId } = useCampSocket(campId);
   const actions = useChecklistActions({ campId, myMemberId, members, initialGroups, socketId });
   const {
@@ -36,7 +37,7 @@ export default function ChecklistClient({ campId, camp, initialGroups, myMemberI
   } = actions;
 
   const dnd = useChecklistDnd({ campId, groups, setGroups, socketId });
-  useChecklistSync({ socket, setGroups });
+  useChecklistSync({ socket, setGroups, setMembers });
 
   // 그룹 네비게이션
   const groupRefs = useRef<Map<string, HTMLElement>>(new Map());
@@ -83,6 +84,7 @@ export default function ChecklistClient({ campId, camp, initialGroups, myMemberI
       <ChecklistHeader
         campId={campId}
         camp={camp}
+        members={members}
         showCompleted={showCompleted}
         onToggleCompleted={() => setShowCompleted((v) => !v)}
       />

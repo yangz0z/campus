@@ -97,6 +97,7 @@ export interface CreateChecklistItemResponse {
 export interface CampSummaryMember {
   nickname: string;
   profileImage: string | null;
+  role: 'owner' | 'member';
 }
 
 export interface CampSummary {
@@ -106,6 +107,7 @@ export interface CampSummary {
   startDate: string;
   endDate: string;
   season: Season;
+  myRole: 'owner' | 'member';
   members: CampSummaryMember[];
 }
 

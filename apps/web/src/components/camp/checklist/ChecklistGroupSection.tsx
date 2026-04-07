@@ -3,7 +3,7 @@
 import { useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import type { AssigneeInfo, CampMemberInfo, ChecklistGroup } from '@campus/shared';
-import { useSortableStyle, SortableGroupDropzone } from '@/components/ui/dnd';
+import { GripHandle, useSortableStyle, SortableGroupDropzone } from '@/components/ui/dnd';
 import ChecklistItem from './ChecklistItem';
 
 type CheckStatus = 'none' | 'partial' | 'complete';
@@ -121,12 +121,9 @@ export default function ChecklistGroupSection({
       style={style}
       className="checklist-group group/header"
     >
-      <div
-        className="checklist-group-header mb-2 flex items-center justify-between px-1"
-        {...attributes}
-        {...listeners}
-      >
+      <div className="checklist-group-header mb-2 flex items-center justify-between px-1">
         <div className="flex min-w-0 flex-1 items-center gap-1.5">
+          <GripHandle listeners={listeners} attributes={attributes} />
           <button
             type="button"
             onClick={onToggleCollapse}

@@ -1,6 +1,6 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import { useId, type ReactNode } from 'react';
 import { DndContext, DragOverlay } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import type { useSortableList } from './useSortableList';
@@ -32,8 +32,11 @@ export default function SortableContainer<G, I>({
     activeGroup, activeItem,
   } = dnd;
 
+  const dndId = useId();
+
   return (
     <DndContext
+      id={dndId}
       sensors={sensors}
       collisionDetection={collisionDetection}
       onDragStart={handleDragStart}
