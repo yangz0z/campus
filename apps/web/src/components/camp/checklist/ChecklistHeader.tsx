@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import type { CampSummary } from '@campus/shared';
+import type { CampMemberInfo, CampSummary } from '@campus/shared';
+import AvatarGroup from '../shared/AvatarGroup';
 import { formatDateShort, calcNights } from '@campus/shared';
 import { createCampInvite } from '@/actions/camp';
 import { useToast } from '@/components/ui/Toast';
@@ -11,11 +12,12 @@ import { useAction } from '@/hooks/useAction';
 interface ChecklistHeaderProps {
   campId: string;
   camp: CampSummary | null;
+  members: CampMemberInfo[];
   showCompleted: boolean;
   onToggleCompleted: () => void;
 }
 
-export default function ChecklistHeader({ campId, camp, showCompleted, onToggleCompleted }: ChecklistHeaderProps) {
+export default function ChecklistHeader({ campId, camp, members, showCompleted, onToggleCompleted }: ChecklistHeaderProps) {
   const [showMeta, setShowMeta] = useState(false);
   const [inviting, setInviting] = useState(false);
   const { toast } = useToast();
@@ -111,7 +113,7 @@ export default function ChecklistHeader({ campId, camp, showCompleted, onToggleC
               </div>
             </div>
 
-            <div className={`checklist-meta overflow-hidden transition-all duration-200 ease-in-out ${showMeta ? 'mt-2 max-h-20 opacity-100' : 'max-h-0 opacity-0'}`}>
+            <div className={`checklist-meta overflow-hidden transition-all duration-200 ease-in-out ${showMeta ? 'mt-2 max-h-32 opacity-100' : 'max-h-0 opacity-0'}`}>
               <div className="checklist-meta-inner space-y-1">
                 {camp.location && (
                   <p className="checklist-location flex items-center gap-1.5 text-[13px] text-gray-500">
@@ -131,6 +133,14 @@ export default function ChecklistHeader({ campId, camp, showCompleted, onToggleC
                   <span aria-hidden className="text-gray-300">·</span>
                   {calcNights(camp.startDate, camp.endDate)}
                 </p>
+                {members.length >= 2 && (
+                  <div className="flex items-center gap-2">
+                    <AvatarGroup members={members} size={22} />
+                    <span className="text-[13px] text-gray-500">
+                      {members.length}명 참여 중
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           </div>

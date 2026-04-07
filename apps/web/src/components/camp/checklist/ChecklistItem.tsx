@@ -195,28 +195,39 @@ export default function ChecklistItem({
                   </span>
                 ) : (
                   <span className="checklist-assignee-avatars flex items-center">
-                    {item.assignees.slice(0, 3).map((a, idx) => (
-                      <span key={a.memberId} className="relative" style={{ marginLeft: idx === 0 ? 0 : -6 }}>
-                        <span className={checkStatus === 'partial' && a.isChecked ? 'opacity-30 grayscale' : ''}>
-                          <Avatar nickname={a.nickname} profileImage={a.profileImage} size={24} />
-                        </span>
-                        {checkStatus === 'partial' && a.isChecked && (
-                          <span className="absolute -bottom-0.5 -right-0.5 flex h-3 w-3 items-center justify-center rounded-full bg-primary-500 ring-1 ring-white">
-                            <svg width="6" height="5" viewBox="0 0 7 6" fill="none">
-                              <path d="M1 3L2.8 5L6 1" stroke="white" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
-                          </span>
-                        )}
-                      </span>
-                    ))}
-                    {item.assignees.length > 3 && (
-                      <span
-                        className="checklist-assignee-overflow flex items-center justify-center rounded-full bg-gray-100 text-[10px] font-semibold text-gray-500 ring-1 ring-white"
-                        style={{ width: 24, height: 24, marginLeft: -6 }}
-                      >
-                        +{item.assignees.length - 3}
-                      </span>
-                    )}
+                    {(() => {
+                      const baseSize = 24;
+                      const hasOverflow = item.assignees.length > 2;
+                      const tw = 2 * baseSize - Math.round(baseSize * 0.27);
+                      const avatarSize = hasOverflow ? Math.floor(tw / (3 - 2 * 0.27)) : baseSize;
+                      const ol = Math.round(avatarSize * 0.27);
+                      return (
+                        <>
+                          {item.assignees.slice(0, 2).map((a, idx) => (
+                            <span key={a.memberId} className="relative" style={{ marginLeft: idx === 0 ? 0 : -ol }}>
+                              <span className={checkStatus === 'partial' && a.isChecked ? 'opacity-30 grayscale' : ''}>
+                                <Avatar nickname={a.nickname} profileImage={a.profileImage} size={avatarSize} />
+                              </span>
+                              {checkStatus === 'partial' && a.isChecked && (
+                                <span className="absolute -bottom-0.5 -right-0.5 flex h-3 w-3 items-center justify-center rounded-full bg-primary-500 ring-1 ring-white">
+                                  <svg width="6" height="5" viewBox="0 0 7 6" fill="none">
+                                    <path d="M1 3L2.8 5L6 1" stroke="white" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+                                  </svg>
+                                </span>
+                              )}
+                            </span>
+                          ))}
+                          {hasOverflow && (
+                            <span
+                              className="checklist-assignee-overflow flex items-center justify-center rounded-full bg-gray-100 font-semibold text-gray-500 ring-1 ring-white"
+                              style={{ width: avatarSize, height: avatarSize, marginLeft: -ol, fontSize: Math.round(avatarSize * 0.4) }}
+                            >
+                              +{item.assignees.length - 2}
+                            </span>
+                          )}
+                        </>
+                      );
+                    })()}
                   </span>
                 )}
               </button>

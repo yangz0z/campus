@@ -138,10 +138,17 @@ export class CampService {
         startDate: m.camp.startDate,
         endDate: m.camp.endDate,
         season: m.camp.season,
-        members: m.camp.members.map((cm) => ({
-          nickname: cm.user.nickname,
-          profileImage: cm.user.profileImage,
-        })),
+        members: [...m.camp.members]
+          .sort((a, b) => {
+            if (a.role === 'owner' && b.role !== 'owner') return -1;
+            if (a.role !== 'owner' && b.role === 'owner') return 1;
+            return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+          })
+          .map((cm) => ({
+            nickname: cm.user.nickname,
+            profileImage: cm.user.profileImage,
+            role: cm.role,
+          })),
       })),
     };
   }

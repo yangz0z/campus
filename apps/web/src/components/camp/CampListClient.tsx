@@ -8,6 +8,7 @@ import type { CampSummary } from '@campus/shared';
 import { dayjs, formatDateShort, calcNights } from '@campus/shared';
 import SwipeRow from '@/components/ui/SwipeRow';
 import CampEditSheet from './CampEditSheet';
+import AvatarGroup from './shared/AvatarGroup';
 import CampDeleteSheet from './CampDeleteSheet';
 
 interface CampRowClientProps {
@@ -81,38 +82,7 @@ function CampRowClient({ camp, index, isLast, onEdit, onDelete }: CampRowClientP
                     <span aria-hidden>·</span>
                     <span>{calcNights(camp.startDate, camp.endDate)}</span>
                   </p>
-                  {camp.members.length > 1 && (
-                    <div className="camp-members flex items-center">
-                      {camp.members.slice(0, 2).map((member, i) => (
-                        member.profileImage ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            key={i}
-                            src={member.profileImage}
-                            alt={member.nickname}
-                            style={{ marginLeft: i === 0 ? 0 : -5 }}
-                            className="h-[18px] w-[18px] rounded-full object-cover ring-1 ring-white"
-                          />
-                        ) : (
-                          <span
-                            key={i}
-                            style={{ marginLeft: i === 0 ? 0 : -5, fontSize: 7 }}
-                            className="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full bg-primary-100 font-semibold text-primary-700 ring-1 ring-white"
-                          >
-                            {member.nickname[0]}
-                          </span>
-                        )
-                      ))}
-                      {camp.members.length > 2 && (
-                        <span
-                          style={{ marginLeft: -5, fontSize: 7 }}
-                          className="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full bg-gray-100 font-semibold text-gray-500 ring-1 ring-white"
-                        >
-                          +{camp.members.length - 2}
-                        </span>
-                      )}
-                    </div>
-                  )}
+                  <AvatarGroup members={camp.members} />
                 </div>
               </div>
 

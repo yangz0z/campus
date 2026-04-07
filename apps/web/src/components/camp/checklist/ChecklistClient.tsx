@@ -83,6 +83,7 @@ export default function ChecklistClient({ campId, camp, initialGroups, myMemberI
       <ChecklistHeader
         campId={campId}
         camp={camp}
+        members={members}
         showCompleted={showCompleted}
         onToggleCompleted={() => setShowCompleted((v) => !v)}
       />
