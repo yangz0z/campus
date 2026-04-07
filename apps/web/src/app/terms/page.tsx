@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import CloseButton from '@/components/shared/CloseButton';
 
 export const metadata = {
   title: '서비스 이용약관 | CampUs',
@@ -7,7 +8,10 @@ export const metadata = {
 export default function TermsPage() {
   return (
     <div className="mx-auto max-w-screen-lg px-6 py-16">
-      <h1 className="mb-8 text-2xl font-bold text-gray-900">서비스 이용약관</h1>
+      <div className="mb-8 flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-gray-900">서비스 이용약관</h1>
+        <CloseButton />
+      </div>
 
       <div className="space-y-8 text-[15px] leading-relaxed text-gray-700">
         <section>

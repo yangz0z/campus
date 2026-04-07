@@ -11,9 +11,11 @@ export default function HeroSection() {
           <span className="text-primary-600">빠짐없이</span> 챙기세요
         </h1>
         <p className="mt-4 text-base leading-relaxed text-gray-500 md:text-lg">
-          계절에 맞는 준비물 추천부터 멤버별 역할 분담까지.
+          CampUs는 캠핑 준비물 체크리스트를 만들고 관리하는 서비스입니다.
           <br className="hidden md:block" />
-          Campus와 함께라면 캠핑 준비가 쉬워집니다.
+          계절에 맞는 준비물 추천부터 멤버별 역할 분담까지,
+          <br className="hidden md:block" />
+          캠핑 준비가 쉬워집니다.
         </p>
         <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
           <Link
