@@ -149,7 +149,7 @@ export class CampService {
   async deleteCamp(user: User, campId: string) {
     const member = await this.campMemberRepository.findOne({ where: { campId, userId: user.id } });
     if (!member) throw new ForbiddenException();
-    if (member.role !== 'owner') throw new ForbiddenException('Only owner can delete camp');
+    if (member.role !== 'owner') throw new ForbiddenException('캠프 소유자만 삭제할 수 있어요.');
 
     const camp = await this.campRepository.findOne({ where: { id: campId } });
     if (!camp) throw new NotFoundException();

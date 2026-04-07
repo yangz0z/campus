@@ -1,4 +1,5 @@
 import { auth } from '@clerk/nextjs/server';
+import { ApiError } from './api-error';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://127.0.0.1:4000';
 
@@ -18,7 +19,13 @@ export async function serverFetch<T>(path: string, init?: RequestInit): Promise<
 
   if (!res.ok) {
     const body = await res.text();
-    throw new Error(`API ${res.status}: ${body}`);
+    let apiMessage: string;
+    try {
+      apiMessage = (JSON.parse(body) as { message?: string }).message ?? body;
+    } catch {
+      apiMessage = body;
+    }
+    throw new ApiError(res.status, apiMessage);
   }
 
   if (res.status === 204 || res.headers.get('content-length') === '0') {

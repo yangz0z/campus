@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import type { CampSummary } from '@campus/shared';
 import { formatDateShort, calcNights } from '@campus/shared';
 import { deleteCamp } from '@/actions/camp';
+import { useAction } from '@/hooks/useAction';
 
 const easeOut = [0.22, 1, 0.36, 1] as const;
 
@@ -16,15 +17,15 @@ interface CampDeleteSheetProps {
 
 export default function CampDeleteSheet({ camp, onClose, onDeleted }: CampDeleteSheetProps) {
   const [isDeleting, setIsDeleting] = useState(false);
+  const action = useAction();
 
   async function handleDelete() {
     setIsDeleting(true);
-    try {
-      await deleteCamp(camp.id);
+    const result = await action(() => deleteCamp(camp.id), '캠프 삭제에 실패했어요.');
+    if (result.ok) {
       onDeleted();
-    } catch {
+    } else {
       setIsDeleting(false);
-      onClose();
     }
   }
 
