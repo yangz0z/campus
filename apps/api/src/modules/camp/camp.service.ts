@@ -349,11 +349,16 @@ export class CampService {
     });
     if (!item || item.group.campId !== campId) throw new NotFoundException();
 
-    let assignee = await this.campChecklistItemAssigneeRepository.findOne({
-      where: { itemId, memberId: member.id },
+    const assignees = await this.campChecklistItemAssigneeRepository.find({
+      where: { itemId },
     });
 
+    let assignee = assignees.find((a) => a.memberId === member.id);
+
     if (!assignee) {
+      if (assignees.length > 0) {
+        throw new ForbiddenException('담당자만 체크할 수 있습니다.');
+      }
       assignee = this.campChecklistItemAssigneeRepository.create({ itemId, memberId: member.id });
     }
 

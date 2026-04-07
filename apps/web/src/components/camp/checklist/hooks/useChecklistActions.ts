@@ -48,6 +48,12 @@ export function useChecklistActions({ campId, myMemberId, members, initialGroups
   const action = useAction();
 
   async function handleToggleCheck(itemId: string, currentValue: boolean) {
+    const targetItem = groups.flatMap((g) => g.items).find((i) => i.id === itemId);
+    if (targetItem && targetItem.assignees.length > 0 && !targetItem.assignees.some((a) => a.memberId === myMemberId)) {
+      action(() => Promise.reject(), '담당자만 체크할 수 있어요. 담당자를 수정해주세요.');
+      return;
+    }
+
     const newValue = !currentValue;
     let willBeComplete = false;
     setGroups((prev) =>
