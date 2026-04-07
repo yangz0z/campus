@@ -10,12 +10,45 @@
 | Backend | Nest.js + TypeORM |
 | Frontend | Next.js (App Router) |
 | Database | PostgreSQL (로컬: Docker / 프로덕션: Neon) |
+| Auth | Clerk |
+| Infra | Docker Compose + Cloudflare Tunnel |
 
 ## 사전 준비
 
 - [Node.js](https://nodejs.org/) 22+
 - [pnpm](https://pnpm.io/) 10+
 - [Docker](https://www.docker.com/) (Docker Compose 포함)
+
+## 환경변수
+
+프로젝트 루트에 `.env` 파일을 생성합니다. Docker Compose가 이 파일에서 변수를 읽어 각 컨테이너에 주입합니다.
+
+```env
+# Clerk 인증
+CLERK_SECRET_KEY=sk_test_xxxxx
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_xxxxx
+NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
+NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-in
+NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/mypage
+NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/mypage
+
+# 프로덕션 도메인
+CORS_ORIGIN=https://camp-withus.com
+NEXT_PUBLIC_API_URL=http://localhost:4000
+NEXT_PUBLIC_WS_URL=https://api.camp-withus.com
+```
+
+| 변수 | 설명 | 기본값 |
+|------|------|--------|
+| `DATABASE_URL` | PostgreSQL 연결 URL (프로덕션) | - |
+| `POSTGRES_USER` | 로컬 DB 사용자 | `campus` |
+| `POSTGRES_PASSWORD` | 로컬 DB 비밀번호 | `campus` |
+| `POSTGRES_DB` | 로컬 DB 이름 | `campus` |
+| `CLERK_SECRET_KEY` | Clerk 시크릿 키 | - |
+| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Clerk 퍼블릭 키 | - |
+| `CORS_ORIGIN` | API CORS 허용 도메인 | `http://localhost:3000` |
+| `NEXT_PUBLIC_API_URL` | API 서버 URL (SSR용) | `http://localhost:4000` |
+| `NEXT_PUBLIC_WS_URL` | WebSocket URL (브라우저용) | `http://localhost:4000` |
 
 ## 로컬 개발 환경
 
@@ -83,16 +116,10 @@ pnpm dev --filter web   # 프론트엔드만
 
 `.env` 파일에 Neon PostgreSQL 연결 정보와 Clerk 인증 키를 설정합니다.
 
-```env
-DATABASE_URL=postgresql://username:password@ep-xxxx.region.aws.neon.tech/dbname?sslmode=require
-CLERK_SECRET_KEY=sk_live_xxxxx
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_live_xxxxx
-```
-
-### Docker로 빌드 및 실행
+### 빌드 및 실행
 
 ```bash
-docker compose --profile prod up --build
+docker compose --profile prod up --build -d
 ```
 
 | 서비스 | URL | 설명 |
@@ -107,18 +134,18 @@ docker compose --profile prod build api   # API만 빌드
 docker compose --profile prod build web   # Web만 빌드
 ```
 
-## 환경변수
+### Cloudflare Tunnel
 
-| 변수 | 설명 | 기본값 |
-|------|------|--------|
-| `DATABASE_URL` | PostgreSQL 연결 URL (프로덕션용) | - |
-| `POSTGRES_USER` | 로컬 DB 사용자 | `campus` |
-| `POSTGRES_PASSWORD` | 로컬 DB 비밀번호 | `campus` |
-| `POSTGRES_DB` | 로컬 DB 이름 | `campus` |
-| `NODE_ENV` | 실행 환경 | `development` |
-| `PORT` | API 서버 포트 | `4000` |
-| `CLERK_SECRET_KEY` | Clerk 시크릿 키 (API, Web) | - |
-| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Clerk 퍼블릭 키 (Web) | - |
+`cloudflared`를 통해 외부에 노출합니다.
+
+```bash
+cloudflared tunnel run campus
+```
+
+| 도메인 | 서비스 |
+|--------|--------|
+| camp-withus.com | Web (localhost:3000) |
+| api.camp-withus.com | API (localhost:4000) |
 
 ## 프로젝트 구조
 
@@ -140,6 +167,7 @@ campus/
 │       │   └── page.tsx
 │       └── Dockerfile
 ├── packages/
+│   ├── shared/               # 공유 타입/유틸
 │   ├── typescript-config/    # 공유 TypeScript 설정
 │   └── eslint-config/        # 공유 ESLint 설정
 ├── docker-compose.yml        # dev/prod profiles 통합
