@@ -53,7 +53,7 @@ export default function DateRangeCalendar({ startDate, endDate, onChange, minDat
   }, [viewDate]);
 
   function handleDateClick(date: string) {
-    if (min && date < min) return;
+    if (min !== null && date < min) return;
 
     // 범위가 이미 잡혀있거나, startDate만 있는데 클릭 날짜가 더 이전이면 → 리셋
     if (startDate && endDate) {

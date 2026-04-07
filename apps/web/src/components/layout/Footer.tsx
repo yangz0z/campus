@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 export default function Footer() {
   return (
     <footer className="site-footer border-t border-earth-200 bg-white mt-30">
@@ -32,10 +34,20 @@ export default function Footer() {
           </span>
         </div>
 
-        {/* 카피라이트 */}
-        <p className="site-footer-copyright text-[12px] text-gray-300">
-          © {new Date().getFullYear()} CampUs. All rights reserved.
-        </p>
+        {/* 링크 & 카피라이트 */}
+        <div className="flex items-center gap-4">
+          <nav className="site-footer-links flex gap-3">
+            <Link href="/privacy" className="text-[12px] text-gray-400 hover:text-gray-600 transition-colors">
+              개인정보처리방침
+            </Link>
+            <Link href="/terms" className="text-[12px] text-gray-400 hover:text-gray-600 transition-colors">
+              이용약관
+            </Link>
+          </nav>
+          <p className="site-footer-copyright text-[12px] text-gray-300">
+            © {new Date().getFullYear()} CampUs. All rights reserved.
+          </p>
+        </div>
 
       </div>
     </footer>
