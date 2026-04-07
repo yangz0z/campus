@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import type { AssigneeInfo, CampMemberInfo } from '@campus/shared';
-import { useSortableStyle } from '@/components/ui/dnd';
+import { GripHandle, useSortableStyle } from '@/components/ui/dnd';
 import Avatar from '../shared/Avatar';
 
 type CheckStatus = 'none' | 'partial' | 'complete';
@@ -127,7 +127,7 @@ export default function ChecklistItem({
   };
 
   return (
-    <div ref={setNodeRef} style={sortableStyle} {...attributes} {...listeners} className="checklist-item group relative">
+    <div ref={setNodeRef} style={sortableStyle} className="checklist-item group relative">
       {!isFirst && <div className="checklist-item-divider mx-5 h-px bg-gray-100" />}
 
       <div
@@ -156,9 +156,10 @@ export default function ChecklistItem({
         {/* 콘텐츠 */}
         <div
           style={contentStyle}
-          className="relative z-10 flex items-center gap-2 bg-white px-5 py-2.5"
+          className="relative z-10 flex items-center gap-2 bg-white pl-2 pr-5 py-2.5"
           onClick={() => { if (isSwipeOpen) closeSwipe(); }}
         >
+          <GripHandle listeners={listeners} attributes={attributes} className="text-gray-200" iconClassName="h-3.5 w-3.5" />
           {/* 체크박스 (3단계) */}
           <button
             type="button"
