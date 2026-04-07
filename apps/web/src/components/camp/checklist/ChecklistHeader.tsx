@@ -27,19 +27,27 @@ export default function ChecklistHeader({ campId, camp, showCompleted, onToggleC
     const result = await action(() => createCampInvite(campId), '초대 링크 생성에 실패했어요.');
     if (result.ok) {
       const url = `${window.location.origin}/invite/${result.data.token}`;
-      if (navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(url);
+      if (navigator.share) {
+        try {
+          await navigator.share({ title: camp?.title ?? '캠프 초대', url });
+        } catch {
+          // 사용자가 공유를 취소한 경우 무시
+        }
       } else {
-        const textarea = document.createElement('textarea');
-        textarea.value = url;
-        textarea.style.position = 'fixed';
-        textarea.style.opacity = '0';
-        document.body.appendChild(textarea);
-        textarea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textarea);
+        try {
+          await navigator.clipboard.writeText(url);
+        } catch {
+          const textarea = document.createElement('textarea');
+          textarea.value = url;
+          textarea.style.position = 'fixed';
+          textarea.style.opacity = '0';
+          document.body.appendChild(textarea);
+          textarea.select();
+          document.execCommand('copy');
+          document.body.removeChild(textarea);
+        }
+        toast('초대링크가 복사되었습니다. 링크를 공유해 캠프에 초대해보세요.');
       }
-      toast('초대링크가 복사되었습니다. 링크를 공유해 캠프에 초대해보세요.');
     }
     setInviting(false);
   }
