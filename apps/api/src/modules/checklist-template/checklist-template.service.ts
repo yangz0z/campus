@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { Season } from '@campus/shared';
@@ -59,17 +59,32 @@ export class ChecklistTemplateService {
     });
 
     return this.dataSource.transaction(async (manager) => {
-      const userTemplate = manager.create(ChecklistTemplate, {
-        title: '나의 체크리스트 템플릿',
-        ownerType: 'user',
-        userId: user.id,
-        sourceTemplateId: systemTemplate?.id ?? null,
-        seasons: Object.values(Season),
-        isActive: true,
-      });
-      const savedTemplate = await manager.save(ChecklistTemplate, userTemplate);
+      // ON CONFLICT DO NOTHING: 동시 요청 시 중복 insert 무시
+      await manager
+        .createQueryBuilder()
+        .insert()
+        .into(ChecklistTemplate)
+        .values({
+          title: '나의 체크리스트 템플릿',
+          ownerType: 'user',
+          userId: user.id,
+          sourceTemplateId: systemTemplate?.id ?? null,
+          seasons: Object.values(Season),
+          isActive: true,
+        })
+        .orIgnore()
+        .execute();
 
-      if (systemTemplate) {
+      const savedTemplate = await manager.findOneOrFail(ChecklistTemplate, {
+        where: { userId: user.id, ownerType: 'user' },
+      });
+
+      // 이미 그룹이 있으면 (이전 요청에서 생성됨) clone 스킵
+      const existingGroups = await manager.count(ChecklistTemplateGroup, {
+        where: { templateId: savedTemplate.id },
+      });
+
+      if (existingGroups === 0 && systemTemplate) {
         for (const sGroup of systemTemplate.groups) {
           const group = manager.create(ChecklistTemplateGroup, {
             templateId: savedTemplate.id,
