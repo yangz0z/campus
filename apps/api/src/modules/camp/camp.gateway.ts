@@ -72,7 +72,7 @@ export class CampGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     // CampMember에서 user relation을 통해 clerkUserId(=providerId)로 멤버 확인
     const member = await this.campMemberRepository.findOne({
-      where: { campId: data.campId, user: { provider: 'google', providerId: clerkUserId } },
+      where: { campId: data.campId, user: { providerId: clerkUserId } },
       relations: ['user'],
     });
 
