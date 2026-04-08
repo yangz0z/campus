@@ -20,15 +20,20 @@ export class AuthService {
   }
 
   async syncUser(clerkUserId: string): Promise<User> {
+    const clerkUser = await this.clerkClient.users.getUser(clerkUserId);
+
+    const rawProvider = clerkUser.externalAccounts[0]?.provider ?? 'email';
+    const provider = rawProvider.startsWith('oauth_')
+      ? rawProvider.slice('oauth_'.length)
+      : rawProvider;
+
     const existing = await this.userRepository.findOne({
-      where: { provider: 'google', providerId: clerkUserId },
+      where: { provider, providerId: clerkUserId },
     });
     if (existing) return existing;
 
-    const clerkUser = await this.clerkClient.users.getUser(clerkUserId);
-
     const user = this.userRepository.create({
-      provider: 'google',
+      provider,
       providerId: clerkUserId,
       email: clerkUser.emailAddresses[0]?.emailAddress ?? null,
       nickname: clerkUser.firstName
