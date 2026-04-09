@@ -52,6 +52,16 @@ export class CampController {
     return this.campService.leaveCamp(user, campId);
   }
 
+  @Delete(':campId/members/:memberId')
+  @HttpCode(204)
+  kickMember(
+    @CurrentUser() user: User,
+    @Param('campId', ParseUUIDPipe) campId: string,
+    @Param('memberId', ParseUUIDPipe) memberId: string,
+  ) {
+    return this.campService.kickMember(user, campId, memberId);
+  }
+
   @Delete(':campId')
   @HttpCode(204)
   deleteCamp(

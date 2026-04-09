@@ -135,7 +135,7 @@ export default function ChecklistHeader({ campId, camp, members, showCompleted, 
                 </p>
                 {members.length >= 2 && (
                   <div className="flex items-center gap-2">
-                    <AvatarGroup members={members} size={22} />
+                    <AvatarGroup members={members} size={22} isOwner={camp?.myRole === 'owner'} campId={campId} />
                     <span className="text-[13px] text-gray-500">
                       {members.length}명 참여 중
                     </span>
