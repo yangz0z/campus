@@ -2,17 +2,21 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useClerk } from '@clerk/nextjs';
 import type { CampSummary } from '@campus/shared';
 import { formatDateShort, calcNights } from '@campus/shared';
 import { acceptCampInvite } from '@/actions/camp';
+import Avatar from '@/components/camp/shared/Avatar';
 
 interface InviteConfirmClientProps {
   token: string;
   camp: CampSummary;
+  user: { nickname: string; profileImage: string | null };
 }
 
-export default function InviteConfirmClient({ token, camp }: InviteConfirmClientProps) {
+export default function InviteConfirmClient({ token, camp, user }: InviteConfirmClientProps) {
   const router = useRouter();
+  const { signOut } = useClerk();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,6 +30,10 @@ export default function InviteConfirmClient({ token, camp }: InviteConfirmClient
       setError('참가에 실패했습니다. 다시 시도해 주세요.');
       setLoading(false);
     }
+  }
+
+  async function handleSwitchAccount() {
+    await signOut({ redirectUrl: `/sign-in?redirect_url=/invite/${token}` });
   }
 
   return (
@@ -58,6 +66,23 @@ export default function InviteConfirmClient({ token, camp }: InviteConfirmClient
               <span aria-hidden className="text-gray-300">·</span>
               {calcNights(camp.startDate, camp.endDate)}
             </p>
+          </div>
+        </div>
+
+        <div className="mt-3 overflow-hidden rounded-2xl bg-white px-5 py-4 shadow-[0_2px_12px_rgba(0,0,0,0.06)]">
+          <p className="mb-2.5 text-[11px] font-medium text-gray-400">참가할 계정</p>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <Avatar nickname={user.nickname} profileImage={user.profileImage} size={32} />
+              <span className="text-[14px] font-medium text-gray-800">{user.nickname}</span>
+            </div>
+            <button
+              type="button"
+              onClick={handleSwitchAccount}
+              className="text-[12px] text-gray-400 transition-colors hover:text-gray-600"
+            >
+              다른 계정으로 →
+            </button>
           </div>
         </div>
 
