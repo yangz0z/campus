@@ -1,4 +1,4 @@
-import { auth } from '@clerk/nextjs/server';
+import { auth, currentUser } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import { getCampInviteInfo } from '@/actions/camp';
 import InviteConfirmClient from './InviteConfirmClient';
@@ -10,6 +10,12 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
   if (!userId) {
     redirect(`/sign-in?redirect_url=/invite/${token}`);
   }
+
+  const clerkUser = await currentUser();
+  const user = {
+    nickname: clerkUser?.firstName ?? clerkUser?.emailAddresses?.[0]?.emailAddress ?? '사용자',
+    profileImage: clerkUser?.imageUrl ?? null,
+  };
 
   let inviteInfo;
   try {
@@ -26,5 +32,5 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
     );
   }
 
-  return <InviteConfirmClient token={token} camp={inviteInfo.camp} />;
+  return <InviteConfirmClient token={token} camp={inviteInfo.camp} user={user} />;
 }

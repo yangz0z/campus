@@ -1,8 +1,12 @@
 'use client';
 
+import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import Avatar from './Avatar';
+import CampKickSheet from '../CampKickSheet';
 
 interface MemberListSheetMember {
+  memberId?: string;
   nickname: string;
   profileImage: string | null;
   role?: 'owner' | 'member';
@@ -12,9 +16,13 @@ interface MemberListSheetProps {
   title?: string;
   members: MemberListSheetMember[];
   onClose: () => void;
+  isOwner?: boolean;
+  campId?: string;
 }
 
-export default function MemberListSheet({ title = '참여자', members, onClose }: MemberListSheetProps) {
+export default function MemberListSheet({ title = '참여자', members, onClose, isOwner, campId }: MemberListSheetProps) {
+  const [kickingMember, setKickingMember] = useState<{ memberId: string; nickname: string } | null>(null);
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center" onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
@@ -28,10 +36,29 @@ export default function MemberListSheet({ title = '참여자', members, onClose 
                 {m.nickname}
                 {m.role === 'owner' && <span className="ml-1.5 text-[11px] font-normal text-gray-400">방장</span>}
               </span>
+              {isOwner && m.memberId && m.role !== 'owner' && (
+                <button
+                  type="button"
+                  onClick={() => setKickingMember({ memberId: m.memberId!, nickname: m.nickname })}
+                  className="ml-auto text-[12px] text-gray-400 transition-colors hover:text-red-500"
+                >
+                  내보내기
+                </button>
+              )}
             </li>
           ))}
         </ul>
       </div>
+
+      {kickingMember && campId && createPortal(
+        <CampKickSheet
+          campId={campId}
+          member={kickingMember}
+          onClose={() => setKickingMember(null)}
+          onKicked={() => setKickingMember(null)}
+        />,
+        document.body,
+      )}
     </div>
   );
 }

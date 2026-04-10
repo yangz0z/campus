@@ -165,6 +165,19 @@ export class CampService {
     this.campGateway.emitToCamp(campId, SocketEvents.MEMBER_LEFT, { campId, memberId });
   }
 
+  async kickMember(requestingUser: User, campId: string, targetMemberId: string) {
+    const requester = await this.campMemberRepository.findOne({ where: { campId, userId: requestingUser.id } });
+    if (!requester) throw new ForbiddenException();
+    if (requester.role !== 'owner') throw new ForbiddenException('방장만 멤버를 내보낼 수 있어요.');
+
+    const target = await this.campMemberRepository.findOne({ where: { id: targetMemberId, campId } });
+    if (!target) throw new NotFoundException();
+    if (target.role === 'owner') throw new ForbiddenException('방장은 내보낼 수 없어요.');
+
+    await this.campMemberRepository.remove(target);
+    this.campGateway.emitToCamp(campId, SocketEvents.MEMBER_LEFT, { campId, memberId: targetMemberId });
+  }
+
   async deleteCamp(user: User, campId: string) {
     const member = await this.campMemberRepository.findOne({ where: { campId, userId: user.id } });
     if (!member) throw new ForbiddenException();

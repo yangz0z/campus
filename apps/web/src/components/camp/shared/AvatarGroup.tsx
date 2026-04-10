@@ -6,6 +6,7 @@ import Avatar from './Avatar';
 import MemberListSheet from './MemberListSheet';
 
 interface AvatarGroupMember {
+  memberId?: string;
   nickname: string;
   profileImage: string | null;
   role?: 'owner' | 'member';
@@ -15,9 +16,11 @@ interface AvatarGroupProps {
   members: AvatarGroupMember[];
   size?: number;
   onClick?: () => void;
+  isOwner?: boolean;
+  campId?: string;
 }
 
-export default function AvatarGroup({ members, size = 18, onClick }: AvatarGroupProps) {
+export default function AvatarGroup({ members, size = 18, onClick, isOwner, campId }: AvatarGroupProps) {
   const [showSheet, setShowSheet] = useState(false);
 
   if (members.length < 2) return null;
@@ -56,7 +59,7 @@ export default function AvatarGroup({ members, size = 18, onClick }: AvatarGroup
       </button>
 
       {showSheet && createPortal(
-        <MemberListSheet members={members} onClose={() => setShowSheet(false)} />,
+        <MemberListSheet members={members} onClose={() => setShowSheet(false)} isOwner={isOwner} campId={campId} />,
         document.body,
       )}
     </>
