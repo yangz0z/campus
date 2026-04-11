@@ -130,36 +130,6 @@ export class CampService {
       order: { createdAt: 'DESC' },
     });
 
-    // D-Day 캠프에 대해서만 미완료 항목 수 계산
-    const today = new Date().toISOString().split('T')[0];
-    const todayCampIds = members
-      .filter((m) => m.camp.startDate === today)
-      .map((m) => m.camp.id);
-
-    const incompleteCountByCamp = new Map<string, number>();
-    if (todayCampIds.length > 0) {
-      const groups = await this.campChecklistGroupRepository.find({
-        where: { campId: In(todayCampIds) },
-        relations: ['items', 'items.assignees'],
-      });
-
-      for (const campId of todayCampIds) {
-        incompleteCountByCamp.set(campId, 0);
-      }
-      for (const group of groups) {
-        for (const item of group.items) {
-          const isComplete =
-            item.assignees.length > 0 && item.assignees.every((a) => a.isChecked);
-          if (!isComplete) {
-            incompleteCountByCamp.set(
-              group.campId,
-              (incompleteCountByCamp.get(group.campId) ?? 0) + 1,
-            );
-          }
-        }
-      }
-    }
-
     return {
       camps: members.map((m) => ({
         id: m.camp.id,
@@ -169,7 +139,6 @@ export class CampService {
         endDate: m.camp.endDate,
         season: m.camp.season,
         myRole: m.role,
-        incompleteCount: incompleteCountByCamp.get(m.camp.id) ?? null,
         members: [...m.camp.members]
           .sort((a, b) => {
             if (a.role === 'owner' && b.role !== 'owner') return -1;
@@ -183,6 +152,27 @@ export class CampService {
           })),
       })),
     };
+  }
+
+  async getIncompleteCount(user: User, campId: string): Promise<{ incompleteCount: number }> {
+    const member = await this.campMemberRepository.findOne({ where: { campId, userId: user.id } });
+    if (!member) throw new ForbiddenException();
+
+    const groups = await this.campChecklistGroupRepository.find({
+      where: { campId },
+      relations: ['items', 'items.assignees'],
+    });
+
+    let incompleteCount = 0;
+    for (const group of groups) {
+      for (const item of group.items) {
+        const isComplete =
+          item.assignees.length > 0 && item.assignees.every((a) => a.isChecked);
+        if (!isComplete) incompleteCount++;
+      }
+    }
+
+    return { incompleteCount };
   }
 
   async leaveCamp(user: User, campId: string) {

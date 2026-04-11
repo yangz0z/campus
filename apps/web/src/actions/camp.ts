@@ -13,6 +13,7 @@ import type {
   GetCampInviteInfoResponse,
   GetCampMembersResponse,
   GetChecklistResponse,
+  GetIncompleteCountResponse,
   GetMyCampsResponse,
   SetItemAssigneesRequest,
   ToggleCheckRequest,
@@ -39,6 +40,10 @@ export async function getCampChecklist(campId: string): Promise<GetChecklistResp
 
 export async function getCampMembers(campId: string): Promise<GetCampMembersResponse> {
   return serverFetch<GetCampMembersResponse>(`/camps/${campId}/members`);
+}
+
+export async function getIncompleteCount(campId: string): Promise<GetIncompleteCountResponse> {
+  return serverFetch<GetIncompleteCountResponse>(`/camps/${campId}/incomplete-count`);
 }
 
 // ── 뮤테이션 ──
