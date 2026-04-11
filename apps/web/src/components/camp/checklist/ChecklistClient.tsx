@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import ChecklistCelebration from './ChecklistCelebration';
 import type { CampMemberInfo, CampSummary, ChecklistGroup, ChecklistItem } from '@campus/shared';
 import { SortableContainer } from '@/components/ui/dnd';
 import { useChecklistActions } from './hooks/useChecklistActions';
@@ -22,6 +23,8 @@ interface ChecklistClientProps {
 
 export default function ChecklistClient({ campId, camp, initialGroups, myMemberId, members: initialMembers }: ChecklistClientProps) {
   const [members, setMembers] = useState(initialMembers);
+  const [showCelebration, setShowCelebration] = useState(false);
+  const prevAllCompleteRef = useRef(false);
   const { socket, socketId } = useCampSocket(campId);
   const actions = useChecklistActions({ campId, myMemberId, members, initialGroups, socketId });
   const {
@@ -38,6 +41,22 @@ export default function ChecklistClient({ campId, camp, initialGroups, myMemberI
 
   const dnd = useChecklistDnd({ campId, groups, setGroups, socketId });
   useChecklistSync({ socket, setGroups, setMembers });
+
+  useEffect(() => {
+    const items = groups.flatMap((g) => g.items);
+    const allComplete =
+      items.length > 0 &&
+      items.every((item) =>
+        item.assignees.length === 0
+          ? item.isCheckedByMe
+          : item.assignees.every((a) => a.isChecked)
+      );
+    if (allComplete && !prevAllCompleteRef.current) {
+      setShowCelebration(true);
+      setTimeout(() => setShowCelebration(false), 2500);
+    }
+    prevAllCompleteRef.current = allComplete;
+  }, [groups]);
 
   // 그룹 네비게이션
   const groupRefs = useRef<Map<string, HTMLElement>>(new Map());
@@ -182,6 +201,8 @@ export default function ChecklistClient({ campId, camp, initialGroups, myMemberI
         onScrollUp={() => scrollToGroup('up')}
         onScrollDown={() => scrollToGroup('down')}
       />
+
+      {showCelebration && <ChecklistCelebration />}
 
       {assigningItem && (
         <AssigneeSheet

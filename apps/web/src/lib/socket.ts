@@ -4,14 +4,13 @@ const WS_URL = process.env.NEXT_PUBLIC_WS_URL ?? 'http://localhost:4000';
 
 let socket: Socket | null = null;
 
-export function getSocket(token: string): Socket {
-  if (socket) {
-    socket.auth = { token };
-    return socket;
-  }
+export function getSocket(getToken: () => Promise<string | null>): Socket {
+  if (socket) return socket;
 
   socket = io(WS_URL, {
-    auth: { token },
+    auth: (cb: (data: { token: string }) => void) => {
+      getToken().then((token) => cb({ token: token ?? '' }));
+    },
     transports: ['websocket'],
     reconnection: true,
     reconnectionAttempts: 10,
