@@ -24,21 +24,8 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    let mounted = true;
-
-    async function connect() {
-      const token = await getTokenRef.current();
-      if (!token || !mounted) return;
-
-      const sock = getSocket(token);
-      if (mounted) setSocket(sock);
-    }
-
-    connect();
-
-    return () => {
-      mounted = false;
-    };
+    const sock = getSocket(() => getTokenRef.current());
+    setSocket(sock);
   }, [isSignedIn]);
 
   return (
