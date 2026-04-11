@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { getMyCamps } from '@/actions/camp';
 import CampListClient from '@/components/camp/CampListClient';
+import { ROUTES } from '@/constants/routes';
 
 export default async function MypagePage() {
   const data = await getMyCamps();
@@ -13,14 +14,14 @@ export default async function MypagePage() {
           <h1 className="mypage-title text-[22px] font-bold text-gray-900">내 캠프</h1>
           <div className="flex items-center gap-2">
             <Link
-              href="/template"
+              href={ROUTES.TEMPLATE}
               className="flex items-center gap-1.5 rounded-full border border-primary-200 bg-white px-3.5 py-2 text-[13px] font-semibold text-primary-700 transition-colors duration-100 hover:bg-primary-50 active:bg-primary-100"
             >
               <span className="text-sm leading-none">📋</span>
               템플릿 관리
             </Link>
             <Link
-              href="/camp/new"
+              href={ROUTES.CAMP.NEW}
               className="new-camp-btn flex items-center gap-1.5 rounded-full bg-primary-600 px-4 py-2 text-[13px] font-semibold text-white shadow-[0_2px_8px_rgba(22,163,74,0.3)] transition-colors duration-100 hover:bg-primary-700 active:bg-primary-800"
             >
               <span className="new-camp-btn-icon text-sm leading-none">🏕️</span>

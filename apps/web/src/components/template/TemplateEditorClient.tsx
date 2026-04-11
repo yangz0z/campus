@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
+import { ROUTES } from '@/constants/routes';
 import { Season } from '@campus/shared';
 import type { GetMyTemplateResponse } from '@campus/shared';
 import { saveMyTemplate } from '@/actions/template';
@@ -421,9 +422,9 @@ export default function TemplateEditorClient({ initialData }: Props) {
   }, [savedSnapshot, confirm]);
 
   const handleBack = useCallback(async () => {
-    if (!isDirty) { router.push('/mypage'); return; }
+    if (!isDirty) { router.push(ROUTES.CAMP_LIST); return; }
     const ok = await confirm({ title: '저장하지 않은 변경 사항', description: '변경 사항을 저장하지 않고 나갈까요?', confirmLabel: '나가기' });
-    if (ok) router.push('/mypage');
+    if (ok) router.push(ROUTES.CAMP_LIST);
   }, [isDirty, router, confirm]);
 
   return (

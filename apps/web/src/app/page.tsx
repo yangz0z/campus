@@ -7,11 +7,12 @@ import SeasonSection from '@/components/home/SeasonSection';
 import StepSection from '@/components/home/StepSection';
 import FeatureSection from '@/components/home/FeatureSection';
 import CtaSection from '@/components/home/CtaSection';
+import { ROUTES } from '@/constants/routes';
 
 export default async function Home() {
   const { userId } = await auth();
   if (userId) {
-    redirect('/mypage');
+    redirect(ROUTES.CAMP_LIST);
   }
 
   return (

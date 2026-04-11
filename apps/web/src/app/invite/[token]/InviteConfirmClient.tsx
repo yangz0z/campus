@@ -7,6 +7,7 @@ import type { CampSummary } from '@campus/shared';
 import { formatDateShort, calcNights } from '@campus/shared';
 import { acceptCampInvite } from '@/actions/camp';
 import Avatar from '@/components/camp/shared/Avatar';
+import { ROUTES } from '@/constants/routes';
 
 interface InviteConfirmClientProps {
   token: string;
@@ -25,7 +26,7 @@ export default function InviteConfirmClient({ token, camp, user }: InviteConfirm
     setError(null);
     try {
       const { campId } = await acceptCampInvite(token);
-      router.push(`/camp/${campId}/checklist`);
+      router.push(ROUTES.CAMP.CHECKLIST(campId));
     } catch {
       setError('참가에 실패했습니다. 다시 시도해 주세요.');
       setLoading(false);
@@ -33,7 +34,7 @@ export default function InviteConfirmClient({ token, camp, user }: InviteConfirm
   }
 
   async function handleSwitchAccount() {
-    await signOut({ redirectUrl: `/sign-in?redirect_url=/invite/${token}` });
+    await signOut({ redirectUrl: ROUTES.INVITE.WITH_REDIRECT(token) });
   }
 
   return (

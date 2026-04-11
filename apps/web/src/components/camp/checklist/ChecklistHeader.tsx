@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import type { CampMemberInfo, CampSummary } from '@campus/shared';
+import { ROUTES } from '@/constants/routes';
 import AvatarGroup from '../shared/AvatarGroup';
 import { formatDateShort, calcNights } from '@campus/shared';
 import { createCampInvite } from '@/actions/camp';
@@ -51,7 +52,7 @@ export default function ChecklistHeader({ campId, camp, members, showCompleted, 
       <div className="checklist-header-inner mx-auto max-w-sm">
         <div className="flex items-center justify-between">
           <Link
-            href="/mypage"
+            href={ROUTES.CAMP_LIST}
             className="checklist-back inline-flex items-center gap-1 text-[13px] text-gray-400 transition-colors hover:text-gray-600"
           >
             <svg width="6" height="11" viewBox="0 0 6 11" fill="none">
