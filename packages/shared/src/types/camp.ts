@@ -108,6 +108,8 @@ export interface CampSummary {
   endDate: string;
   season: Season;
   myRole: 'owner' | 'member';
+  /** D-Day 캠프의 미완료 항목 수. D-Day가 아니면 null */
+  incompleteCount: number | null;
   members: CampSummaryMember[];
 }
 

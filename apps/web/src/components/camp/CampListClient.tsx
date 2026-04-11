@@ -104,7 +104,22 @@ function CampRowClient({ camp, index, isLast, onEdit, onDelete, onLeave }: CampR
               </div>
 
               {isToday ? (
-                <span className="shrink-0 rounded-full bg-primary-100 px-3 py-1 text-[12px] font-bold text-primary-700">D-Day</span>
+                <div className="shrink-0 flex flex-col items-center gap-1.5">
+                  {/* 말풍선 */}
+                  {camp.incompleteCount !== null && (
+                    <div className="relative">
+                      <span className={`block whitespace-nowrap rounded-xl px-2.5 py-1 text-[11px] font-bold text-white shadow-sm ${camp.incompleteCount === 0 ? 'bg-primary-500' : 'bg-orange-400'}`}>
+                        {camp.incompleteCount === 0 ? '모두 완료 🎉' : `미완료 ${camp.incompleteCount}개`}
+                      </span>
+                      {/* 말풍선 꼬리 */}
+                      <span
+                        className={`absolute left-1/2 top-full -translate-x-1/2 border-x-[5px] border-t-[5px] border-x-transparent ${camp.incompleteCount === 0 ? 'border-t-primary-500' : 'border-t-orange-400'}`}
+                        aria-hidden="true"
+                      />
+                    </div>
+                  )}
+                  <span className="rounded-full bg-primary-100 px-3 py-1 text-[12px] font-bold text-primary-700">D-Day</span>
+                </div>
               ) : diff > 0 ? (
                 <span className={`shrink-0 rounded-full px-3 py-1 text-[12px] font-bold ${isSoon ? 'bg-warm-100 text-warm-500' : 'bg-primary-50 text-primary-600'}`}>
                   D-{diff}

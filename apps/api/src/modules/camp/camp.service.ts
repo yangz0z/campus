@@ -1,7 +1,7 @@
 import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { randomUUID } from 'crypto';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, In, Repository } from 'typeorm';
 import { User } from '../user/entities/user.entity';
 import { ChecklistTemplate } from '../checklist-template/entities/checklist-template.entity';
 import { Camp } from './entities/camp.entity';
@@ -130,6 +130,36 @@ export class CampService {
       order: { createdAt: 'DESC' },
     });
 
+    // D-Day 캠프에 대해서만 미완료 항목 수 계산
+    const today = new Date().toISOString().split('T')[0];
+    const todayCampIds = members
+      .filter((m) => m.camp.startDate === today)
+      .map((m) => m.camp.id);
+
+    const incompleteCountByCamp = new Map<string, number>();
+    if (todayCampIds.length > 0) {
+      const groups = await this.campChecklistGroupRepository.find({
+        where: { campId: In(todayCampIds) },
+        relations: ['items', 'items.assignees'],
+      });
+
+      for (const campId of todayCampIds) {
+        incompleteCountByCamp.set(campId, 0);
+      }
+      for (const group of groups) {
+        for (const item of group.items) {
+          const isComplete =
+            item.assignees.length > 0 && item.assignees.every((a) => a.isChecked);
+          if (!isComplete) {
+            incompleteCountByCamp.set(
+              group.campId,
+              (incompleteCountByCamp.get(group.campId) ?? 0) + 1,
+            );
+          }
+        }
+      }
+    }
+
     return {
       camps: members.map((m) => ({
         id: m.camp.id,
@@ -139,6 +169,7 @@ export class CampService {
         endDate: m.camp.endDate,
         season: m.camp.season,
         myRole: m.role,
+        incompleteCount: incompleteCountByCamp.get(m.camp.id) ?? null,
         members: [...m.camp.members]
           .sort((a, b) => {
             if (a.role === 'owner' && b.role !== 'owner') return -1;
