@@ -30,7 +30,7 @@ export default function ChecklistCelebration() {
             transition={{ duration: 0.3, delay: 0.2, ease: easeOut }}
           >
             <p className="mt-4 text-[22px] font-bold text-gray-900">모두 완료했어요!</p>
-            <p className="mt-1 text-[14px] text-gray-500">캠프 준비 완료! 🏕️</p>
+            <p className="mt-1 text-[14px] text-gray-500">이제 떠나기만 하면 돼요!</p>
           </motion.div>
         </motion.div>
       </div>
