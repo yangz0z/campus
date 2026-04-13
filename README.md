@@ -16,101 +16,46 @@ https://camp-withus.com
 
 ## 사전 준비
 
-- [Node.js](https://nodejs.org/) 22+
+- [Node.js](https://nodejs.org/) 22 ~ 24 (`nvm use`로 `.nvmrc` 적용)
 - [pnpm](https://pnpm.io/) 10+
-- [Docker](https://www.docker.com/) (Docker Compose 포함)
+- [Docker](https://www.docker.com/) (PostgreSQL 컨테이너용, 클라우드 DB 사용 시 불필요)
+
+> **주의**: Node 25+에서는 SSR `localStorage` 호환 문제가 있으므로 22 ~ 24를 사용하세요.
 
 ## 환경변수
 
-프로젝트 루트에 `.env.dev` 파일을 생성합니다. Docker Compose가 이 파일에서 변수를 읽어 각 컨테이너에 주입합니다.
-**.env 파일은 운영환경에서 사용합니다. 반드시 .env.dev로 하셔야 합니다.**
+`.env.example`을 복사하여 `.env.dev`를 생성하고, Clerk 인증 키를 채워넣습니다.
 
-```env
-# Clerk 인증
-CLERK_SECRET_KEY=sk_test_xxxxx
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_xxxxx
-NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
-NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-in
-NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/mypage
-NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/mypage
-
-# 프로덕션 도메인
-CORS_ORIGIN=https://camp-withus.com
-NEXT_PUBLIC_API_URL=http://localhost:4000
-NEXT_PUBLIC_WS_URL=https://api.camp-withus.com
+```bash
+cp .env.example .env.dev
 ```
-
-| 변수 | 설명 | 기본값 |
-|------|------|--------|
-| `DATABASE_URL` | PostgreSQL 연결 URL (프로덕션) | - |
-| `POSTGRES_USER` | 로컬 DB 사용자 | `campus` |
-| `POSTGRES_PASSWORD` | 로컬 DB 비밀번호 | `campus` |
-| `POSTGRES_DB` | 로컬 DB 이름 | `campus` |
-| `CLERK_SECRET_KEY` | Clerk 시크릿 키 | - |
-| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Clerk 퍼블릭 키 | - |
-| `CORS_ORIGIN` | API CORS 허용 도메인 | `http://localhost:3000` |
-| `NEXT_PUBLIC_API_URL` | API 서버 URL (SSR용) | `http://localhost:4000` |
-| `NEXT_PUBLIC_WS_URL` | WebSocket URL (브라우저용) | `http://localhost:4000` |
 
 ## 로컬 개발 환경
 
-### Docker로 실행 (권장)
+### 1) Docker로 실행 (권장)
 
 모든 서비스(PostgreSQL + API + Web)를 한 번에 띄웁니다.
-
-먼저 프로젝트 루트에 `.env.dev` 파일을 생성하고 Clerk 인증 키를 설정합니다.
-
-```env
-CLERK_SECRET_KEY=sk_test_xxxxx
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_xxxxx
-```
 
 ```bash
 docker compose --env-file .env.dev --profile dev up -d
 ```
 
-| 서비스 | URL | 설명 |
-|--------|-----|------|
-| API | http://localhost:4000 | Nest.js (hot reload) |
-| Web | http://localhost:3000 | Next.js (hot reload) |
-| PostgreSQL | localhost:5432 | DB (user: campus / pw: campus) |
+### 2) 호스트에서 직접 실행
 
-#### DB만 Docker로 띄우고 호스트에서 직접 개발
+Docker 없이 호스트에서 직접 실행하거나, 클라우드 DB에 연결하고 싶은 경우 사용합니다.
+DB는 Docker로 로컬 PostgreSQL만 띄우거나, `.env.dev`에 클라우드 DB URL을 직접 설정합니다.
+```bash
+# 로컬 PostgreSQL만 필요한 경우
+docker compose --env-file .env.dev --profile dev up postgres -d
+```
 
 ```bash
-# PostgreSQL 컨테이너만 실행
-docker compose --env-file .env.dev --profile dev up postgres
-
-# 호스트에서 의존성 설치 및 개발 서버 실행
-pnpm install
-pnpm dev
+nvm use                # Node 22 활성화
+pnpm install           # 의존성 설치
+pnpm dev:local         # .env.dev 기반으로 전체 서비스 실행
 ```
 
-이 경우 `.env.dev` 파일에 로컬 DB 연결 정보를 설정해야 합니다.
-
-```env
-DATABASE_URL=postgresql://campus:campus@localhost:5432/campus
-```
-
-### Docker 없이 실행
-
-별도의 PostgreSQL이 필요합니다.
-
-```bash
-# 환경변수 설정 (.env 파일 생성 후 DB 및 Clerk 정보 입력)
-# DATABASE_URL, CLERK_SECRET_KEY, NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY 설정
-
-# 의존성 설치 및 실행
-pnpm install
-pnpm dev
-```
-
-개별 앱만 실행하려면:
-
-```bash
-pnpm dev --filter api   # 백엔드만
-pnpm dev --filter web   # 프론트엔드만
-```
+포트를 변경하고 싶다면 `.env.dev`에서 `WEB_PORT`, `API_PORT`를 수정하고, `CORS_ORIGIN`, `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_WS_URL`도 함께 맞춰주세요.
 
 ## 프로덕션 환경
 

@@ -1,7 +1,7 @@
 import { auth } from '@clerk/nextjs/server';
 import { ApiError } from './api-error';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://127.0.0.1:4000';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://127.0.0.1:4100';
 
 export async function serverFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const { getToken } = await auth();

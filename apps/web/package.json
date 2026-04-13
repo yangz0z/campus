@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "next build",
-    "dev": "next dev --port 3000",
+    "dev": "PORT=${WEB_PORT:-3200} next dev",
     "start": "next start",
     "lint": "next lint",
     "clean": "rm -rf .next .turbo"
