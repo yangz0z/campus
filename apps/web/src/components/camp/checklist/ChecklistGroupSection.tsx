@@ -21,6 +21,8 @@ interface ChecklistGroupSectionProps {
   isCollapsed: boolean;
   onToggleCollapse: () => void;
   showCompleted: boolean;
+  showOnlyMine: boolean;
+  myMemberId: string;
   delayedRemoveIds: Set<string>;
   members: CampMemberInfo[];
   isDragging?: boolean;
@@ -39,6 +41,8 @@ export default function ChecklistGroupSection({
   isCollapsed,
   onToggleCollapse,
   showCompleted,
+  showOnlyMine,
+  myMemberId,
   delayedRemoveIds,
   members,
   isDragging,
@@ -70,9 +74,12 @@ export default function ChecklistGroupSection({
     { dragOpacity: isDragging ? 0 : 1 },
   );
 
+  const mineFiltered = showOnlyMine
+    ? group.items.filter((item) => item.assignees.length === 0 || item.assignees.some((a) => a.memberId === myMemberId))
+    : group.items;
   const visibleItems = showCompleted
-    ? group.items
-    : group.items.filter((item) => getCheckStatus(item) !== 'complete' || delayedRemoveIds.has(item.id));
+    ? mineFiltered
+    : mineFiltered.filter((item) => getCheckStatus(item) !== 'complete' || delayedRemoveIds.has(item.id));
   const completedCount = group.items.filter((item) => getCheckStatus(item) === 'complete').length;
   const isEmpty = group.items.length === 0;
 
