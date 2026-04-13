@@ -4,9 +4,8 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
-import type { CampSummary, WeatherForecast } from '@campus/shared';
+import type { CampSummary } from '@campus/shared';
 import { dayjs, formatDateShort, calcNights } from '@campus/shared';
-import WeatherBadge from './weather/WeatherBadge';
 import { getIncompleteCount } from '@/actions/camp';
 import SwipeRow from '@/components/ui/SwipeRow';
 import CampEditSheet from './CampEditSheet';
@@ -19,13 +18,12 @@ interface CampRowClientProps {
   index: number;
   isLast: boolean;
   incompleteCount: number | null; // null = 로딩 중, number = 완료
-  forecast?: WeatherForecast | null;
   onEdit: () => void;
   onDelete: () => void;
   onLeave: () => void;
 }
 
-function CampRowClient({ camp, index, isLast, incompleteCount, forecast, onEdit, onDelete, onLeave }: CampRowClientProps) {
+function CampRowClient({ camp, index, isLast, incompleteCount, onEdit, onDelete, onLeave }: CampRowClientProps) {
   const diff = dayjs(camp.startDate).diff(dayjs().startOf('day'), 'day');
   const isToday = diff === 0;
   const isSoon = diff > 0 && diff <= 7;
@@ -103,7 +101,6 @@ function CampRowClient({ camp, index, isLast, incompleteCount, forecast, onEdit,
                     <span aria-hidden>·</span>
                     <span>{calcNights(camp.startDate, camp.endDate)}</span>
                   </p>
-                  {forecast && <WeatherBadge forecast={forecast} targetDate={camp.startDate.slice(0, 10)} />}
                   <AvatarGroup members={camp.members} />
                 </div>
               </div>
@@ -186,10 +183,10 @@ function CampRowClient({ camp, index, isLast, incompleteCount, forecast, onEdit,
 
 interface CampListClientProps {
   camps: CampSummary[];
-  weatherMap?: Record<string, WeatherForecast | null>;
+
 }
 
-export default function CampListClient({ camps: initialCamps, weatherMap = {} }: CampListClientProps) {
+export default function CampListClient({ camps: initialCamps }: CampListClientProps) {
   const router = useRouter();
   const [camps, setCamps] = useState<CampSummary[]>(initialCamps);
   const [editingCampId, setEditingCampId] = useState<string | null>(null);
@@ -264,7 +261,7 @@ export default function CampListClient({ camps: initialCamps, weatherMap = {} }:
                     index={i}
                     isLast={i === upcomingCamps.length - 1}
                     incompleteCount={incompleteCounts[camp.id] ?? null}
-                    forecast={weatherMap[camp.id]}
+
                     onEdit={() => setEditingCampId(camp.id)}
                     onDelete={() => setConfirmDeleteCampId(camp.id)}
                     onLeave={() => setConfirmLeaveCampId(camp.id)}
@@ -293,7 +290,7 @@ export default function CampListClient({ camps: initialCamps, weatherMap = {} }:
                     index={i}
                     isLast={i === pastCamps.length - 1}
                     incompleteCount={null}
-                    forecast={weatherMap[camp.id]}
+
                     onEdit={() => setEditingCampId(camp.id)}
                     onDelete={() => setConfirmDeleteCampId(camp.id)}
                     onLeave={() => setConfirmLeaveCampId(camp.id)}

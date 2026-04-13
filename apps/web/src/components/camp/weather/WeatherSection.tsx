@@ -56,14 +56,7 @@ export default function WeatherSection({ campLocation, startDate, endDate, initi
 
   return (
     <div className="mt-2">
-      <div className="flex items-center gap-1.5 text-[11px] text-gray-400">
-        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="shrink-0">
-          <circle cx="8" cy="6" r="3" stroke="currentColor" strokeWidth="1.3" />
-          <path d="M4 6c0 3 4 7 4 7s4-4 4-7" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
-        </svg>
-        {forecast.location}
-      </div>
-      <div className="mt-1.5 flex gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+      <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none">
         {displayDays.map((day) => (
           <DayCard key={day.date} day={day} />
         ))}
