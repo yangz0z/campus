@@ -98,12 +98,22 @@ export default function ChecklistGroupSection({
   function openAddItem() {
     setIsAddingItem(true);
     setNewItemTitle('');
-    setTimeout(() => itemInputRef.current?.focus(), 50);
   }
+
+  const addItemContainerRef = useRef<HTMLDivElement>(null);
 
   function cancelAddItem() {
     setIsAddingItem(false);
     setNewItemTitle('');
+  }
+
+  function handleAddItemBlur(e: React.FocusEvent) {
+    if (addItemContainerRef.current?.contains(e.relatedTarget as Node)) return;
+    setTimeout(() => {
+      if (!addItemContainerRef.current?.contains(document.activeElement)) {
+        handleAddItem();
+      }
+    }, 100);
   }
 
   async function handleAddItem() {
@@ -113,7 +123,7 @@ export default function ChecklistGroupSection({
     try {
       await onAddItem(group.id, title);
       setNewItemTitle('');
-      setTimeout(() => itemInputRef.current?.focus(), 50);
+      itemInputRef.current?.focus();
     } finally {
       setAddingItem(false);
     }
@@ -223,12 +233,13 @@ export default function ChecklistGroupSection({
 
         {/* 아이템 추가 */}
         {isAddingItem ? (
-          <div className="checklist-add-item rounded-b-2xl overflow-hidden">
+          <div ref={addItemContainerRef} className="checklist-add-item rounded-b-2xl overflow-hidden" onBlur={handleAddItemBlur}>
             <div className="mx-5 h-px bg-gray-100" />
-            <div className="checklist-add-item-row flex items-center gap-3 px-5 py-2.5">
+            <div className="checklist-add-item-row flex items-center gap-2 px-4 py-2.5">
               <span className="h-4 w-4 shrink-0 rounded border border-gray-200" />
               <input
                 ref={itemInputRef}
+                autoFocus
                 value={newItemTitle}
                 onChange={(e) => setNewItemTitle(e.target.value)}
                 onKeyDown={(e) => {
@@ -237,7 +248,7 @@ export default function ChecklistGroupSection({
                 }}
                 placeholder="항목 이름"
                 disabled={addingItem}
-                className="checklist-add-item-input flex-1 bg-transparent text-[15px] text-gray-900 placeholder-gray-300 outline-none disabled:opacity-50"
+                className="checklist-add-item-input min-w-0 flex-1 bg-transparent text-[15px] text-gray-900 placeholder-gray-300 outline-none disabled:opacity-50"
               />
               <button
                 type="button"

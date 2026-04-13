@@ -137,15 +137,42 @@ export function useChecklistActions({ campId, myMemberId, members, initialGroups
   }
 
   async function handleAddItem(groupId: string, title: string) {
+    const tempId = `temp-${Date.now()}`;
+    const optimisticItem = {
+      id: tempId,
+      title,
+      isRequired: false,
+      sortOrder: 0,
+      memo: null,
+      assignees: [],
+      isCheckedByMe: false,
+    };
+
+    setGroups((prev) =>
+      prev.map((g) => (g.id === groupId ? { ...g, items: [...g.items, optimisticItem] } : g)),
+    );
+
     const result = await action(
       () => createChecklistItem(campId, groupId, { title }, socketId ?? undefined),
       '아이템 추가에 실패했어요.',
     );
+
     if (result.ok) {
       setGroups((prev) =>
-        prev.map((g) => (g.id === groupId ? { ...g, items: [...g.items, result.data] } : g)),
+        prev.map((g) => {
+          if (g.id !== groupId) return g;
+          return { ...g, items: g.items.map((item) => (item.id === tempId ? result.data : item)) };
+        }),
       );
+      return;
     }
+
+    setGroups((prev) =>
+      prev.map((g) => {
+        if (g.id !== groupId) return g;
+        return { ...g, items: g.items.filter((item) => item.id !== tempId) };
+      }),
+    );
   }
 
   async function handleUpdateGroup(groupId: string, title: string) {

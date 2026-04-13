@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import type { AssigneeInfo, CampMemberInfo } from '@campus/shared';
 import { GripHandle, useSortableStyle } from '@/components/ui/dnd';
 import SwipeRow from '@/components/ui/SwipeRow';
@@ -57,12 +57,6 @@ export default function ChecklistItem({
   const [pendingMemo, setPendingMemo] = useState('');
   const titleInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    if (isEditing) {
-      const timer = setTimeout(() => titleInputRef.current?.focus(), 50);
-      return () => clearTimeout(timer);
-    }
-  }, [isEditing]);
 
   function openEditor() {
     setPendingTitle(item.title);
@@ -144,6 +138,7 @@ export default function ChecklistItem({
               {isEditing ? (
                 <input
                   ref={titleInputRef}
+                  autoFocus
                   value={pendingTitle}
                   onChange={(e) => setPendingTitle(e.target.value)}
                   onKeyDown={(e) => {
