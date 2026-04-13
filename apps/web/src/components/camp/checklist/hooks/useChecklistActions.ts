@@ -33,6 +33,7 @@ interface UseChecklistActionsParams {
 export function useChecklistActions({ campId, myMemberId, members, initialGroups, socketId }: UseChecklistActionsParams) {
   const [groups, setGroups] = useState<ChecklistGroup[]>(initialGroups);
   const [showCompleted, setShowCompleted] = useState(false);
+  const [showOnlyMine, setShowOnlyMine] = useState(false);
   const [delayedRemoveIds, setDelayedRemoveIds] = useState<Set<string>>(new Set());
   const [collapsedGroupIds, setCollapsedGroupIds] = useState<Set<string>>(new Set());
 
@@ -210,6 +211,8 @@ export function useChecklistActions({ campId, myMemberId, members, initialGroups
     setGroups,
     showCompleted,
     setShowCompleted,
+    showOnlyMine,
+    setShowOnlyMine,
     delayedRemoveIds,
     collapsedGroupIds,
     toggleCollapse,

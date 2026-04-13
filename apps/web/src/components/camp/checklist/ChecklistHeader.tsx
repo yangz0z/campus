@@ -16,9 +16,12 @@ interface ChecklistHeaderProps {
   members: CampMemberInfo[];
   showCompleted: boolean;
   onToggleCompleted: () => void;
+  showOnlyMine: boolean;
+  onToggleOnlyMine: () => void;
+  memberCount: number;
 }
 
-export default function ChecklistHeader({ campId, camp, members, showCompleted, onToggleCompleted }: ChecklistHeaderProps) {
+export default function ChecklistHeader({ campId, camp, members, showCompleted, onToggleCompleted, showOnlyMine, onToggleOnlyMine, memberCount }: ChecklistHeaderProps) {
   const [showMeta, setShowMeta] = useState(false);
   const [inviting, setInviting] = useState(false);
   const { toast } = useToast();
@@ -91,7 +94,25 @@ export default function ChecklistHeader({ campId, camp, members, showCompleted, 
                 </svg>
               </button>
 
-              <div className="mt-1.5 flex shrink-0 items-center">
+              <div className="mt-1.5 flex shrink-0 items-center gap-1">
+                {memberCount >= 2 && (
+                  <button
+                    type="button"
+                    onClick={onToggleOnlyMine}
+                    className={`flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-medium transition-colors ${
+                      showOnlyMine ? 'bg-primary-50 text-primary-600' : 'text-gray-400 hover:text-gray-500'
+                    }`}
+                  >
+                    <svg width="11" height="11" viewBox="0 0 14 14" fill="none" className="shrink-0">
+                      {showOnlyMine ? (
+                        <path d="M7 1a3 3 0 100 6 3 3 0 000-6zM2 12.5c0-2.5 2.2-4 5-4s5 1.5 5 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                      ) : (
+                        <path d="M7 1a3 3 0 100 6 3 3 0 000-6zM2 12.5c0-2.5 2.2-4 5-4s5 1.5 5 4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+                      )}
+                    </svg>
+                    내 할 일만
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={onToggleCompleted}

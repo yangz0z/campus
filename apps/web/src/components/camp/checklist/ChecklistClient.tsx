@@ -30,6 +30,7 @@ export default function ChecklistClient({ campId, camp, initialGroups, myMemberI
   const {
     groups, setGroups,
     showCompleted, setShowCompleted,
+    showOnlyMine, setShowOnlyMine,
     delayedRemoveIds, collapsedGroupIds, toggleCollapse,
     assigningItem, setAssigningItem,
     addingGroup, newGroupTitle, setNewGroupTitle, addingGroupLoading, groupInputRef,
@@ -106,6 +107,9 @@ export default function ChecklistClient({ campId, camp, initialGroups, myMemberI
         members={members}
         showCompleted={showCompleted}
         onToggleCompleted={() => setShowCompleted((v) => !v)}
+        showOnlyMine={showOnlyMine}
+        onToggleOnlyMine={() => setShowOnlyMine((v) => !v)}
+        memberCount={members.length}
       />
 
       <SortableContainer<ChecklistGroup, ChecklistItem>
@@ -132,6 +136,8 @@ export default function ChecklistClient({ campId, camp, initialGroups, myMemberI
               isCollapsed={collapsedGroupIds.has(group.id)}
               onToggleCollapse={() => toggleCollapse(group.id)}
               showCompleted={showCompleted}
+              showOnlyMine={showOnlyMine}
+              myMemberId={myMemberId}
               delayedRemoveIds={delayedRemoveIds}
               members={members}
               isDragging={dnd.activeId === group.id}
