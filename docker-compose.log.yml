@@ -1,0 +1,47 @@
+services:
+  loki:
+    image: grafana/loki:latest
+    ports:
+      - "3100:3100"
+    volumes:
+      - type: bind
+        source: ./loki-config.yml
+        target: /etc/loki/local-config.yaml
+        read_only: true
+      - type: bind
+        source: ./data/loki
+        target: /loki
+    command: -config.file=/etc/loki/local-config.yaml
+
+  promtail:
+    image: grafana/promtail:latest
+    volumes:
+      - type: bind
+        source: /var/run/docker.sock
+        target: /var/run/docker.sock
+        read_only: true
+      - type: bind
+        source: ./promtail-config.yml
+        target: /etc/promtail/config.yml
+        read_only: true
+      - type: bind
+        source: /Users/wincrane2/webhook.log
+        target: /var/log/webhook.log
+        read_only: true
+      - type: bind
+        source: /Users/wincrane2/.cloudflared
+        target: /var/log/cloudflared
+        read_only: true
+    command: -config.file=/etc/promtail/config.yml
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3001:3000"
+    volumes:
+      - type: bind
+        source: ./data/grafana
+        target: /var/lib/grafana
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+

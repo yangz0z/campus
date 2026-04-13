@@ -22,7 +22,8 @@ https://camp-withus.com
 
 ## 환경변수
 
-프로젝트 루트에 `.env` 파일을 생성합니다. Docker Compose가 이 파일에서 변수를 읽어 각 컨테이너에 주입합니다.
+프로젝트 루트에 `.env.dev` 파일을 생성합니다. Docker Compose가 이 파일에서 변수를 읽어 각 컨테이너에 주입합니다.
+**.env 파일은 운영환경에서 사용합니다. 반드시 .env.dev로 하셔야 합니다.**
 
 ```env
 # Clerk 인증
@@ -57,7 +58,7 @@ NEXT_PUBLIC_WS_URL=https://api.camp-withus.com
 
 모든 서비스(PostgreSQL + API + Web)를 한 번에 띄웁니다.
 
-먼저 프로젝트 루트에 `.env` 파일을 생성하고 Clerk 인증 키를 설정합니다.
+먼저 프로젝트 루트에 `.env.dev` 파일을 생성하고 Clerk 인증 키를 설정합니다.
 
 ```env
 CLERK_SECRET_KEY=sk_test_xxxxx
@@ -65,7 +66,7 @@ NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_xxxxx
 ```
 
 ```bash
-docker compose --profile dev up
+docker compose --env-file .env.dev --profile dev up -d
 ```
 
 | 서비스 | URL | 설명 |
@@ -78,14 +79,14 @@ docker compose --profile dev up
 
 ```bash
 # PostgreSQL 컨테이너만 실행
-docker compose --profile dev up postgres
+docker compose --env-file .env.dev --profile dev up postgres
 
 # 호스트에서 의존성 설치 및 개발 서버 실행
 pnpm install
 pnpm dev
 ```
 
-이 경우 `.env` 파일에 로컬 DB 연결 정보를 설정해야 합니다.
+이 경우 `.env.dev` 파일에 로컬 DB 연결 정보를 설정해야 합니다.
 
 ```env
 DATABASE_URL=postgresql://campus:campus@localhost:5432/campus

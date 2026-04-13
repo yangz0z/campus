@@ -17,6 +17,13 @@ export const databaseConfig: TypeOrmModuleAsyncOptions = {
       migrations: [__dirname + '/../migrations/*{.ts,.js}'],
       synchronize: nodeEnv !== 'production',
       logging: nodeEnv !== 'production',
+      extra: {
+        max: 10,
+        connectionTimeoutMillis: 5000,
+        idleTimeoutMillis: 30000,
+      },
+      retryAttempts: 3,
+      retryDelay: 1000,
     };
   },
 };
