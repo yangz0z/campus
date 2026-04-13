@@ -27,18 +27,33 @@ export class AuthService {
       ? rawProvider.slice('oauth_'.length)
       : rawProvider;
 
-    const existing = await this.userRepository.findOne({
+    const email = clerkUser.emailAddresses[0]?.emailAddress ?? null;
+
+    // providerId 기반 조회 (정확한 매칭)
+    const existingById = await this.userRepository.findOne({
       where: { provider, providerId: clerkUserId },
     });
-    if (existing) return existing;
+    if (existingById) return existingById;
 
+    // provider + email 기반 조회 (기존 계정 연결)
+    if (email) {
+      const existingByEmail = await this.userRepository.findOne({
+        where: { provider, email },
+      });
+      if (existingByEmail) {
+        existingByEmail.providerId = clerkUserId;
+        return this.userRepository.save(existingByEmail);
+      }
+    }
+
+    // 신규 생성
     const user = this.userRepository.create({
       provider,
       providerId: clerkUserId,
-      email: clerkUser.emailAddresses[0]?.emailAddress ?? null,
+      email,
       nickname: clerkUser.firstName
         ? `${clerkUser.firstName} ${clerkUser.lastName ?? ''}`.trim()
-        : (clerkUser.emailAddresses[0]?.emailAddress?.split('@')[0] ?? 'User'),
+        : (email?.split('@')[0] ?? 'User'),
       profileImage: clerkUser.imageUrl ?? null,
     });
 
