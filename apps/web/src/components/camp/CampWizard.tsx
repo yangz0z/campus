@@ -78,7 +78,8 @@ export default function CampWizard() {
     if (result.ok) {
       setCampId(result.data.campId);
       setIsCompleted(true);
-      setTimeout(() => router.push(ROUTES.CAMP.CHECKLIST(result.data.campId)), 2000);
+      router.prefetch(ROUTES.CAMP.CHECKLIST(result.data.campId));
+      setTimeout(() => router.push(ROUTES.CAMP.CHECKLIST(result.data.campId)), 800);
     }
     setIsSubmitting(false);
   };

@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { SignInButton, UserButton } from '@clerk/nextjs';
 
@@ -9,7 +10,7 @@ export default function Header() {
   return (
     <header className="site-header sticky top-0 z-50 overflow-hidden border-b border-earth-200 bg-white/80 backdrop-blur-md">
       <div className="mx-auto flex h-14 max-w-screen-lg items-center justify-between px-4">
-        <a href="/" className="site-logo flex items-center gap-2">
+        <Link href="/" className="site-logo flex items-center gap-2">
           <svg
             width="22" height="20" viewBox="0 0 22 20" fill="none"
             className="site-logo-icon text-primary-600"
@@ -32,7 +33,7 @@ export default function Header() {
             <span className="site-logo-camp text-primary-700">Camp</span>
             <span className="site-logo-us text-warm-500">Us</span>
           </span>
-        </a>
+        </Link>
 
         <nav>
           {!isSignedIn ? (

@@ -34,3 +34,40 @@ export async function serverFetch<T>(path: string, init?: RequestInit): Promise<
 
   return res.json();
 }
+
+/** 시간 기반 재검증 캐싱이 적용된 서버 fetch */
+export async function serverFetchCached<T>(
+  path: string,
+  revalidateSeconds: number,
+  init?: RequestInit,
+): Promise<T> {
+  const { getToken } = await auth();
+  const token = await getToken();
+
+  const res = await fetch(`${API_BASE}${path}`, {
+    ...init,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(init?.headers as Record<string, string>),
+    },
+    next: { revalidate: revalidateSeconds },
+  });
+
+  if (!res.ok) {
+    const body = await res.text();
+    let apiMessage: string;
+    try {
+      apiMessage = (JSON.parse(body) as { message?: string }).message ?? body;
+    } catch {
+      apiMessage = body;
+    }
+    throw new ApiError(res.status, apiMessage);
+  }
+
+  if (res.status === 204 || res.headers.get('content-length') === '0') {
+    return undefined as T;
+  }
+
+  return res.json();
+}

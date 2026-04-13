@@ -9,10 +9,10 @@ import type {
   UpdateTemplateItemRequest,
   SaveTemplateRequest,
 } from '@campus/shared';
-import { serverFetch } from '@/lib/api-server';
+import { serverFetch, serverFetchCached } from '@/lib/api-server';
 
 export async function getMyTemplate(): Promise<GetMyTemplateResponse> {
-  return serverFetch<GetMyTemplateResponse>('/templates/me');
+  return serverFetchCached<GetMyTemplateResponse>('/templates/me', 60);
 }
 
 export async function addTemplateGroup(

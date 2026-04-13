@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import type { CampSummary } from '@campus/shared';
 import { dayjs, formatDateShort, calcNights } from '@campus/shared';
@@ -80,6 +79,7 @@ function CampRowClient({ camp, index, isLast, incompleteCount, onEdit, onDelete,
           <div style={contentStyle} className="relative z-10 bg-white">
             <Link
               href={`/camp/${camp.id}/checklist`}
+              prefetch={true}
               onClick={(e) => { if (isSwipeOpen) { e.preventDefault(); closeSwipe(); } }}
               className="camp-list-link flex items-center gap-3 px-5 py-4 transition-colors duration-100 active:bg-gray-50"
             >
@@ -186,7 +186,6 @@ interface CampListClientProps {
 }
 
 export default function CampListClient({ camps: initialCamps }: CampListClientProps) {
-  const router = useRouter();
   const [camps, setCamps] = useState<CampSummary[]>(initialCamps);
   const [editingCampId, setEditingCampId] = useState<string | null>(null);
   const [confirmDeleteCampId, setConfirmDeleteCampId] = useState<string | null>(null);
@@ -226,19 +225,16 @@ export default function CampListClient({ camps: initialCamps }: CampListClientPr
   function handleUpdated(updated: CampSummary) {
     setCamps((prev) => prev.map((c) => c.id === updated.id ? updated : c));
     setEditingCampId(null);
-    router.refresh();
   }
 
   function handleDeleted(campId: string) {
     setCamps((prev) => prev.filter((c) => c.id !== campId));
     setConfirmDeleteCampId(null);
-    router.refresh();
   }
 
   function handleLeft(campId: string) {
     setCamps((prev) => prev.filter((c) => c.id !== campId));
     setConfirmLeaveCampId(null);
-    router.refresh();
   }
 
   return (
