@@ -1,11 +1,22 @@
 import Link from 'next/link';
 import { getMyCamps } from '@/actions/camp';
+import { getWeatherForecast } from '@/actions/weather';
 import CampListClient from '@/components/camp/CampListClient';
 import { ROUTES } from '@/constants/routes';
+import type { WeatherForecast } from '@campus/shared';
 
 export default async function MypagePage() {
   const data = await getMyCamps();
   const camps = data.camps;
+
+  const weatherMap: Record<string, WeatherForecast | null> = {};
+  await Promise.all(
+    camps
+      .filter((c) => c.location)
+      .map(async (c) => {
+        weatherMap[c.id] = await getWeatherForecast(c.location!, 3);
+      }),
+  );
 
   return (
     <div className="mypage bg-[#F2F2F0]">
@@ -39,7 +50,7 @@ export default async function MypagePage() {
             <p className="camp-empty-desc mt-1.5 text-[14px] text-gray-400">새 캠프를 만들어 캠핑 준비를 시작해 보세요.</p>
           </div>
         ) : (
-          <CampListClient camps={camps} />
+          <CampListClient camps={camps} weatherMap={weatherMap} />
         )}
       </main>
     </div>

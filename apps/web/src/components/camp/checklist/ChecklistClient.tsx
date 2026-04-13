@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import ChecklistCelebration from './ChecklistCelebration';
-import type { CampMemberInfo, CampSummary, ChecklistGroup, ChecklistItem } from '@campus/shared';
+import type { CampMemberInfo, CampSummary, ChecklistGroup, ChecklistItem, WeatherForecast } from '@campus/shared';
 import { SortableContainer } from '@/components/ui/dnd';
 import { useChecklistActions } from './hooks/useChecklistActions';
 import { useChecklistDnd } from './hooks/useChecklistDnd';
@@ -19,9 +19,10 @@ interface ChecklistClientProps {
   initialGroups: import('@campus/shared').ChecklistGroup[];
   myMemberId: string;
   members: CampMemberInfo[];
+  weatherForecast?: WeatherForecast | null;
 }
 
-export default function ChecklistClient({ campId, camp, initialGroups, myMemberId, members: initialMembers }: ChecklistClientProps) {
+export default function ChecklistClient({ campId, camp, initialGroups, myMemberId, members: initialMembers, weatherForecast }: ChecklistClientProps) {
   const [members, setMembers] = useState(initialMembers);
   const [showCelebration, setShowCelebration] = useState(false);
   const prevAllCompleteRef = useRef(false);
@@ -110,6 +111,7 @@ export default function ChecklistClient({ campId, camp, initialGroups, myMemberI
         showOnlyMine={showOnlyMine}
         onToggleOnlyMine={() => setShowOnlyMine((v) => !v)}
         memberCount={members.length}
+        weatherForecast={weatherForecast ?? null}
       />
 
       <SortableContainer<ChecklistGroup, ChecklistItem>

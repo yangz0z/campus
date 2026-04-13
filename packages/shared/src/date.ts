@@ -57,3 +57,41 @@ export function calcNights(start: string, end: string): string {
 export function nowISO(): string {
   return dayjs().toISOString();
 }
+
+/**
+ * 현재 시각의 밀리초 타임스탬프 반환
+ */
+export function nowMs(): number {
+  return dayjs().valueOf();
+}
+
+/**
+ * 두 날짜 사이의 일수 (양 끝 포함): "4/13 ~ 4/15" → 3
+ */
+export function calcDaysBetween(start: string, end: string): number {
+  return dayjs.tz(end).diff(dayjs.tz(start), 'day') + 1;
+}
+
+/**
+ * 날짜가 시작~종료 범위에 포함되는지 (양 끝 포함)
+ */
+export function isDateInRange(date: string, start: string, end: string): boolean {
+  const d = dayjs.tz(date);
+  const s = dayjs.tz(start);
+  const e = dayjs.tz(end);
+  return (d.isSame(s, 'day') || d.isAfter(s, 'day'))
+    && (d.isSame(e, 'day') || d.isBefore(e, 'day'));
+}
+
+/**
+ * 날짜의 표시 정보 반환: { month, day, weekday, isWeekend }
+ */
+export function parseDateInfo(dateStr: string) {
+  const d = dayjs.tz(dateStr);
+  return {
+    month: d.month() + 1,
+    day: d.date(),
+    weekday: d.format('dd'),         // 한국어: 월, 화, ...
+    isWeekend: d.day() === 0 || d.day() === 6,
+  };
+}

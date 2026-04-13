@@ -1,4 +1,6 @@
 import { getCamp, getCampChecklist, getCampMembers } from '@/actions/camp';
+import { getWeatherForecast } from '@/actions/weather';
+import { calcDaysBetween } from '@campus/shared';
 import ChecklistClient from '@/components/camp/checklist/ChecklistClient';
 
 export default async function ChecklistPage({ params }: { params: Promise<{ campId: string }> }) {
@@ -10,6 +12,10 @@ export default async function ChecklistPage({ params }: { params: Promise<{ camp
     getCampMembers(campId),
   ]);
 
+  const weatherForecast = camp.location
+    ? await getWeatherForecast(camp.location, Math.min(calcDaysBetween(camp.startDate, camp.endDate), 14))
+    : null;
+
   return (
     <ChecklistClient
       campId={campId}
@@ -17,6 +23,7 @@ export default async function ChecklistPage({ params }: { params: Promise<{ camp
       initialGroups={checklist.groups}
       myMemberId={checklist.myMemberId}
       members={membersData.members}
+      weatherForecast={weatherForecast}
     />
   );
 }
