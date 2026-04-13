@@ -19,7 +19,7 @@ import { CampMember } from './entities/camp-member.entity';
 
 @WebSocketGateway({
   cors: {
-    origin: process.env.CORS_ORIGIN ?? 'http://localhost:3000',
+    origin: process.env.CORS_ORIGIN ?? 'http://localhost:3200',
     credentials: true,
   },
 })

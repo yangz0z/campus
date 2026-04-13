@@ -6,17 +6,20 @@ export const databaseConfig: TypeOrmModuleAsyncOptions = {
   inject: [ConfigService],
   useFactory: (configService: ConfigService) => {
     const nodeEnv = configService.get<string>('NODE_ENV');
+    const dbUrl = configService.get<string>('DATABASE_URL') ?? '';
+    const isLocalDb = /localhost|127\.0\.0\.1|@postgres:/.test(dbUrl);
+    const isProd = nodeEnv === 'production';
     return {
       type: 'postgres',
-      url: configService.get<string>('DATABASE_URL'),
+      url: dbUrl,
       ssl:
-        nodeEnv === 'production'
+        isProd || !isLocalDb
           ? { rejectUnauthorized: false }
           : false,
       autoLoadEntities: true,
       migrations: [__dirname + '/../migrations/*{.ts,.js}'],
-      synchronize: nodeEnv !== 'production',
-      logging: nodeEnv !== 'production',
+      synchronize: !isProd && !!isLocalDb,
+      logging: !isProd,
       extra: {
         max: 10,
         connectionTimeoutMillis: 5000,

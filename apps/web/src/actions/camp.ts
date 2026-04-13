@@ -22,12 +22,13 @@ import type {
   ReorderChecklistItemsRequest,
   ReorderChecklistGroupsRequest,
 } from '@campus/shared';
-import { serverFetch } from '@/lib/api-server';
+import { serverFetch, serverFetchCached } from '@/lib/api-server';
+import { revalidatePath } from 'next/cache';
 
 // ── 조회 ──
 
 export async function getMyCamps(): Promise<GetMyCampsResponse> {
-  return serverFetch<GetMyCampsResponse>('/camps');
+  return serverFetchCached<GetMyCampsResponse>('/camps', 30);
 }
 
 export async function getCamp(campId: string): Promise<CampSummary> {
@@ -49,18 +50,21 @@ export async function getIncompleteCount(campId: string): Promise<GetIncompleteC
 // ── 뮤테이션 ──
 
 export async function updateCamp(campId: string, data: UpdateCampRequest): Promise<void> {
-  return serverFetch<void>(`/camps/${campId}`, {
+  await serverFetch<void>(`/camps/${campId}`, {
     method: 'PATCH',
     body: JSON.stringify(data),
   });
+  revalidatePath('/camp-list');
 }
 
 export async function deleteCamp(campId: string): Promise<void> {
-  return serverFetch<void>(`/camps/${campId}`, { method: 'DELETE' });
+  await serverFetch<void>(`/camps/${campId}`, { method: 'DELETE' });
+  revalidatePath('/camp-list');
 }
 
 export async function leaveCamp(campId: string): Promise<void> {
-  return serverFetch<void>(`/camps/${campId}/leave`, { method: 'POST' });
+  await serverFetch<void>(`/camps/${campId}/leave`, { method: 'POST' });
+  revalidatePath('/camp-list');
 }
 
 export async function kickMember(campId: string, memberId: string): Promise<void> {

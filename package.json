@@ -4,11 +4,16 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
+    "dev:local": "dotenv -e .env.dev -- turbo run dev",
     "lint": "turbo run lint",
     "clean": "turbo run clean"
   },
   "devDependencies": {
+    "dotenv-cli": "^11.0.0",
     "turbo": "^2.4.0"
+  },
+  "engines": {
+    "node": ">=22 <25"
   },
   "packageManager": "pnpm@10.29.3"
 }
