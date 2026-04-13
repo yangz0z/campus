@@ -111,6 +111,10 @@ export interface CampSummary {
   members: CampSummaryMember[];
 }
 
+export interface GetIncompleteCountResponse {
+  incompleteCount: number;
+}
+
 export interface GetMyCampsResponse {
   camps: CampSummary[];
 }

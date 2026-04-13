@@ -43,6 +43,14 @@ export class CampController {
     return this.campService.acceptCampInvite(user, token);
   }
 
+  @Get(':campId/incomplete-count')
+  getIncompleteCount(
+    @CurrentUser() user: User,
+    @Param('campId', ParseUUIDPipe) campId: string,
+  ) {
+    return this.campService.getIncompleteCount(user, campId);
+  }
+
   @Post(':campId/leave')
   @HttpCode(204)
   leaveCamp(

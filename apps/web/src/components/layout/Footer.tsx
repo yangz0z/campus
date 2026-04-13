@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { ROUTES } from '@/constants/routes';
 
 export default function Footer() {
   return (
@@ -37,10 +38,10 @@ export default function Footer() {
         {/* 링크 & 카피라이트 */}
         <div className="flex items-center gap-4">
           <nav className="site-footer-links flex gap-3">
-            <Link href="/privacy" className="text-[12px] text-gray-400 hover:text-gray-600 transition-colors">
+            <Link href={ROUTES.PRIVACY} className="text-[12px] text-gray-400 hover:text-gray-600 transition-colors">
               개인정보처리방침
             </Link>
-            <Link href="/terms" className="text-[12px] text-gray-400 hover:text-gray-600 transition-colors">
+            <Link href={ROUTES.TERMS} className="text-[12px] text-gray-400 hover:text-gray-600 transition-colors">
               이용약관
             </Link>
           </nav>

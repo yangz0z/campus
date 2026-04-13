@@ -1,7 +1,7 @@
 import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { randomUUID } from 'crypto';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, In, Repository } from 'typeorm';
 import { User } from '../user/entities/user.entity';
 import { ChecklistTemplate } from '../checklist-template/entities/checklist-template.entity';
 import { Camp } from './entities/camp.entity';
@@ -152,6 +152,27 @@ export class CampService {
           })),
       })),
     };
+  }
+
+  async getIncompleteCount(user: User, campId: string): Promise<{ incompleteCount: number }> {
+    const member = await this.campMemberRepository.findOne({ where: { campId, userId: user.id } });
+    if (!member) throw new ForbiddenException();
+
+    const groups = await this.campChecklistGroupRepository.find({
+      where: { campId },
+      relations: ['items', 'items.assignees'],
+    });
+
+    let incompleteCount = 0;
+    for (const group of groups) {
+      for (const item of group.items) {
+        const isComplete =
+          item.assignees.length > 0 && item.assignees.every((a) => a.isChecked);
+        if (!isComplete) incompleteCount++;
+      }
+    }
+
+    return { incompleteCount };
   }
 
   async leaveCamp(user: User, campId: string) {

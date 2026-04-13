@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import type { CampSummary } from '@campus/shared';
 import { dayjs, formatDateShort, calcNights } from '@campus/shared';
+import { getIncompleteCount } from '@/actions/camp';
 import SwipeRow from '@/components/ui/SwipeRow';
 import CampEditSheet from './CampEditSheet';
 import AvatarGroup from './shared/AvatarGroup';
@@ -16,12 +17,13 @@ interface CampRowClientProps {
   camp: CampSummary;
   index: number;
   isLast: boolean;
+  incompleteCount: number | null; // null = 로딩 중, number = 완료
   onEdit: () => void;
   onDelete: () => void;
   onLeave: () => void;
 }
 
-function CampRowClient({ camp, index, isLast, onEdit, onDelete, onLeave }: CampRowClientProps) {
+function CampRowClient({ camp, index, isLast, incompleteCount, onEdit, onDelete, onLeave }: CampRowClientProps) {
   const diff = dayjs(camp.startDate).diff(dayjs().startOf('day'), 'day');
   const isToday = diff === 0;
   const isSoon = diff > 0 && diff <= 7;
@@ -104,7 +106,27 @@ function CampRowClient({ camp, index, isLast, onEdit, onDelete, onLeave }: CampR
               </div>
 
               {isToday ? (
-                <span className="shrink-0 rounded-full bg-primary-100 px-3 py-1 text-[12px] font-bold text-primary-700">D-Day</span>
+                <div className="shrink-0 flex flex-col items-center gap-1.5">
+                  {/* 말풍선 */}
+                  <div className="relative">
+                    {incompleteCount === null ? (
+                      /* 로딩 스켈레톤 */
+                      <span className="block h-[22px] w-16 animate-pulse rounded-xl bg-gray-200" />
+                    ) : (
+                      <span className={`block whitespace-nowrap rounded-xl px-2.5 py-1 text-[11px] font-bold text-white shadow-sm ${incompleteCount === 0 ? 'bg-primary-500' : 'bg-orange-400'}`}>
+                        {incompleteCount === 0 ? '모두 완료 🎉' : `미완료 ${incompleteCount}개`}
+                      </span>
+                    )}
+                    {/* 말풍선 꼬리 */}
+                    {incompleteCount !== null && (
+                      <span
+                        className={`absolute left-1/2 top-full -translate-x-1/2 border-x-[5px] border-t-[5px] border-x-transparent ${incompleteCount === 0 ? 'border-t-primary-500' : 'border-t-orange-400'}`}
+                        aria-hidden="true"
+                      />
+                    )}
+                  </div>
+                  <span className="rounded-full bg-primary-100 px-3 py-1 text-[12px] font-bold text-primary-700">D-Day</span>
+                </div>
               ) : diff > 0 ? (
                 <span className={`shrink-0 rounded-full px-3 py-1 text-[12px] font-bold ${isSoon ? 'bg-warm-100 text-warm-500' : 'bg-primary-50 text-primary-600'}`}>
                   D-{diff}
@@ -169,9 +191,34 @@ export default function CampListClient({ camps: initialCamps }: CampListClientPr
   const [editingCampId, setEditingCampId] = useState<string | null>(null);
   const [confirmDeleteCampId, setConfirmDeleteCampId] = useState<string | null>(null);
   const [confirmLeaveCampId, setConfirmLeaveCampId] = useState<string | null>(null);
+  // D-Day 캠프 미완료 수: campId → number (null = 로딩 중)
+  const [incompleteCounts, setIncompleteCounts] = useState<Record<string, number | null>>({});
 
   const upcomingCamps = camps.filter((c) => dayjs(c.startDate).diff(dayjs().startOf('day'), 'day') >= 0);
   const pastCamps = camps.filter((c) => dayjs(c.startDate).diff(dayjs().startOf('day'), 'day') < 0);
+
+  // D-Day 캠프만 별도 fetch
+  useEffect(() => {
+    const todayCamps = upcomingCamps.filter(
+      (c) => dayjs(c.startDate).diff(dayjs().startOf('day'), 'day') === 0,
+    );
+    if (todayCamps.length === 0) return;
+
+    // 로딩 상태로 초기화
+    setIncompleteCounts((prev) => {
+      const next = { ...prev };
+      for (const c of todayCamps) next[c.id] = null;
+      return next;
+    });
+
+    for (const camp of todayCamps) {
+      getIncompleteCount(camp.id).then(({ incompleteCount }) => {
+        setIncompleteCounts((prev) => ({ ...prev, [camp.id]: incompleteCount }));
+      });
+    }
+  // upcomingCamps는 렌더링마다 새 배열 → camps로 의존
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [camps]);
   const editingCamp = camps.find((c) => c.id === editingCampId) ?? null;
   const confirmDeleteCamp = camps.find((c) => c.id === confirmDeleteCampId) ?? null;
   const confirmLeaveCamp = camps.find((c) => c.id === confirmLeaveCampId) ?? null;
@@ -212,6 +259,7 @@ export default function CampListClient({ camps: initialCamps }: CampListClientPr
                     camp={camp}
                     index={i}
                     isLast={i === upcomingCamps.length - 1}
+                    incompleteCount={incompleteCounts[camp.id] ?? null}
                     onEdit={() => setEditingCampId(camp.id)}
                     onDelete={() => setConfirmDeleteCampId(camp.id)}
                     onLeave={() => setConfirmLeaveCampId(camp.id)}
@@ -239,6 +287,7 @@ export default function CampListClient({ camps: initialCamps }: CampListClientPr
                     camp={camp}
                     index={i}
                     isLast={i === pastCamps.length - 1}
+                    incompleteCount={null}
                     onEdit={() => setEditingCampId(camp.id)}
                     onDelete={() => setConfirmDeleteCampId(camp.id)}
                     onLeave={() => setConfirmLeaveCampId(camp.id)}

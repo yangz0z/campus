@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import { ROUTES } from '@/constants/routes';
 
 export default function CtaSection() {
   return (
@@ -52,7 +53,7 @@ export default function CtaSection() {
           className="mt-9"
         >
           <Link
-            href="/sign-in"
+            href={ROUTES.SIGN_IN}
             className="inline-flex items-center gap-2 rounded-2xl bg-white px-9 py-4 text-base font-semibold text-primary-700 shadow-xl transition-all hover:-translate-y-0.5 hover:shadow-2xl"
           >
             무료로 시작하기

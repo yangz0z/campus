@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
+import { ROUTES } from '@/constants/routes';
 import { formatDateShort, type Season } from '@campus/shared';
 import ChatBubble from './shared/ChatBubble';
 import ConfettiEffect from './shared/ConfettiEffect';
@@ -49,7 +50,7 @@ export default function CampWizard() {
   }, [currentStep, isCompleted]);
 
   const handleCancel = useCallback(() => {
-    router.push('/mypage');
+    router.push(ROUTES.CAMP_LIST);
   }, [router]);
 
   const handleNameNext = (title: string, location: string) => {
@@ -77,7 +78,7 @@ export default function CampWizard() {
     if (result.ok) {
       setCampId(result.data.campId);
       setIsCompleted(true);
-      setTimeout(() => router.push(`/camp/${result.data.campId}/checklist`), 2000);
+      setTimeout(() => router.push(ROUTES.CAMP.CHECKLIST(result.data.campId)), 2000);
     }
     setIsSubmitting(false);
   };

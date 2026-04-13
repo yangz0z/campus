@@ -2,13 +2,14 @@ import { auth, currentUser } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import { getCampInviteInfo } from '@/actions/camp';
 import InviteConfirmClient from './InviteConfirmClient';
+import { ROUTES } from '@/constants/routes';
 
 export default async function InvitePage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
 
   const { userId } = await auth();
   if (!userId) {
-    redirect(`/sign-in?redirect_url=/invite/${token}`);
+    redirect(ROUTES.INVITE.WITH_REDIRECT(token));
   }
 
   const clerkUser = await currentUser();

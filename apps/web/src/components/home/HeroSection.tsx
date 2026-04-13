@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import { ROUTES } from '@/constants/routes';
 
 const FLOATING = [
   { emoji: '🏕️', style: { top: '14%', left: '7%' }, delay: 0, dur: 5 },
@@ -119,7 +120,7 @@ export default function HeroSection() {
           className="mt-10"
         >
           <Link
-            href="/sign-in"
+            href={ROUTES.SIGN_IN}
             className="inline-flex items-center gap-2.5 rounded-2xl bg-primary-600 px-9 py-4 text-base font-semibold text-white shadow-lg shadow-primary-600/30 transition-all hover:-translate-y-0.5 hover:bg-primary-700 hover:shadow-xl hover:shadow-primary-600/40"
           >
             무료로 시작하기
