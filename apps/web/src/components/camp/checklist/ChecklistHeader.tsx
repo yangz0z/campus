@@ -2,9 +2,10 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import type { CampMemberInfo, CampSummary } from '@campus/shared';
+import type { CampMemberInfo, CampSummary, WeatherForecast } from '@campus/shared';
 import { ROUTES } from '@/constants/routes';
 import AvatarGroup from '../shared/AvatarGroup';
+import WeatherSection from '../weather/WeatherSection';
 import { formatDateShort, calcNights } from '@campus/shared';
 import { createCampInvite } from '@/actions/camp';
 import { useToast } from '@/components/ui/Toast';
@@ -19,9 +20,10 @@ interface ChecklistHeaderProps {
   showOnlyMine: boolean;
   onToggleOnlyMine: () => void;
   memberCount: number;
+  weatherForecast: WeatherForecast | null;
 }
 
-export default function ChecklistHeader({ campId, camp, members, showCompleted, onToggleCompleted, showOnlyMine, onToggleOnlyMine, memberCount }: ChecklistHeaderProps) {
+export default function ChecklistHeader({ campId, camp, members, showCompleted, onToggleCompleted, showOnlyMine, onToggleOnlyMine, memberCount, weatherForecast }: ChecklistHeaderProps) {
   const [showMeta, setShowMeta] = useState(false);
   const [inviting, setInviting] = useState(false);
   const { toast } = useToast();
@@ -135,7 +137,7 @@ export default function ChecklistHeader({ campId, camp, members, showCompleted, 
               </div>
             </div>
 
-            <div className={`checklist-meta overflow-hidden transition-all duration-200 ease-in-out ${showMeta ? 'mt-2 max-h-32 opacity-100' : 'max-h-0 opacity-0'}`}>
+            <div className={`checklist-meta overflow-hidden transition-all duration-200 ease-in-out ${showMeta ? 'mt-2 max-h-64 opacity-100' : 'max-h-0 opacity-0'}`}>
               <div className="checklist-meta-inner space-y-1">
                 {camp.location && (
                   <p className="checklist-location flex items-center gap-1.5 text-[13px] text-gray-500">
@@ -163,6 +165,12 @@ export default function ChecklistHeader({ campId, camp, members, showCompleted, 
                     </span>
                   </div>
                 )}
+                <WeatherSection
+                  campLocation={camp.location}
+                  startDate={camp.startDate}
+                  endDate={camp.endDate}
+                  initialForecast={weatherForecast}
+                />
               </div>
             </div>
           </div>

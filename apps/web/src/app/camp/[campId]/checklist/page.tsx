@@ -1,5 +1,7 @@
 import { Suspense } from 'react';
 import { getCamp, getCampChecklist, getCampMembers } from '@/actions/camp';
+import { getWeatherForecast } from '@/actions/weather';
+import { calcDaysBetween } from '@campus/shared';
 import ChecklistClient from '@/components/camp/checklist/ChecklistClient';
 import ChecklistLoading from './loading';
 
@@ -10,6 +12,10 @@ async function ChecklistContent({ campId }: { campId: string }) {
     getCampMembers(campId),
   ]);
 
+  const weatherForecast = camp.location
+    ? await getWeatherForecast(camp.location, Math.min(calcDaysBetween(camp.startDate, camp.endDate), 14))
+    : null;
+
   return (
     <ChecklistClient
       campId={campId}
@@ -17,6 +23,7 @@ async function ChecklistContent({ campId }: { campId: string }) {
       initialGroups={checklist.groups}
       myMemberId={checklist.myMemberId}
       members={membersData.members}
+      weatherForecast={weatherForecast}
     />
   );
 }

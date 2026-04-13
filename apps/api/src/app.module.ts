@@ -8,6 +8,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { CampModule } from './modules/camp/camp.module';
 import { ChecklistTemplateModule } from './modules/checklist-template/checklist-template.module';
 import { UserModule } from './modules/user/user.module';
+import { WeatherModule } from './modules/weather/weather.module';
 import { databaseConfig } from './config/database.config';
 
 @Module({
@@ -19,6 +20,7 @@ import { databaseConfig } from './config/database.config';
     UserModule,
     ChecklistTemplateModule,
     CampModule,
+    WeatherModule,
   ],
   controllers: [AppController],
   providers: [AppService],

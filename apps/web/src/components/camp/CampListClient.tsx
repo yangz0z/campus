@@ -183,6 +183,7 @@ function CampRowClient({ camp, index, isLast, incompleteCount, onEdit, onDelete,
 
 interface CampListClientProps {
   camps: CampSummary[];
+
 }
 
 export default function CampListClient({ camps: initialCamps }: CampListClientProps) {
@@ -256,6 +257,7 @@ export default function CampListClient({ camps: initialCamps }: CampListClientPr
                     index={i}
                     isLast={i === upcomingCamps.length - 1}
                     incompleteCount={incompleteCounts[camp.id] ?? null}
+
                     onEdit={() => setEditingCampId(camp.id)}
                     onDelete={() => setConfirmDeleteCampId(camp.id)}
                     onLeave={() => setConfirmLeaveCampId(camp.id)}
@@ -284,6 +286,7 @@ export default function CampListClient({ camps: initialCamps }: CampListClientPr
                     index={i}
                     isLast={i === pastCamps.length - 1}
                     incompleteCount={null}
+
                     onEdit={() => setEditingCampId(camp.id)}
                     onDelete={() => setConfirmDeleteCampId(camp.id)}
                     onLeave={() => setConfirmLeaveCampId(camp.id)}

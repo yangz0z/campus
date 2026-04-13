@@ -10,4 +10,8 @@
 - `any` 사용 금지
 - default export 대신 named export 사용
 - 높은 응집도와 낮은 결합도를 준수
+
+
+## 아키텍쳐 원칙
+- shared에는 유틸 함수만 있고 프로젝트에서는 shared만 import 하도록
 - 
