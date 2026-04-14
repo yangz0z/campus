@@ -1,9 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
-import { Repository } from 'typeorm';
 import { createClerkClient } from '@clerk/backend';
 import { User } from '../user/entities/user.entity';
+import { UserService } from '../user/user.service';
 
 const USER_CACHE_TTL = 5 * 60 * 1000; // 5분
 
@@ -18,8 +17,7 @@ export class AuthService {
   private userCache = new Map<string, CacheEntry>();
 
   constructor(
-    @InjectRepository(User)
-    private userRepository: Repository<User>,
+    private userService: UserService,
     private configService: ConfigService,
   ) {
     this.clerkClient = createClerkClient({
@@ -32,9 +30,7 @@ export class AuthService {
     const cached = this.userCache.get(clerkUserId);
     if (cached && cached.expiresAt > Date.now()) return cached.promise;
 
-    const promise = this.userRepository.findOne({
-      where: { providerId: clerkUserId },
-    });
+    const promise = this.userService.findByProviderId(clerkUserId);
 
     this.userCache.set(clerkUserId, {
       promise,
@@ -65,19 +61,16 @@ export class AuthService {
 
     // provider + email 기반 조회 (기존 계정 연결)
     if (email) {
-      const existingByEmail = await this.userRepository.findOne({
-        where: { provider, email },
-      });
-      if (existingByEmail) {
-        existingByEmail.providerId = clerkUserId;
-        const saved = await this.userRepository.save(existingByEmail);
+      const existing = await this.userService.findByProviderAndEmail(provider, email);
+      if (existing) {
+        const linked = await this.userService.linkProvider(existing, clerkUserId);
         this.invalidateCache(clerkUserId);
-        return saved;
+        return linked;
       }
     }
 
     // 신규 생성
-    const user = this.userRepository.create({
+    const user = await this.userService.create({
       provider,
       providerId: clerkUserId,
       email,
@@ -87,8 +80,7 @@ export class AuthService {
       profileImage: clerkUser.imageUrl ?? null,
     });
 
-    const saved = await this.userRepository.save(user);
     this.invalidateCache(clerkUserId);
-    return saved;
+    return user;
   }
 }

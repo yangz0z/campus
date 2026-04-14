@@ -14,4 +14,4 @@
 
 ## 아키텍쳐 원칙
 - shared에는 유틸 함수만 있고 프로젝트에서는 shared만 import 하도록
-- 
+- NestJS 모듈 소유권 분리: 엔티티의 Repository는 해당 엔티티를 소유한 모듈의 Service에서만 접근. 다른 모듈은 Service를 통해서만 데이터에 접근 (예: AuthModule → UserService, AuthModule → UserRepository 직접 접근 금지)
