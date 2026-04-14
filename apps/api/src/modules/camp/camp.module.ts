@@ -9,6 +9,9 @@ import { CampChecklistItemAssignee } from './entities/camp-checklist-item-assign
 import { CampInvite } from './entities/camp-invite.entity';
 import { CampController } from './camp.controller';
 import { CampService } from './camp.service';
+import { CampMemberService } from './camp-member.service';
+import { CampChecklistService } from './camp-checklist.service';
+import { CampInviteService } from './camp-invite.service';
 import { CampGateway } from './camp.gateway';
 
 @Module({
@@ -24,7 +27,7 @@ import { CampGateway } from './camp.gateway';
     ChecklistTemplateModule,
   ],
   controllers: [CampController],
-  providers: [CampService, CampGateway],
+  providers: [CampMemberService, CampService, CampChecklistService, CampInviteService, CampGateway],
   exports: [TypeOrmModule],
 })
 export class CampModule {}
