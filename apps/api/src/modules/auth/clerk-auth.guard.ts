@@ -8,14 +8,12 @@ import { Reflector } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { verifyToken } from '@clerk/backend';
 import { IS_PUBLIC_KEY } from './decorators/public.decorator';
-import { AuthService } from './auth.service';
 
 @Injectable()
 export class ClerkAuthGuard implements CanActivate {
   constructor(
     private reflector: Reflector,
     private configService: ConfigService,
-    private authService: AuthService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -33,8 +31,7 @@ export class ClerkAuthGuard implements CanActivate {
       const payload = await verifyToken(token, {
         secretKey: this.configService.get<string>('CLERK_SECRET_KEY')!,
       });
-
-      request.user = await this.authService.syncUser(payload.sub);
+      request.clerkUserId = payload.sub;
       return true;
     } catch {
       throw new UnauthorizedException();

@@ -5,9 +5,17 @@ import { Repository } from 'typeorm';
 import { createClerkClient } from '@clerk/backend';
 import { User } from '../user/entities/user.entity';
 
+const USER_CACHE_TTL = 5 * 60 * 1000; // 5분
+
+interface CacheEntry {
+  promise: Promise<User | null>;
+  expiresAt: number;
+}
+
 @Injectable()
 export class AuthService {
   private clerkClient;
+  private userCache = new Map<string, CacheEntry>();
 
   constructor(
     @InjectRepository(User)
@@ -19,7 +27,33 @@ export class AuthService {
     });
   }
 
-  async syncUser(clerkUserId: string): Promise<User> {
+  /** clerkUserId로 유저 조회 (캐시 적용, 동시 요청 시 Promise 공유) */
+  async findByClerkId(clerkUserId: string): Promise<User | null> {
+    const cached = this.userCache.get(clerkUserId);
+    if (cached && cached.expiresAt > Date.now()) return cached.promise;
+
+    const promise = this.userRepository.findOne({
+      where: { providerId: clerkUserId },
+    });
+
+    this.userCache.set(clerkUserId, {
+      promise,
+      expiresAt: Date.now() + USER_CACHE_TTL,
+    });
+
+    // DB 조회 실패 시 캐시 제거
+    promise.catch(() => this.userCache.delete(clerkUserId));
+
+    return promise;
+  }
+
+  /** 캐시 무효화 (유저 생성/수정 후 호출) */
+  private invalidateCache(clerkUserId: string): void {
+    this.userCache.delete(clerkUserId);
+  }
+
+  /** Clerk API에서 프로필을 가져와 신규 유저 생성 (또는 기존 계정 연결) */
+  async createFromClerk(clerkUserId: string): Promise<User> {
     const clerkUser = await this.clerkClient.users.getUser(clerkUserId);
 
     const rawProvider = clerkUser.externalAccounts[0]?.provider ?? 'email';
@@ -29,12 +63,6 @@ export class AuthService {
 
     const email = clerkUser.emailAddresses[0]?.emailAddress ?? null;
 
-    // providerId 기반 조회 (정확한 매칭)
-    const existingById = await this.userRepository.findOne({
-      where: { provider, providerId: clerkUserId },
-    });
-    if (existingById) return existingById;
-
     // provider + email 기반 조회 (기존 계정 연결)
     if (email) {
       const existingByEmail = await this.userRepository.findOne({
@@ -42,7 +70,9 @@ export class AuthService {
       });
       if (existingByEmail) {
         existingByEmail.providerId = clerkUserId;
-        return this.userRepository.save(existingByEmail);
+        const saved = await this.userRepository.save(existingByEmail);
+        this.invalidateCache(clerkUserId);
+        return saved;
       }
     }
 
@@ -57,6 +87,8 @@ export class AuthService {
       profileImage: clerkUser.imageUrl ?? null,
     });
 
-    return this.userRepository.save(user);
+    const saved = await this.userRepository.save(user);
+    this.invalidateCache(clerkUserId);
+    return saved;
   }
 }
