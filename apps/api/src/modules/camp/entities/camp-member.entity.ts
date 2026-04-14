@@ -10,6 +10,13 @@ import {
 import { User } from '../../user/entities/user.entity';
 import { Camp } from './camp.entity';
 
+export type CampMemberRole = 'owner' | 'member';
+
+export const CAMP_MEMBER_ROLE = {
+  OWNER: 'owner' as const,
+  MEMBER: 'member' as const,
+};
+
 @Entity('camp_member')
 @Unique('uq_camp_member', ['campId', 'userId'])
 export class CampMember {
@@ -34,7 +41,7 @@ export class CampMember {
   userId!: string;
 
   @Column({ length: 10, default: 'member' })
-  role!: 'owner' | 'member';
+  role!: CampMemberRole;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt!: Date;
