@@ -25,7 +25,7 @@ services:
         target: /etc/promtail/config.yml
         read_only: true
       - type: bind
-        source: /Users/wincrane2/webhook.log
+        source: /Volumes/SSD/study/campus/logs/webhook.log
         target: /var/log/webhook.log
         read_only: true
       - type: bind
