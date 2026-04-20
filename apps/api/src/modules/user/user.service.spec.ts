@@ -1,8 +1,12 @@
 // UserService 단위 테스트:
-// - Repository<User>를 vi.fn() mock으로 주입하여 DB 없이 로직만 검증
-// - Test.createTestingModule 대신 직접 new로 주입하여 DI 보일러플레이트 제거
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+// - Test.createTestingModule로 NestJS DI 컨테이너를 경유해 조립
+// - @InjectRepository(User)가 참조하는 토큰을 getRepositoryToken(User)로 매칭하여 mock 주입
+// - Controller 테스트(weather.controller.spec.ts)와 동일한 패턴으로 통일
+import { Test } from '@nestjs/testing';
+import type { TestingModule } from '@nestjs/testing';
+import { getRepositoryToken } from '@nestjs/typeorm';
 import type { Repository } from 'typeorm';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { UserService } from './user.service';
 import { User } from './entities/user.entity';
 
@@ -32,12 +36,23 @@ function makeUser(overrides: Partial<User> = {}): User {
 }
 
 describe('UserService', () => {
-  let repo: UserRepoMock;
   let service: UserService;
+  let repo: UserRepoMock;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     repo = makeRepoMock();
-    service = new UserService(repo as unknown as Repository<User>);
+
+    // DI 컨테이너 경유 조립:
+    // - providers에 UserService를 그대로 넣으면 NestJS가 인스턴스 생성
+    // - @InjectRepository(User) 토큰은 getRepositoryToken(User)로 override
+    const moduleRef: TestingModule = await Test.createTestingModule({
+      providers: [
+        UserService,
+        { provide: getRepositoryToken(User), useValue: repo },
+      ],
+    }).compile();
+
+    service = moduleRef.get<UserService>(UserService);
   });
 
   describe('findByProviderId', () => {

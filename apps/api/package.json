@@ -38,6 +38,7 @@
     "@campus/eslint-config": "workspace:*",
     "@campus/typescript-config": "workspace:*",
     "@nestjs/cli": "^11.0.0",
+    "@nestjs/testing": "^11.0.0",
     "@swc/core": "^1.7.0",
     "@types/node": "^22.0.0",
     "eslint": "^9.0.0",
