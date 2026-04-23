@@ -38,4 +38,9 @@ yarn-error.log*
 data
 
 #claude
-.claude
+.claude/*
+!.claude/rules
+!.claude/rules/**
+!.claude/skills
+!.claude/skills/**
+.claude/settings.local.json
