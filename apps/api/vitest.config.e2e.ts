@@ -12,6 +12,9 @@ export default defineConfig({
     include: ['test/**/*.e2e-spec.ts'],
     setupFiles: ['./test/setup.ts'],
     testTimeout: 10_000,
+    // Testcontainers가 Docker 이미지를 처음 받을 때 30~60초 걸릴 수 있어
+    // beforeAll/afterAll 훅 타임아웃을 넉넉히 둔다.
+    hookTimeout: 120_000,
   },
   plugins: [
     swc.vite({
