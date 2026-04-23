@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { Season } from '@campus/shared';
@@ -24,15 +29,7 @@ export class ChecklistTemplateService {
   ) {}
 
   async getMyTemplate(user: User) {
-    let template = await this.templateRepository.findOne({
-      where: { userId: user.id, ownerType: 'user' },
-      relations: ['groups', 'groups.items'],
-      order: { groups: { sortOrder: 'ASC', items: { sortOrder: 'ASC' } } },
-    });
-
-    if (!template) {
-      template = await this.cloneSystemTemplate(user);
-    }
+    const template = await this.ensureUserTemplate(user);
 
     return {
       id: template.id,
@@ -51,64 +48,74 @@ export class ChecklistTemplateService {
     };
   }
 
-  private async cloneSystemTemplate(user: User): Promise<ChecklistTemplate> {
-    const systemTemplate = await this.templateRepository.findOne({
-      where: { ownerType: 'system', isActive: true },
+  async ensureUserTemplate(user: User): Promise<ChecklistTemplate> {
+    const existing = await this.templateRepository.findOne({
+      where: { userId: user.id, ownerType: 'user' },
       relations: ['groups', 'groups.items'],
       order: { groups: { sortOrder: 'ASC', items: { sortOrder: 'ASC' } } },
     });
+    if (existing) return existing;
 
     return this.dataSource.transaction(async (manager) => {
-      // ON CONFLICT DO NOTHING: 동시 요청 시 중복 insert 무시
-      await manager
-        .createQueryBuilder()
-        .insert()
-        .into(ChecklistTemplate)
-        .values({
+      // 동일 유저에 대한 동시 clone을 직렬화 (트랜잭션 종료 시 자동 해제)
+      await manager.query(
+        `SELECT pg_advisory_xact_lock(hashtext($1), hashtext($2))`,
+        [user.id, 'checklist_template_clone'],
+      );
+
+      const afterLock = await manager.findOne(ChecklistTemplate, {
+        where: { userId: user.id, ownerType: 'user' },
+        relations: ['groups', 'groups.items'],
+        order: { groups: { sortOrder: 'ASC', items: { sortOrder: 'ASC' } } },
+      });
+      if (afterLock) return afterLock;
+
+      const systemTemplate = await manager.findOne(ChecklistTemplate, {
+        where: { ownerType: 'system', isActive: true },
+        relations: ['groups', 'groups.items'],
+        order: { groups: { sortOrder: 'ASC', items: { sortOrder: 'ASC' } } },
+      });
+      if (!systemTemplate) {
+        throw new ServiceUnavailableException(
+          'System template is not initialized',
+        );
+      }
+
+      const created = await manager.save(
+        manager.create(ChecklistTemplate, {
           title: '나의 체크리스트 템플릿',
           ownerType: 'user',
           userId: user.id,
-          sourceTemplateId: systemTemplate?.id ?? null,
+          sourceTemplateId: systemTemplate.id,
           seasons: Object.values(Season),
           isActive: true,
-        })
-        .orIgnore()
-        .execute();
+        }),
+      );
 
-      const savedTemplate = await manager.findOneOrFail(ChecklistTemplate, {
-        where: { userId: user.id, ownerType: 'user' },
-      });
-
-      // 이미 그룹이 있으면 (이전 요청에서 생성됨) clone 스킵
-      const existingGroups = await manager.count(ChecklistTemplateGroup, {
-        where: { templateId: savedTemplate.id },
-      });
-
-      if (existingGroups === 0 && systemTemplate) {
-        for (const sGroup of systemTemplate.groups) {
-          const group = manager.create(ChecklistTemplateGroup, {
-            templateId: savedTemplate.id,
+      for (const sGroup of systemTemplate.groups) {
+        const savedGroup = await manager.save(
+          manager.create(ChecklistTemplateGroup, {
+            templateId: created.id,
             title: sGroup.title,
             sortOrder: sGroup.sortOrder,
-          });
-          const savedGroup = await manager.save(ChecklistTemplateGroup, group);
-
-          for (const sItem of sGroup.items) {
-            const item = manager.create(ChecklistTemplateItem, {
+          }),
+        );
+        for (const sItem of sGroup.items) {
+          await manager.save(
+            manager.create(ChecklistTemplateItem, {
               groupId: savedGroup.id,
               title: sItem.title,
               description: sItem.description,
               sortOrder: sItem.sortOrder,
               isRequired: sItem.isRequired,
               seasons: sItem.seasons,
-            });
-            await manager.save(ChecklistTemplateItem, item);
-          }
+            }),
+          );
         }
       }
 
       return manager.findOneOrFail(ChecklistTemplate, {
-        where: { id: savedTemplate.id },
+        where: { id: created.id },
         relations: ['groups', 'groups.items'],
         order: { groups: { sortOrder: 'ASC', items: { sortOrder: 'ASC' } } },
       });

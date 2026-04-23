@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createClerkClient } from '@clerk/backend';
 import { User } from '../user/entities/user.entity';
 import { UserService } from '../user/user.service';
+import { ChecklistTemplateService } from '../checklist-template/checklist-template.service';
 
 const USER_CACHE_TTL = 5 * 60 * 1000; // 5분
 
@@ -13,12 +14,14 @@ interface CacheEntry {
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
   private clerkClient;
   private userCache = new Map<string, CacheEntry>();
 
   constructor(
     private userService: UserService,
     private configService: ConfigService,
+    private checklistTemplateService: ChecklistTemplateService,
   ) {
     this.clerkClient = createClerkClient({
       secretKey: this.configService.get<string>('CLERK_SECRET_KEY')!,
@@ -81,6 +84,13 @@ export class AuthService {
     });
 
     this.invalidateCache(clerkUserId);
+
+    // 로그인 응답을 막지 않도록 fire-and-forget로 템플릿 미리 생성.
+    // 실패/경합 시엔 /templates/me 호출 시 advisory lock 경로가 복구 담당.
+    this.checklistTemplateService
+      .ensureUserTemplate(user)
+      .catch((err) => this.logger.error('Template warmup failed', err));
+
     return user;
   }
 }
