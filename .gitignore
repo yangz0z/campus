@@ -11,6 +11,11 @@ out/
 # Turbo
 .turbo/
 
+# Playwright
+apps/web/playwright-report/
+apps/web/test-results/
+apps/web/blob-report/
+
 # Environment
 .env
 .env.local

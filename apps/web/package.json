@@ -9,6 +9,8 @@
     "lint": "next lint",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:e2e": "dotenv -e ../../.env.dev -- playwright test",
+    "test:e2e:ui": "dotenv -e ../../.env.dev -- playwright test --ui",
     "clean": "rm -rf .next .turbo"
   },
   "dependencies": {
@@ -26,6 +28,7 @@
   },
   "devDependencies": {
     "@campus/typescript-config": "workspace:*",
+    "@playwright/test": "^1.48.0",
     "@tailwindcss/postcss": "^4.2.2",
     "@testing-library/jest-dom": "^6.6.0",
     "@testing-library/react": "^16.1.0",
