@@ -15,6 +15,7 @@ out/
 apps/web/playwright-report/
 apps/web/test-results/
 apps/web/blob-report/
+apps/web/playwright/.auth/
 
 # Environment
 .env

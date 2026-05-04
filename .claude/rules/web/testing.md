@@ -95,7 +95,7 @@ pnpm turbo run test                 # 3. monorepo regression
 - If both themes exist, test both
 - Visual regression **supplements** unit tests, does not replace them
 
-## Browser E2E (Step 6, planned)
+## Browser E2E (Playwright)
 
 ```ts
 import { test, expect } from '@playwright/test';
@@ -107,11 +107,75 @@ test('landing hero loads', async ({ page }) => {
 ```
 
 - Avoid timeout-based waits — use `waitForResponse` / `waitForLoadState`
-- Clerk auth bypass via testing tokens (to be decided in Step 6)
+- Two browsers in CI: Chromium + WebKit (Firefox skipped — low domestic share)
+- Default `webServer.timeout: 120_000` for Next.js dev cold compile
+- Project structure:
+  - `setup` project (testMatch `auth.setup.ts`) for one-time login
+  - `chromium` / `webkit` for unauthenticated landing flows
+  - `chromium-authenticated` (`dependencies: ['setup']`, `storageState: ...`) for protected-route flows
 
-## Real-World Pitfalls (discovered in Step 5)
+## Clerk Authentication Test Helpers
 
-### Pitfall — RTL cleanup not auto-registered with `globals: false`
+### `+clerk_test` email / fictional phone — official trick
+
+**Source**: <https://clerk.com/docs/testing/test-emails-and-phones>
+
+> "Any email with the `+clerk_test` subaddress is a test email address. No emails will be sent, and they can be verified with the code `424242`."
+>
+> "Any fictional phone number is a test phone number. No SMS will be sent, and they can all be verified with the code `424242`."
+
+| Type | Pattern | Verification code |
+|------|---------|-------------------|
+| Email | subaddress includes `+clerk_test` (e.g. `jane+clerk_test@example.com`) | `424242` |
+| Phone | `+1 (XXX) 555-0100` ~ `+1 (XXX) 555-0199` | `424242` |
+
+- **Dev instances only** — production rejects this pattern
+- No real email/SMS is sent (safe for CI)
+- Useful when Clerk forces verification (new device, risk-based) that `setupClerkTestingToken` alone cannot bypass
+
+### Required Clerk Dashboard settings for E2E
+
+1. **User & Authentication → Email, phone, username**
+   - `Email address` — ON
+   - `Password` — ON
+   - `Verification at sign-in` (email code) — OFF (otherwise blocks our flow)
+2. **User & Authentication → Multi-factor**
+   - All methods — OFF (or "Optional")
+3. **(Recommended)** Pre-create a test user via Dashboard with `+clerk_test` email; password is enough.
+4. Store credentials in `.env.dev` as `E2E_CLERK_USER_EMAIL` / `E2E_CLERK_USER_PASSWORD` (gitignored).
+
+### Reference implementation in our project
+
+- `apps/web/e2e/auth.setup.ts` — Clerk login + storageState save
+- `apps/web/e2e/authenticated.*.spec.ts` — protected-route specs that reuse storageState
+
+```ts
+// auth.setup.ts essence
+await clerkSetup({ publishableKey: process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY });
+await setupClerkTestingToken({ page });
+await page.goto('/sign-in', { timeout: 60_000 }); // dev cold-compile may exceed 30s
+
+await page.locator('input[name="identifier"]').fill(email);
+await page.locator('button[data-localization-key="formButtonPrimary"]').click();
+await page.locator('input[name="password"]').fill(password);
+await page.locator('button[data-localization-key="formButtonPrimary"]').click();
+
+// If Clerk forces an email verification (new device, etc.)
+const wentToFactorTwo = await page.waitForURL(/factor-two/, { timeout: 5_000 })
+  .then(() => true).catch(() => false);
+if (wentToFactorTwo) {
+  const otpInput = page.locator('input[autocomplete="one-time-code"]').first();
+  await otpInput.click();
+  await page.keyboard.type('424242', { delay: 50 });
+}
+
+await page.waitForURL((url) => !url.pathname.startsWith('/sign-in'));
+await page.context().storageState({ path: STORAGE_STATE });
+```
+
+## Real-World Pitfalls
+
+### Pitfall 1 — RTL cleanup not auto-registered with `globals: false` (Step 5)
 
 **Symptom**: previous test's rendered DOM leaks into the next test. `queryByRole('img')` finds the previous test's `<img>`.
 
@@ -125,6 +189,49 @@ import { cleanup } from '@testing-library/react';
 afterEach(() => {
   cleanup();
 });
+```
+
+### Pitfall 2 — Multiple Clerk setup tests don't share `clerkSetup` effect (Step 6.5a)
+
+**Symptom**: First setup test calls `clerkSetup()`, second one calls `setupClerkTestingToken({ page })` and fails with `Clerk Frontend API URL is required to bypass bot protection`.
+
+**Cause**: Setup tests run in isolation per worker. Side effects of `clerkSetup` don't propagate.
+
+**Fix**: Use a single setup test that runs `clerkSetup` → `setupClerkTestingToken` → login → `storageState` in sequence.
+
+### Pitfall 3 — `name: /계속|continue/i` matches the Google OAuth button (Step 6.5a)
+
+**Symptom**: `getByRole('button', { name: /계속|continue/i })` resolves to 2 elements (strict mode violation).
+
+**Cause**: Clerk renders a "Sign in with Google" button alongside the primary submit button.
+
+**Fix**: Use Clerk's stable selector `data-localization-key="formButtonPrimary"` (language-agnostic):
+```ts
+await page.locator('button[data-localization-key="formButtonPrimary"]').click();
+```
+
+### Pitfall 4 — `page.keyboard.type` fails on OTP input without focus (Step 6.5a)
+
+**Symptom**: OTP boxes remain empty, "Enter code" error appears after submission.
+
+**Cause**: Clerk's 6-cell OTP UI doesn't auto-focus the first input on render.
+
+**Fix**: Click the input first, then type with a small delay so React onChange can distribute digits across cells:
+```ts
+const otpInput = page.locator('input[autocomplete="one-time-code"]').first();
+await otpInput.click();
+await page.keyboard.type('424242', { delay: 50 });
+```
+
+### Pitfall 5 — Next.js dev cold-compile exceeds default 30s navigation timeout (Step 6.5a)
+
+**Symptom**: Full e2e run fails on first `page.goto('/sign-in')` with timeout, but isolated setup-only run passes.
+
+**Cause**: Next.js dev compiles each route on first request. Cold compile of `/sign-in` (Clerk widget pulls many bundles) can exceed 30s on slower machines.
+
+**Fix**: Pass explicit timeout per navigation:
+```ts
+await page.goto('/sign-in', { timeout: 60_000 });
 ```
 
 ## Agent Support

@@ -28,6 +28,7 @@
   },
   "devDependencies": {
     "@campus/typescript-config": "workspace:*",
+    "@clerk/testing": "^1.4.0",
     "@playwright/test": "^1.48.0",
     "@tailwindcss/postcss": "^4.2.2",
     "@testing-library/jest-dom": "^6.6.0",
