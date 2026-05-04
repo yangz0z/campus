@@ -92,26 +92,51 @@ export class ChecklistTemplateService {
         }),
       );
 
-      for (const sGroup of systemTemplate.groups) {
-        const savedGroup = await manager.save(
-          manager.create(ChecklistTemplateGroup, {
-            templateId: created.id,
-            title: sGroup.title,
-            sortOrder: sGroup.sortOrder,
-          }),
-        );
-        for (const sItem of sGroup.items) {
-          await manager.save(
-            manager.create(ChecklistTemplateItem, {
-              groupId: savedGroup.id,
-              title: sItem.title,
-              description: sItem.description,
-              sortOrder: sItem.sortOrder,
-              isRequired: sItem.isRequired,
-              seasons: sItem.seasons,
-            }),
+      // 성능 최적화: 배치 INSERT 사용
+      const groupInserts = systemTemplate.groups.map((sGroup, index) => ({
+        templateId: created.id,
+        title: sGroup.title,
+        sortOrder: index,
+      }));
+
+      // 모든 그룹을 한 번에 삽입하고 ID 받기
+      const insertedGroups = await manager
+        .createQueryBuilder()
+        .insert()
+        .into(ChecklistTemplateGroup)
+        .values(groupInserts)
+        .returning(['id', 'sortOrder'])
+        .execute();
+
+      // 아이템들도 배치로 삽입
+      const itemInserts: any[] = [];
+      systemTemplate.groups.forEach((sGroup, groupIndex) => {
+        const groupId = insertedGroups.raw[groupIndex]?.id;
+        if (!groupId) {
+          throw new ServiceUnavailableException(
+            `Failed to get group ID for index ${groupIndex}`,
           );
         }
+
+        sGroup.items.forEach((sItem, itemIndex) => {
+          itemInserts.push({
+            groupId,
+            title: sItem.title,
+            description: sItem.description,
+            sortOrder: itemIndex,
+            isRequired: sItem.isRequired,
+            seasons: sItem.seasons,
+          });
+        });
+      });
+
+      if (itemInserts.length > 0) {
+        await manager
+          .createQueryBuilder()
+          .insert()
+          .into(ChecklistTemplateItem)
+          .values(itemInserts)
+          .execute();
       }
 
       return manager.findOneOrFail(ChecklistTemplate, {
